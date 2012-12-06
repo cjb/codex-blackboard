@@ -1,0 +1,63 @@
+<head>
+  <title>Blackboard</title>
+</head>
+
+<body>
+  {{> hello}}
+
+  {{> rounds}}
+
+  {{> puzzles}}
+</body>
+
+<template name="hello">
+  <div class="hero-unit">
+    <h2>Hello World!</h2>
+  </div>
+</template>
+
+<template name="rounds">
+  <h3>Rounds</h3>
+  <table class="table table-bordered">
+    <tr>
+      <th>Round ID</th>
+      <th>Round order</th>
+      <th>Round name</th>
+      <th>Unlocked at</th>
+    </tr>
+    {{#each rounds}}
+     {{> round_item}}
+    {{/each}}
+  </table>
+</template>
+
+<template name="round_item">
+  <tr>
+    <td>{{id}}</td>
+    <td>{{order}}</td>
+    <td>{{name}}</td>
+    <td>{{created}}</td>
+  </tr>
+</template>
+
+<template name="puzzles">
+  <h3>Puzzles</h3>
+  <table class="table table-bordered">
+    <tr>
+      <th>Round</th>
+      <th>Title</th>
+      <th>Answer</th>
+    </tr>
+    {{#each puzzles}}
+      {{> puzzle_item}}
+    {{/each}}
+  </table>
+</template>
+
+<template name="puzzle_item">
+  <tr>
+    <td>{{round}}</td>
+    <td>{{title}}</td>
+    <td>{{answer}}</td>
+  </tr>
+</template>
