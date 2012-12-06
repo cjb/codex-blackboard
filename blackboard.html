@@ -33,7 +33,7 @@
 
 <template name="round_item">
   <tr>
-    <td>{{id}}</td>
+    <td><a href="/round/{{id}}">{{id}}</td>
     <td>{{order}}</td>
     <td>{{name}}</td>
     <td>{{created}}</td>
@@ -44,6 +44,7 @@
   <h3>Puzzles</h3>
   <table class="table table-bordered">
     <tr>
+      <th>Puzzle ID</th>
       <th>Round</th>
       <th>Title</th>
       <th>Answer</th>
@@ -56,6 +57,7 @@
 
 <template name="puzzle_item">
   <tr>
+    <td><a href="/puzzle/{{id}}">{{id}}</a></td>
     <td>{{round}}</td>
     <td>{{title}}</td>
     <td>{{answer}}</td>
