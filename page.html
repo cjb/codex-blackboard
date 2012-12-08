@@ -1,0 +1,23 @@
+<head>
+  <title>{{title}}</title>
+</head>
+
+<body>
+ {{> page }}
+</body>
+
+<template name="page">
+<!-- DEBUGGING: currentPage: "{{currentPage}}" -->
+
+<!-- add common header here -->
+  {{#if equal currentPage "blackboard"}}yo!
+    {{> blackboard }}
+  {{/if}}
+  {{#if equal currentPage "round"}}
+    {{> round }}
+  {{/if}}
+  {{#if equal currentPage "puzzle"}}
+    {{> puzzle }}
+  {{/if}}
+<!-- add footer here? -->
+</template>

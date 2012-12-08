@@ -1,22 +1,64 @@
-<head>
-  <title>Blackboard</title>
-</head>
-
-<body>
-  {{> hello}}
-
-  {{> rounds}}
-
-  {{> puzzles}}
-</body>
-
-<template name="hello">
-  <div class="hero-unit">
-    <h2>Hello World!</h2>
+<template name="blackboard">
+<div class="navbar navbar-inverse navbar-fixed-top bb-topbar">
+  <div class="navbar-inner">
+    <div class="container-fluid">
+      <div class="nav-collapse collapse">
+<!-- Last update bar -->
+   <div class="bb-lastupdate navbar-text">
+    <span class="left">
+    <b>Last update:</b>
+    </span>
+    <span class="content">
+    New puzzles: <span class="bb-puzzle">MARIO
+    CART</span>, <span class="bb-puzzle">LEGEND</span>.
+    </span>
+    <span class="right pull-right">
+    <a href="#">more...</a>
+    </span>
   </div>
+<!-- Last chat bar -->
+  <div class="bb-lastchat navbar-text">
+    <span class="left">
+    <b>Last chat:</b>
+    </span>
+    <span class="content">
+    <span class="bb-nick">cjb</span>: Any news?  Has the coin been
+    found?
+    </span>
+    <span class="right pull-right">
+    <a href="#">more...</a>
+    </span>
+  </div>
+  
+</div></div></div></div>
+
+<!-- puzzles w/ index -->
+<div class="row">
+  <div class="span3 bb-sidebar">
+    <ul class="nav nav-list bb-sidenav affix">
+      {{#each rounds}}
+      <li><a href="#r{{id}}"><i class="icon-chevron-right"></i>
+      {{name}}</a></li>
+      {{/each}}
+    </ul>
+  </div>
+  <div class="span9"  data-spy="scroll" data-target=".bb-sidebar">
+    <!-- content div -->
+
+    <section id="r1">
+    <h1>Mario!</h1>
+    </section>
+    <section id="r2">
+    <h2>Zelda!</h2>
+    </section>
+
+  {{> bb_rounds}}
+  {{> bb_puzzles}}
+  </div>
+</div>
 </template>
 
-<template name="rounds">
+<template name="bb_rounds">
   <h3>Rounds</h3>
   <table class="table table-bordered">
     <tr>
@@ -31,7 +73,7 @@
   </table>
 </template>
 
-<template name="round_item">
+ <template name="round_item">
   <tr>
     <td><a href="/round/{{id}}">{{id}}</td>
     <td>{{order}}</td>
@@ -40,7 +82,7 @@
   </tr>
 </template>
 
-<template name="puzzles">
+<template name="bb_puzzles">
   <h3>Puzzles</h3>
   <table class="table table-bordered">
     <tr>
