@@ -1,0 +1,31 @@
+html, body{ height: 100%; margin: 0; padding: 0!important;}
+body{background: url(/img/grid_noise.png);}
+
+#header{ height: 45px; width: 100%; position: absolute; top: 0; z-index:100;}
+  #headerInner{background-image:url(/img/irongrip.png); box-shadow: 0px 2px 4px #777; height:100%;}
+    #logo{color: #FFFFFF;display: block;float: left;font-size: 20px;font-weight: 200;
+      line-height: 1;margin: 10px 10px 0;}
+    #nickAndRoom{color: white; margin-top: 8px;}
+      #joinRoom{margin:5px; display:inline;}
+        #roomName{width: 100px;}
+      #mute{margin-right: 4px;}
+
+#content{ width: 100%; position: absolute; top: 45px;}
+  #messages{height: 100%;}
+    #messagesInner{overflow-y: scroll; overflow-x: hidden;height:100%; background-color: white;
+      box-shadow: 0px 2px 4px #777;}
+    #messagesInner > p { padding: 4px; border-radius:5px;}
+    #messagesInner > p.messageRow:nth-child(even){background-color: #eee;}
+      .messageRow{ color: #666; font-size: 1.2em; margin: 4px 5px;}
+      .messageRow > strong{ margin-right: 5px;}
+        .timestamp{ font-size: .65em; color: #049cdb;}
+      .systemRow{ margin: 0; font-size: .8em; color: #aaa; padding: 1px 4px!important;}
+
+#footer{ height: 50px; width: 100%; position: absolute; bottom: 0;}
+  #chatInput{ position: absolute; bottom:0;width:100%;}
+    #messageInputInner{background-image:url(/img/darkdenim3.png);}
+      #messageForm{margin:15px 0 0 0; padding: 0 20px 0 10px;box-shadow: 0px 2px 4px #777;}
+        #messageInput{width: 100%;}
+
+.modal{margin: -100px 0 0 -280px !important; display:none;}
+  .warning{color: red; margin-bottom: 10px;}

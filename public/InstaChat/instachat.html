@@ -1,0 +1,86 @@
+<head>
+  <title>InstaChat</title>
+</head>
+
+
+
+<body>
+  
+  <div id="header">
+    <div class="container" id="headerInner">
+      <h2 id="logo" class="pull-left brand">
+        Insta<strong>Chat</strong>
+      </h2>
+
+      {{> nickAndRoom}}
+    </div>
+  </div>
+
+  <div id="content">
+    {{> messages}}
+  </div>
+
+  <div id="footer">
+    {{> messages-input}}
+  </div>
+
+  {{> nickModal}}
+
+</body>
+
+
+<template name="nickModal">
+  <div class="modal" id="nickPickModal">
+    <div class="modal-header">
+      <!-- <a class="close" data-dismiss="modal">×</a> -->
+      <h3>Pick a Nick Name</h3>
+    </div>
+    <div class="modal-body">
+      <form id="nickPick">
+        <div class="warning"></div>
+        <p><input type="text" id="nickInput" class="span5" value="{{nick}}">
+          <br><input type="submit" value="Start Chatting" class="span1"></p>
+      </form>
+    </div>
+  </div>
+</template>
+
+
+<template name="nickAndRoom">
+  <div id="nickAndRoom" class="pull-right">
+    <strong>{{nick}}</strong>
+    is in the room:
+    <form id="joinRoom" class="form-search">
+      <input id="roomName" type="text" class="search-query" value="{{room}}">
+    </form>
+    <button id="mute" class="btn btn-small btn-inverse">
+        <spat class="{{volumeIcon}} icon-white"></span>
+      </button>
+  </div>
+</template>
+
+
+<template name="messages-input">
+  <div id="chatInput">
+    <div class="container" id="messageInputInner">
+      <form id="messageForm">
+        <input id="messageInput" placeholder="Type your mesage and press enter..."  autocomplete="off" >
+      </form>
+    </div>
+  </div>
+</template>
+
+
+<template name="messages">
+  <div id="messages">
+    <div class="container" id="messagesInner">
+        {{#each messages}}
+          {{#if system}}
+            <p class="systemRow">⊕ {{pretty_ts timestamp}} {{body}}</p>
+          {{else}}
+            <p class="messageRow"><span class="timestamp">{{pretty_ts timestamp}}</span> <strong>{{nick}}:</strong>{{body}}</p>
+          {{/if}}
+        {{/each}}
+    </div>
+  </div>
+</template>
