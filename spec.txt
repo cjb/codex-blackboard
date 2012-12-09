@@ -1,0 +1,51 @@
+API:
+
+Puzzles are always assigned to some round; use special "Unnamed round"
+to capture no assignment?  Be sure to show "unnamed round" on
+blackboard iff there are puzzles in it. (Sorts last)
+
+[NO] Special puzzle titled "META" for each round.
+
+1. Create new round
+   Rename round
+   Remove round
+   Assign an order to a round ("round X is before/after round Y")
+2. Create new puzzle (also create google drive folder)
+   Rename puzzle     (also rename google drive folder)
+   Remove puzzle     (trash google drive folder?)
+   Assign an order to a puzzle ("puzzle X is before/after puzzle Y")
+3. (re)assign puzzle to round
+   Remove puzzle/round assignment
+   Get round for puzzle
+4. Assign/change answer to puzzle (mark as solved)
+   Remove answer from puzzle (mark as unsolved)
+   Get answer for puzzle
+5. Set <tag> for <puzzle> to <value>
+   Remove <tag> from <puzzle>
+   tags: "stuck", "location"
+6. Set <tag> for <round> to <value>
+   Remove <tag> from <round>
+   tags: "meta answer", "hint", "transform"
+7. <nick> touched <puzzle>
+   When was the last touch of <puzzle>?
+   - chat integration
+8. Get/set personal information for <nick>
+   tags:  "working on", "location"
+   "set <tag> for <nick> to <value>"
+   remove <tag> from <nick>
+9. Get chat log for <puzzle>
+   Append to chat log for <puzzle> (also <nick> touched <puzzle>)
+   Get URL for chat room for <puzzle>
+10. Create/fetch google drive folder for <puzzle>
+
+"Last 5 new puzzles"
+"I'm stuck"
+"Tell me a joke"
+"What is <person> working on?"
+"What's <person>'s real name?"
+Abbreviation for puzzle name (special tag?)
+"release round" / "release puzzle" -- ensure they don't show up until
+names are finalized.  maybe less necessary now?
+if puzzle name/number is in the URL, what happens if the name/number
+is changed?  alternative is to assign a random hash as the id, not
+very friendly.  can we do a live redirect?
