@@ -64,6 +64,9 @@ collection = (type) -> switch type
 oplog = (message, type="", id="") ->
   OpLogs.insert { timestamp:UTCNow(), message:message, type:type, id:id }
 
+getTag = (object, name) ->
+  (tag.value for tag in (object.tags or []) when tag.name is name)[0]
+
 Meteor.methods
   newRoundGroup: (args) ->
     throw new Meteor.Error(400, "missing name") unless args.name
@@ -83,7 +86,7 @@ Meteor.methods
   delRoundGroup: (args) ->
     throw new Meteor.Error(400, "missing id") unless args.id
     oplog "Deleted Round Group "+RoundGrounds.findOne(args.id).name
-    RoundGroups.delete(args.id)
+    RoundGroups.remove(args.id)
     return true
 
   newRound: (args) ->
@@ -109,7 +112,7 @@ Meteor.methods
   delRound: (args) ->
     throw new Meteor.Error(400, "missing id") unless args.id
     oplog "Deleted Round "+Rounds.findOne(args.id).name
-    Rounds.delete(args.id)
+    Rounds.remove(args.id)
     # XXX: delete chat room logs?
     return true
 
@@ -140,7 +143,7 @@ Meteor.methods
   delPuzzle: (args) ->
     throw new Meteor.Error(400, "missing id") unless args.id
     oplog "Deleted puzzle: "+Puzzles.findOne(args.id).name
-    Puzzles.delete(args.id)
+    Puzzles.remove(args.id)
     # XXX: delete google drive folder
     # XXX: delete chat room logs?
     return true
@@ -154,7 +157,7 @@ Meteor.methods
     return Nicks.findOne(id)
   delNick: (args) ->
     throw new Meteor.Error(400, "missing id") unless args.id
-    Nicks.delete(args.id)
+    Nicks.remove(args.id)
     return true
 
   newMessage: (args)->
@@ -175,15 +178,25 @@ Meteor.methods
     id = object._id or object
     throw new Meteor.Error(400, "missing object") unless id
     throw new Meteor.Error(400, "missing name") unless name
-    collection(type).update id, $addToSet: tags: {name: name, value: value}
+    tags = collection(type).findOne(id).tags
+    # remove existing value for tag, if present
+    ntags = (tag for tag in tags when tag.name isnt name)
+    # add new tag, but keep tags sorted
+    ntags.push {name:name, value:value}
+    ntags.sort (a, b) -> (a?.name or "").localeCompare (b?.name or "")
+    # update the tag set only if there wasn't a race
+    collection(type).update { _id: id, tags: tags }, { $set: { tags: ntags } }
+    # XXX (on server) loop if this update failed?
     return true
   delTag: (type, object, name) ->
     id = object._id or object
     throw new Meteor.Error(400, "missing object") unless id
     throw new Meteor.Error(400, "missing name") unless name
     tags = collection(type).findOne(id).tags
-    ntags = tag for tag in tags when tag.name isnt name
+    ntags = (tag for tag in tags when tag.name isnt name)
+    # update the tag set only if there wasn't a race
     collection(type).update { _id: id, tags: tags }, { $set: { tags: ntags } }
+    # XXX (on server) loop if this update failed?
     return true
 
   addRoundToGroup: (round, group) ->
