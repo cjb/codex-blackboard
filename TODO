@@ -1,14 +1,18 @@
+. Rework schema to move away from ordered lists in round/roundgroups
+  since MongoDB doesn't preserve the order of arrays
 . Better design for main blackboard page
   - fix layout of "last update", "last chat"
   - make table cells have consistent widths from round to round
   - fix the bootstrap "affix" component, which isn't properly tracking
     main page scroll position
+  - fix tag layout; compress per-puzzle tags a lot
 . Design puzzle information page
   - chat log at top, google drive at bottom, links to full-screen these
 . Design round information page
   - like puzzle info page?
+. Implement full-window chat screen (port InstaChat), link from blackboard
 . Implement paginated chat log archive page
-. Implement paginated database operation log page
+. Implement paginated database operation log page, link from blackboard
 . Finish implementing functionality of spec.txt in lib/model.coffee
   - carefully implement puzzle/round reordering functions, use
     MongoDB findAndModify() operation to avoid race conditions when
@@ -24,7 +28,9 @@
     handle that case.
 . Hook up Instachat code
   - use puzzle/round ids as room names, so we don't have to rename them?
-. Add schema for database operation logging
+x Add schema for database operation logging
+  - tweak schema to allow condensing N "added puzzle X" messages into
+    single update line
 . use puzzle/round name instead of id in url
   - automatically do a Router.navigate() if name changes
 
