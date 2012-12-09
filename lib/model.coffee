@@ -10,8 +10,8 @@ RoundGroups = new Meteor.Collection "roundgroups"
 
 # Rounds are:
 #   _id: mongodb id
-#   puzzles: [ array of puzzle _ids, in order ]
 #   name: string (special name '' for puzzles w/o a round)
+#   puzzles: [ array of puzzle _ids, in order ]
 #   created: timestamp
 #   touched: timestamp -- for special "round" chat, usually metapuzzle
 #   last_touch_by: _id of Nick
@@ -45,12 +45,46 @@ Nicks = new Meteor.Collection "nicks"
 Messages = new Meteor.Collection "messages"
 
 Meteor.methods
+  newRoundGroup: (args) ->
+    newRoundGroup =
+      name: args.name or ""
+      tags: args.tags or []
+      rounds: args.rounds or []
+    id = RoundGroups.insert newRoundGroup
+    return RoundGroups.findOne(id)
+
+  newRound: (args) ->
+    now = UTCNow()
+    newRound =
+      name: args.name or ""
+      tags: args.tags or []
+      puzzles: args.puzzles or []
+      created: now
+      touched: now
+      last_touch_by: args.who or ""
+    id = Rounds.insert newRound
+    return Rounds.findOne(id)
+
+  newPuzzle: (args) ->
+    now = UTCNow()
+    newPuzzle =
+      name: args.name or ""
+      tags: args.tags or []
+      answer: null
+      created: now
+      solved: null
+      touched: now
+      last_touch_by: args.who or ""
+      drive: args.drive or null
+    id = Puzzles.insert newPuzzle
+    return Puzzles.findOne(id)
+
   newNick: (args) ->
     newNick =
-      name: args.name or "foo"
+      name: args.name or ""
       tags: args.tags or []
-    Nicks.insert newNick
-    return true
+    id = Nicks.insert newNick
+    return Nicks.findOne(id)
 
   newMessage: (args)->
     newMsg =
@@ -59,7 +93,25 @@ Meteor.methods
       system: args.system or false
       room_name: args.room_name or "general"
       timestamp: UTCNow()
-    Messages.insert newMsg
+    id = Messages.insert newMsg
+    return Messages.findOne(id)
+
+  setTag: (type, object, name, value) ->
+    collection = switch type
+      when "puzzle" then Puzzles
+      when "round" then Rounds
+      when "roundgroup" then RoundGroups
+      when "nick" then Nicks
+      else throw new Meteor.Error(400, "Bad collection type")
+    collection.update object._id, $addToSet: tags: { name: name, value: value }
+    return true
+
+  addRoundToGroup: (round, group) ->
+    # remove round from all other groups
+    RoundGroups.find(rounds: round._id).forEach (rg) ->
+      RoundGroups.update rg._id, $pull: rounds: round._id
+    # add round to the given group
+    RoundGroups.update group._id, $addToSet: rounds: round._id
     return true
 
   addPuzzleToRound: (puzzle, round) ->

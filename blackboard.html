@@ -33,75 +33,56 @@
 </div></div></div></div>
 
 <!-- puzzles w/ index -->
+<div class="container">
 <div class="row">
   <div class="span3 bb-sidebar">
     <ul class="nav nav-list bb-sidenav affix">
+      {{#each roundgroups}}
+      <li class="nav-header">{{name}}</li>
       {{#each rounds}}
-      <li><a href="#r{{id}}"><i class="icon-chevron-right"></i>
+      <li><a href="#round{{_id}}"><i class="icon-chevron-right"></i>
       {{name}}</a></li>
+      {{/each}}
       {{/each}}
     </ul>
   </div>
-  <div class="span9"  data-spy="scroll" data-target=".bb-sidebar">
+  <div class="span9"  data-spy="scroll" data-target=".bb-sidebar"
+       style="margin-top:75px">
     <!-- content div -->
 
-    <section id="r1">
-    <h1>Mario!</h1>
-    </section>
-    <section id="r2">
-    <h2>Zelda!</h2>
-    </section>
-
-  {{> bb_rounds}}
-  {{> bb_puzzles}}
+    {{#each roundgroups}}
+    <h1>{{name}}</h1>
+    {{#each rounds}}
+      {{> blackboard_round }}
+    {{/each}}
+    {{/each}}
   </div>
+</div>
 </div>
 </template>
 
-<template name="bb_rounds">
-  <h3>Rounds</h3>
-  <table class="table table-bordered">
-    <tr>
-      <th>Round ID</th>
-      <th>Round order</th>
-      <th>Round name</th>
-      <th>Unlocked at</th>
-    </tr>
-    {{#each rounds}}
-     {{> round_item}}
-    {{/each}}
-  </table>
-</template>
+<template name="blackboard_round">
+  <section id="round{{_id}}">
+  <h2><a href="#" class="round-link">{{name}}</a></h2>
 
- <template name="round_item">
-  <tr>
-    <td><a href="/round/{{id}}">{{id}}</td>
-    <td>{{order}}</td>
-    <td>{{name}}</td>
-    <td>{{created}}</td>
-  </tr>
-</template>
-
-<template name="bb_puzzles">
-  <h3>Puzzles</h3>
   <table class="table table-bordered">
     <tr>
       <th>Puzzle ID</th>
-      <th>Round</th>
-      <th>Title</th>
+      <th>Name</th>
       <th>Answer</th>
     </tr>
     {{#each puzzles}}
-      {{> puzzle_item}}
+      {{> blackboard_puzzle}}
     {{/each}}
   </table>
+
+  </section>
 </template>
 
-<template name="puzzle_item">
+<template name="blackboard_puzzle">
   <tr>
-    <td><a href="/puzzle/{{id}}">{{id}}</a></td>
-    <td>{{round}}</td>
-    <td>{{title}}</td>
-    <td>{{answer}}</td>
+    <td>{{_id}}</td>
+    <td><a href="#" class="puzzle-link">{{name}}</a></td>
+    <td>{{#if answer}}{{answer}}{{/if}}</td>
   </tr>
 </template>

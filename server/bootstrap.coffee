@@ -1,47 +1,29 @@
 # if the database is empty on server start, create some sample data.
 Meteor.startup ->
-  if Rounds.find().count() is 0
-    rounds = [ 
-      {
-        id: "1",
-        order: "1",
-        name: "Pluto",
-      },
-      {
-        id: "2",
-        order: "2",
-        name: "Kronos",
-      },
-    ]
+  if RoundGroups.find().count() is 0
+    # note that Meteor.call is async... this causes some slight issues...
+    Meteor.call "newRoundGroup", name: "First Group", (error, rg1) ->
+        Meteor.call "newRound", name: "Pluto", (error, r1) ->
+          Meteor.call "addRoundToGroup", r1, rg1
+          Meteor.call "newPuzzle",
+            name: "The Plutonian Transport Agency"
+            answer: "SOLUTION"
+            tags: [{name: "status", value: "stuck"}]
+          , (error, p1) ->
+            Meteor.call "addPuzzleToRound", p1, r1
 
-    for round in rounds
-      timestamp = (new Date()).getTime()
-      round_id = Rounds.insert
-        id: round.id, order: round.order, name: round.name, created: timestamp
+        Meteor.call "newRound", name: "Kronos", (error, r2) ->
+          Meteor.call "addRoundToGroup", r2, rg1
+          Meteor.call "newPuzzle",
+            name: "The Thin Red Line"
+            answer: "SOLVENT"
+          , (error, p2) ->
+            Meteor.call "addPuzzleToRound", p2, r2
 
-    puzzles = [
-      {
-        id: "1",
-        order: "1",
-        round: "1",
-        title: "The Plutonian Transport Agency",
-        answer: "SOLUTION",
-      },
-      {
-        id: "2",
-        order: "2",
-        round: "2",
-        title: "The Thin Red Line",
-        answer: "SOLVENT",
-      },
-      {
-        id: "3",
-        order: "3",
-        round: "2",
-        title: "Space Invader",
-        answer: "",
-      },
-    ]
+    Meteor.call "newRoundGroup", name: "Second Group", (error, rg2) ->
+      Meteor.call "newRound", name: "Quartet", (error, r3) ->
+        Meteor.call "addRoundToGroup", r3, rg2
 
-    for puzzle in puzzles
-      puzzle_id = Puzzles.insert id: puzzle.id, order: puzzle.order, round: puzzle.round, title: puzzle.title, answer: puzzle.answer
+    # a new puzzle, not in any round
+    Meteor.call "newPuzzle"
+      name: "Space Invader"
