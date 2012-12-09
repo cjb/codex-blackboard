@@ -25,5 +25,6 @@
 . Hook up Instachat code
   - use puzzle/round ids as room names, so we don't have to rename them?
 . Add schema for database operation logging
-
+. use puzzle/round name instead of id in url
+  - automatically do a Router.navigate() if name changes
 
