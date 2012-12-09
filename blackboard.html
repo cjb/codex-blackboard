@@ -52,6 +52,7 @@
 
     {{#each roundgroups}}
     <h1>{{name}}</h1>
+    {{>blackboard_tags}}
     {{#each rounds}}
       {{> blackboard_round }}
     {{/each}}
@@ -64,25 +65,52 @@
 <template name="blackboard_round">
   <section id="round{{_id}}">
   <h2><a href="#" class="round-link">{{name}}</a></h2>
+  {{>blackboard_tags}}
 
-  <table class="table table-bordered">
+  <table class="table table-bordered bb-puzzle">
     <tr>
-      <th>Puzzle ID</th>
       <th>Name</th>
-      <th>Answer</th>
+      <th>Solution</th>
+      <th>Status</th>
+      <th>Working on this</th>
+      <th>Last update</th>
     </tr>
     {{#each puzzles}}
       {{> blackboard_puzzle}}
     {{/each}}
   </table>
-
   </section>
 </template>
 
 <template name="blackboard_puzzle">
-  <tr>
-    <td>{{_id}}</td>
-    <td><a href="#" class="puzzle-link">{{name}}</a></td>
+  <tr><!-- {{id}} -->
+    <td>
+      <a href="#" class="puzzle-link">{{name}}</a>
+      {{>blackboard_puzzle_tags}}
+    </td>
     <td>{{#if answer}}{{answer}}{{/if}}</td>
+    <td>{{status}}</td>
+    <td>{{whos_working}}</td>
+    <td>{{last_update}}</td>
   </tr>
+</template>
+
+<template name="blackboard_tags">
+  {{#if tags}}
+  <dl class="dl-horizontal">
+  {{#each tags}}
+    <dt>{{name}}</dt><dd>{{value}}</dd>
+  {{/each}}
+  </dl>
+  {{/if}}
+</template>
+
+<template name="blackboard_puzzle_tags">
+  <dl class="dl-horizontal">
+  {{#each tags}}
+    {{#unless equal name "status"}}
+    <dt>{{name}}</dt><dd>{{value}}</dd>
+    {{/unless}}
+  {{/each}}
+  </dl>
 </template>

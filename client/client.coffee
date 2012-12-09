@@ -18,6 +18,14 @@ Template.blackboard_puzzle.events
     event.preventDefault()
     puzzle = template.data
     Router.goToPuzzle puzzle
+Template.blackboard_puzzle.status = ->
+  return (getTag this, "status") or ""
+Template.blackboard_puzzle.whos_working = ->
+  # XXX look at chat logs?
+  return ""
+Template.blackboard_puzzle.last_update = ->
+  # look at various timestamps
+  return ""
 
 Template.puzzle.puzzle = -> Puzzles.findOne(Session.get "id")
 Template.round.round = -> Rounds.findOne(Session.get "id")
