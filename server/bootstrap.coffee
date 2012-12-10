@@ -380,3 +380,4 @@ Meteor.startup ->
             for puzzle in round.puzzles
               Meteor.call "newPuzzle", puzzle, (error, p) ->
                 Meteor.call "addPuzzleToRound", p, r
+                Meteor.call "setAnswer", p._id, puzzle.answer if puzzle.answer

@@ -239,7 +239,7 @@ Meteor.methods
                                                            args.after
     unimplemented()
 
-  addAnswer: (puzzle, answer, who="") ->
+  setAnswer: (puzzle, answer, who="") ->
     id = puzzle._id or puzzle
     throw new Meteor.Error(400, "missing puzzle") unless id
     throw new Meteor.Error(400, "missing answer") unless answer

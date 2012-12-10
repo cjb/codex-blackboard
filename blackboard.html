@@ -7,6 +7,9 @@
   <div class="navbar-inner">
 <!-- Last update bar -->
   <div class="bb-lastupdate">
+    <span class="right pull-right">
+    <a href="#" id="bb-more-updates">more...</a>
+    </span>
     <span class="left">
     <strong>Last update:</strong>
     </span>
@@ -14,12 +17,12 @@
     New puzzles: <span class="bb-puzzle">MARIO
     CART</span>, <span class="bb-puzzle">LEGEND</span>.
     </span>
-    <span class="right pull-right">
-    <a href="#" id="bb-more-updates">more...</a>
-    </span>
   </div>
 <!-- Last chat bar -->
   <div class="bb-lastchat">
+    <span class="right pull-right">
+    <a href="#" id="bb=more-chats">more...</a>
+    </span>
     <span class="left">
     <strong>Last chat:</strong>
     </span>
@@ -27,11 +30,8 @@
     <span class="bb-nick">cjb</span>: Any news?  Has the coin been
     found?
     </span>
-    <span class="right pull-right">
-    <a href="#" id="bb=more-chats">more...</a>
-    </span>
   </div>
-  
+
 </div></div>
 
 <!-- puzzles w/ index -->
@@ -47,16 +47,17 @@
       {{/each}}
     </ul>
   </div>
-  <div class="span10">
+  <div id="bb-tables" class="span10">
     <!-- content div -->
+    <h1>Codex Puzzle Blackboard</h1>
 
     {{#each roundgroups}}
     <section id="group{{_id}}">
-    <h1>{{name}}</h1>
-    {{>blackboard_tags}}
+    <h2>{{name}}</h2>
     {{#each rounds}}
       {{> blackboard_round }}
     {{/each}}
+    {{>blackboard_tags}}
     </section>
     {{/each}}
   </div>
@@ -67,53 +68,53 @@
 
 <template name="blackboard_round">
   <section id="round{{_id}}">
-  <h2><a href="#" class="round-link">{{name}}</a></h2>
-  {{>blackboard_tags}}
+  <h3><a href="#" class="round-link">{{name}}</a></h3>
 
-  <table class="table table-bordered bb-puzzle">
+  {{#if hasPuzzles}}
+  <table class="table table-bordered table-condensed bb-puzzle">
     <tr>
-      <th>Name</th>
-      <th>Solution</th>
-      <th>Status</th>
-      <th>Working on this</th>
-      <th>Last update</th>
+      <th class="puzzle-name">Name</th>
+      <th class="puzzle-answer">Solution</th>
+      <th class="puzzle-status">Status</th>
+      <th class="puzzle-working">Working on this</th>
+      <th class="puzzle-update">Last update</th>
     </tr>
     {{#each puzzles}}
       {{> blackboard_puzzle}}
     {{/each}}
   </table>
+  {{else}}
+  <i>No puzzles in this round yet.</i>
+  {{/if}}
+  {{>blackboard_tags}}
   </section>
 </template>
 
 <template name="blackboard_puzzle">
   <tr><!-- {{id}} -->
-    <td>
+    <td class="puzzle-name">
       <a href="#" class="puzzle-link">{{name}}</a>
       {{>blackboard_puzzle_tags}}
     </td>
-    <td>{{#if answer}}{{answer}}{{/if}}</td>
-    <td>{{status}}</td>
-    <td>{{whos_working}}</td>
-    <td>{{last_update}}</td>
+    <td class="puzzle-answer">{{#if answer}}<span class="answer">{{answer}}</span>{{/if}}</td>
+    <td class="puzzle-status">{{status}}</td>
+    <td class="puzzle-working">{{whos_working}}</td>
+    <td class="puzzle-update">{{last_update}}</td>
   </tr>
 </template>
 
 <template name="blackboard_tags">
-  {{#if tags}}
-  <dl class="dl-horizontal">
-  {{#each tags}}
-    <dt>{{name}}</dt><dd>{{value}}</dd>
-  {{/each}}
-  </dl>
-  {{/if}}
+  <dl class="dl-horizontal">{{#each tags}}
+    <dt>{{name}}:</dt><dd>{{value}}</dd>
+  {{/each}}</dl>
 </template>
 
 <template name="blackboard_puzzle_tags">
-  <dl class="dl-horizontal">
-  {{#each tags}}
-    {{#unless equal name "status"}}
-    <dt>{{name}}</dt><dd>{{value}}</dd>
-    {{/unless}}
-  {{/each}}
-  </dl>
+  <table class="bb-tag-table"><tbody>{{!
+    }}{{#each tags}}{{!
+      }}{{#unless equal name "status"}}
+        <tr><td>{{name}}:</td><td>{{value}}</td></tr>
+      {{/unless}}{{!
+    }}{{/each}}{{!
+  }}</tbody></table>
 </template>

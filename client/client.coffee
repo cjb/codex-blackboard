@@ -18,6 +18,7 @@ Template.blackboard.rendered = ->
   # XXX disabled because it doesn't play nice with narrow screens
   #$("#bb-sidebar > .bb-sidenav").affix()
 Template.blackboard.rounds = -> Rounds.find _id: $in: this.rounds
+Template.blackboard_round.hasPuzzles = -> (this.puzzles.length > 0)
 Template.blackboard_round.puzzles = -> Puzzles.find _id: $in: this.puzzles
 Template.blackboard_round.events
   "click .round-link": (event, template) ->

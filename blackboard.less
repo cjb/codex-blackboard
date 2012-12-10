@@ -1,11 +1,20 @@
+.ellipsis {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
 #bb-body {
   padding-top: 81px;
-  section {
-    /* Indent our sections to start underneath the chat/update log */
-    padding-top: 81px;
-    margin-top: -81px;
-  }
 
+  .bb-lastchat, .bb-lastupdate {
+    margin-bottom: 2px;
+    padding: 8px 85px 8px 14px;
+    .right { margin-right: -50px; }
+    .ellipsis;
+  }
+}
+#bb-sidebar {
   .bb-sidenav {
     margin-top: 10px;
     background-color: #fff;
@@ -19,6 +28,8 @@
 
     position: fixed; /* for wide screens */
 
+    li.nav-header, li > a { .ellipsis; }
+
     /* Chevrons */
     .icon-chevron-right {
       float: right;
@@ -27,10 +38,46 @@
       opacity: .25;
     }
   }
-
-  .bb-lastchat, .bb-lastupdate {
-    margin-bottom: 2px;
-    padding: 8px 35px 8px 14px;
+}
+#bb-tables {
+  section {
+    /* Indent our sections to start underneath the chat/update log */
+    padding-top: 81px;
+    margin-top: -81px;
+  }
+  h2 {
+    border-bottom: 1px solid #e5e5e5;
+  }
+  font-size: 93%; /* 13px for body text */
+  h2,h3 {
+   font-size: 130%;
+   margin-top: 0;
+   margin-bottom: 0;
+  }
+  dl {
+    margin: 0;
+    &:empty { display: none; }
+    /* narrower tag names */
+    dt { width: 120px; }
+    dd { margin-left: 130px; }
+  }
+  .bb-puzzle {
+    margin-bottom: 0;
+    th { background: #f8f8f8; }
+    .answer {
+      font-family: 'Andale Mono', Courier, monospace;
+      text-transform: uppercase;
+    }
+    .bb-tag-table {
+      font-size: 90%;
+      border-collapse: collapse;
+      &, td, tr { border: none; }
+      td { padding: 0 3px; margin: 0; }
+    }
+    td,th { padding-top: 0; padding-bottom: 0; }
+    /* try to make table spacing more-or-less consistent */
+    td,th { width: 10%; }
+    .puzzle-name, .puzzle-answer { width: 35%; }
   }
 }
 
@@ -48,11 +95,14 @@
   /* navbar becomes unfixed below 980px */
   #bb-body {
     padding-top: 0;
-
+  }
+  #bb-tables {
     section {
       padding-top: 0;
       margin-top: 0;
     }
+  }
+  #bb-sidebar {
     .bb-sidenav {
       /* unfix sidebar */
       position: static;
@@ -84,14 +134,16 @@
   }
 
   /* Sidenav */
-  .bb-sidenav {
-    width: auto;
-    margin-bottom: 20px;
-  }
-  .bb-sidenav.affix {
-    position: static;
-    width: auto;
-    top: 0;
+  #bb-sidebar {
+    .bb-sidenav {
+      width: auto;
+      margin-bottom: 20px;
+      &.affix {
+        position: static;
+        width: auto;
+        top: 0;
+      }
+    }
   }
 }
 
