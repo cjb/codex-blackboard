@@ -6,6 +6,17 @@
 Template.page.currentPage = -> (Session.get "currentPage") or "blackboard"
 
 Template.blackboard.roundgroups = -> RoundGroups.find {}
+Template.blackboard.rendered = ->
+  $("body").scrollspy(target: "#bb-sidebar", offset: (81+10))
+  # update bootstrap "scroll spy" component when rounds list changes
+  ss = $("body").data("scrollspy")
+  ss.refresh()
+  # hack to ensure first element is selected on first reload
+  ss.activate(ss.targets[0]) if ss.targets.length
+  ss.process()
+  # affix side menu
+  # XXX disabled because it doesn't play nice with narrow screens
+  #$("#bb-sidebar > .bb-sidenav").affix()
 Template.blackboard.rounds = -> Rounds.find _id: $in: this.rounds
 Template.blackboard_round.puzzles = -> Puzzles.find _id: $in: this.puzzles
 Template.blackboard_round.events

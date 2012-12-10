@@ -7,5 +7,6 @@ insecure
 preserve-inputs
 coffeescript
 backbone
-bootstrap
 autopublish
+less
+bootstrap

@@ -1,42 +1,43 @@
 <template name="blackboard">
+<div id="bb-body">
+
+<div class="container-fluid bb-content">
+
 <div class="navbar navbar-inverse navbar-fixed-top bb-topbar">
   <div class="navbar-inner">
-    <div class="container-fluid">
-      <div class="nav-collapse collapse">
 <!-- Last update bar -->
-   <div class="bb-lastupdate navbar-text">
+  <div class="bb-lastupdate">
     <span class="left">
-    <b>Last update:</b>
+    <strong>Last update:</strong>
     </span>
     <span class="content">
     New puzzles: <span class="bb-puzzle">MARIO
     CART</span>, <span class="bb-puzzle">LEGEND</span>.
     </span>
     <span class="right pull-right">
-    <a href="#">more...</a>
+    <a href="#" id="bb-more-updates">more...</a>
     </span>
   </div>
 <!-- Last chat bar -->
-  <div class="bb-lastchat navbar-text">
+  <div class="bb-lastchat">
     <span class="left">
-    <b>Last chat:</b>
+    <strong>Last chat:</strong>
     </span>
     <span class="content">
     <span class="bb-nick">cjb</span>: Any news?  Has the coin been
     found?
     </span>
     <span class="right pull-right">
-    <a href="#">more...</a>
+    <a href="#" id="bb=more-chats">more...</a>
     </span>
   </div>
   
-</div></div></div></div>
+</div></div>
 
 <!-- puzzles w/ index -->
-<div class="container">
-<div class="row">
-  <div class="span3 bb-sidebar">
-    <ul class="nav nav-list bb-sidenav affix">
+<div class="row-fluid">
+  <div id="bb-sidebar" class="span2">
+    <ul class="nav nav-list bb-sidenav span2">
       {{#each roundgroups}}
       <li class="nav-header">{{name}}</li>
       {{#each rounds}}
@@ -46,18 +47,20 @@
       {{/each}}
     </ul>
   </div>
-  <div class="span9"  data-spy="scroll" data-target=".bb-sidebar"
-       style="margin-top:75px">
+  <div class="span10">
     <!-- content div -->
 
     {{#each roundgroups}}
+    <section id="group{{_id}}">
     <h1>{{name}}</h1>
     {{>blackboard_tags}}
     {{#each rounds}}
       {{> blackboard_round }}
     {{/each}}
+    </section>
     {{/each}}
   </div>
+</div>
 </div>
 </div>
 </template>

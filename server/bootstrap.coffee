@@ -152,7 +152,7 @@ SAMPLE_DATA = [
       answer: "TAURUS"
     ]
   ,
-    name: "Dr wily's fortress round"
+    name: "Dr wily's really really really long fortress round" # slight hack
     tags: [
       { name: "Meta answer", value: "ZELDA" }
     ]
