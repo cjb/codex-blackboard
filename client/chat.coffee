@@ -90,7 +90,7 @@ Template.nickModal.nick   = -> Session.get "nick"
 )()
 
 registerVisibilityChange ->
-  instachat.keepalive() if instachat.keepalive
+  instachat.keepalive?()
 
 prettyRoomName = ->
   type = Session.get('type')
@@ -275,16 +275,21 @@ ensureNick = (cb=(->)) ->
     changeNick cb
 
 Template.chat.created = ->
-  ensureNick ->
-    type = Session.get('type')
-    id = Session.get('id')
-    joinRoom type, id
+  this.afterFirstRender = ->
+    # created callback means that we've switched to chat, but
+    # can't call ensureNick until after firstRender
+    ensureNick ->
+      type = Session.get('type')
+      id = Session.get('id')
+      joinRoom type, id
 
 Template.chat.rendered = ->
   $("title").text("Chat: "+prettyRoomName())
   $(window).resize()
-Template.chat.destroyed = ->
-  hideMessageAlert()
+  this.afterFirstRender?()
+  this.afterFirstRender = null
+
+cleanupChat = ->
   if instachat.keepaliveInterval
     Meteor.clearInterval instachat.keepaliveInterval
     instachat.keepalive = instachat.keepaliveInterval = null
@@ -292,6 +297,12 @@ Template.chat.destroyed = ->
     nick: Session.get('nick')
     room_name: Session.get "room_name"
     present: false
+
+Template.chat.destroyed = ->
+  hideMessageAlert()
+  cleanupChat()
+# window.unload is a bit spotty with async stuff, but we might as well try
+$(window).unload -> cleanupChat()
 
 # App startup
 Meteor.startup ->
