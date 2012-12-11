@@ -5,6 +5,7 @@
 #   _id: mongodb id
 #   timestamp: timestamp
 #   message: string -- human-readable description of what was done
+#   nick: canonicalized string -- who did it, if known
 #   type: string
 #   id: string -- type/id give a mongodb reference to the object modified
 #                 so we can hyperlink to it.
@@ -94,8 +95,8 @@ collection = (type) -> switch type
       when "nick" then Nicks
       else throw new Meteor.Error(400, "Bad collection type")
 
-oplog = (message, type="", id="") ->
-  OpLogs.insert { timestamp:UTCNow(), message:message, type:type, id:id }
+oplog = (message, type="", id="", who="") ->
+  OpLogs.insert { timestamp:UTCNow(), message:message, type:type, id:id, nick:canonical(who) }
 
 getTag = (object, name) ->
   (tag.value for tag in (object.tags or []) when tag.canon is canonical(name))[0]
@@ -121,17 +122,18 @@ Meteor.methods
       tags: canonicalTags(args.tags or [])
       rounds: args.rounds or []
     id = RoundGroups.insert newRoundGroup
-    oplog "Created new Round Group: "+args.name
+    oplog "Added", "roundgroup", id, (args.who or "")
     return RoundGroups.findOne(id)
   renameRoundGroup: (args) ->
     throw new Meteor.Error(400, "missing id") unless args.id
     throw new Meteor.Error(400, "missing name") unless args.name
     RoundGroups.update args.id, $set: name: args.name
-    oplog "Renamed Round Group to "+args.name
+    oplog "Renamed", "roundgroup", id, (args.who or "")
     return true
   delRoundGroup: (args) ->
     throw new Meteor.Error(400, "missing id") unless args.id
-    oplog "Deleted Round Group "+RoundGrounds.findOne(args.id).name
+    oplog "Deleted Round Group "+RoundGrounds.findOne(args.id).name, \
+        "roundgroup", null, (args.who or "")
     RoundGroups.remove(args.id)
     return true
 
@@ -147,18 +149,19 @@ Meteor.methods
       touched: now
       last_touch_by: args.who or ""
     id = Rounds.insert newRound
-    oplog "Created new Round: "+args.name, "round", id
+    oplog "Added", "round", id, (args.who or "")
     return Rounds.findOne(id)
   renameRound: (args) ->
     throw new Meteor.Error(400, "missing id") unless args.id
     throw new Meteor.Error(400, "missing name") unless args.name
     Rounds.update args.id, $set: name: args.name
-    oplog "Renamed Round to "+args.name, "round", args.id
+    oplog "Renamed", "round", id, (args.who or "")
     # XXX: rename chat room logs?
     return true
   delRound: (args) ->
     throw new Meteor.Error(400, "missing id") unless args.id
-    oplog "Deleted Round "+Rounds.findOne(args.id).name
+    oplog "Deleted Round "+Rounds.findOne(args.id).name, \
+        "round", null, (args.who or "")
     Rounds.remove(args.id)
     # XXX: delete chat room logs?
     return true
@@ -178,19 +181,20 @@ Meteor.methods
       drive: args.drive or null
     id = Puzzles.insert newPuzzle
     # XXX: create google drive folder
-    oplog "Added new puzzle: "+args.name, "puzzle", id
+    oplog "Added", "puzzle", id, (args.who or "")
     return Puzzles.findOne(id)
   renamePuzzle: (args) ->
     throw new Meteor.Error(400, "missing id") unless args.id
     throw new Meteor.Error(400, "missing name") unless args.name
     Puzzles.update args.id, $set: name: args.name
-    oplog "Renamed puzzle: "+args.name, "puzzle", args.id
+    oplog "Renamed", "puzzle", id, (args.who or "")
     # XXX: rename google drive folder
     # XXX: rename chat room logs?
     return true
   delPuzzle: (args) ->
     throw new Meteor.Error(400, "missing id") unless args.id
-    oplog "Deleted puzzle: "+Puzzles.findOne(args.id).name
+    oplog "Deleted puzzle: "+Puzzles.findOne(args.id).name, \
+        "puzzle", null, (args.who or "")
     Puzzles.remove(args.id)
     # XXX: delete google drive folder
     # XXX: delete chat room logs?
@@ -342,6 +346,7 @@ Meteor.methods
       solved: now
       touched:now
       last_touch_by: who
+    oplog "Found an answer to", "puzzle", id, (who or "")
     if Meteor.isClient
       blackboard.newAnswerSound.play()
     return true
@@ -355,6 +360,7 @@ Meteor.methods
       solved: null
       touched:now
       last_touch_by: who
+    oplog "Deleted answer", "puzzle", id, (who or "")
     return true
 
   touch: (type, id, who) ->

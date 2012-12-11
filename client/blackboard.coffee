@@ -4,6 +4,40 @@ Meteor.startup ->
   blackboard.newAnswerSound = new Audio "sound/that_was_easy.wav"
 
 Template.blackboard.lastupdates = ->
+  LIMIT = 10
+  ologs = OpLogs.find {}, \
+        {sort: [["timestamp","desc"]], limit_BUG: LIMIT}
+  # Meteor doesn't support the limit option yet.  So in a hacky workaround,
+  # limit the collection client-side
+  ologs = ologs.fetch().slice(0, LIMIT)
+  # now look through the entries and collect similar logs
+  # this way we can say "New puzzles: X, Y, and Z" instead of just "New Puzzle: Z"
+  return '' unless ologs && ologs.length
+  message = [ ologs[0] ]
+  for ol in ologs[1..]
+    if ol.message is message[0].message and ol.type is message[0].type
+      message.push ol
+    else
+      break
+  type = ''
+  if message[0].id
+    type = (switch message[0].type
+      when 'puzzle' then ' puzzle'
+      when 'round' then ' round'
+      when 'roundgroup' then ' round group'
+      else ' unknown item') + (if message.length > 1 then 's ' else ' ')
+  desc = message.map (ol) ->
+    return '' unless ol.id
+    (collection(ol.type)?.findOne(ol.id)?.name or '')
+  return {
+    timestamp: message[0].timestamp
+    message: message[0].message
+    nick: message[0].nick
+    type: type
+    names: desc.join(',')
+  }
+
+Template.blackboard.lastchats = ->
   LIMIT = 2
   m = Messages.find {room_name: "general/0", system: false}, \
         {sort: [["timestamp","desc"]], limit_BUG: LIMIT}

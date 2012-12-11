@@ -14,8 +14,11 @@
     <strong>Last update:</strong>
     </span>
     <span class="center">
-    New puzzles: <span class="bb-puzzle">MARIO
-    CART</span>, <span class="bb-puzzle">LEGEND</span>.
+    {{#with lastupdates}}
+    <span class="timestamp">{{pretty_ts timestamp}}</span>
+    {{message}}{{type}}<span class="object-names">{{names}}</span>
+    {{#if nick}} (<strong>{{nick}}</strong>){{/if}}
+    {{/with}}
     </span>
   </div>
 <!-- Last chat bar -->
@@ -27,7 +30,7 @@
       <strong>Last chats:</strong>
     </span>
     <span class="center">
-    {{#each lastupdates}}
+    {{#each lastchats}}
     <p class="messageRow">
     <span class="timestamp">{{pretty_ts timestamp}}</span>
     <strong>{{nick}}:</strong>

@@ -9,7 +9,7 @@
 #bb-body {
   padding-top: @navbar-height;
 
-  @left-size: 80px;
+  @left-size: 85px;
   @right-size: 50px;
   @vert-padding: 4px;
 
@@ -26,7 +26,12 @@
     margin-bottom: 0;
     font: 90%;
     line-height: 1.2;
+  }
+  .bb-lastchat, .bb-lastupdate {
     .timestamp { color: #555; }
+  }
+  .bb-lastupdate {
+    .object-names { text-transform: uppercase; }
   }
 }
 #bb-sidebar {
