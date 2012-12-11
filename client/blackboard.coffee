@@ -50,6 +50,7 @@ Template.blackboard.pretty_ts = (ts) -> Template.messages.pretty_ts ts
 Template.blackboard.roundgroups = -> RoundGroups.find {}
 Template.blackboard.rounds = -> Rounds.find _id: $in: this.rounds
 Template.blackboard.rendered = ->
+  $("#bb-sidebar").localScroll({ duration: 400 })
   $("body").scrollspy(target: "#bb-sidebar", offset: (NAVBAR_HEIGHT + 10))
   # update bootstrap "scroll spy" component when rounds list changes
   ss = $("body").data("scrollspy")
