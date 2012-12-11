@@ -41,3 +41,12 @@ x Play audio on the local machine when a puzzle is solved or a new puzzle
   is added.  (Any other events?  We don't want to make it too spammy, but
   getting an answer correct is a time everyone in the room will be cheering
   out loud anyway.)
+- add mute button to front page (use instachat's button/cookie?)
+  don't know exactly where it goes in the UI
+- chat improvements:
+  - /me commands (probably needs an 'action' boolean added to the schema)
+  - /play {trombone, rimshot, crickets}, maybe using the below:
+  - URL parsing (ie, links to images display them, links to sounds play them)
+    (i think hubot-scripts uses some functionality like this)
+  - file upload via the google drive folder attached to the puzzle/round
+  - nick completion (@foo?)
