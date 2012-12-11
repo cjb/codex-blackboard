@@ -75,19 +75,22 @@ Template.nickModal.nick   = -> Session.get "nick"
     visibilityChange = "webkitvisibilitychange"
   callbacks = []
   register = (cb) -> callbacks.push cb
-  isVisible = -> document[hidden] or false
+  isVisible = -> !(document[hidden] or false)
   onVisibilityChange = (->
     wasHidden = true
     (e) ->
-      isHidden = isVisible()
+      isHidden = !isVisible()
       return  if wasHidden is isHidden
       wasHidden = isHidden
       for cb in callbacks
-        cb isHidden
+        cb !isHidden
   )()
   document.addEventListener visibilityChange, onVisibilityChange, false
   return [isVisible, register]
 )()
+
+registerVisibilityChange ->
+  instachat.keepalive() if instachat.keepalive
 
 prettyRoomName = ->
   type = Session.get('type')
@@ -103,15 +106,15 @@ joinRoom = (type, id) ->
   Router.goToChat(type, id)
   scrollMessagesView()
   $("#messageInput").select()
-  keepalive = ->
+  instachat.keepalive = ->
     Meteor.call "setPresence"
       nick: Session.get('nick')
       room_name: Session.get "room_name"
       present: true
       foreground: isVisible() # foreground/background tab status
-  keepalive()
+  instachat.keepalive()
   # send a keep alive every four minutes
-  instachat.keepaliveInterval = Meteor.setInterval keepalive, 4*60*1000
+  instachat.keepaliveInterval = Meteor.setInterval instachat.keepalive, 4*60*1000
 
 scrollMessagesView = ->
   Meteor.setTimeout ->
@@ -284,7 +287,7 @@ Template.chat.destroyed = ->
   hideMessageAlert()
   if instachat.keepaliveInterval
     Meteor.clearInterval instachat.keepaliveInterval
-    instachat.keepaliveInterval = null
+    instachat.keepalive = instachat.keepaliveInterval = null
   Meteor.call "setPresence"
     nick: Session.get('nick')
     room_name: Session.get "room_name"
