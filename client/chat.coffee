@@ -50,9 +50,45 @@ Template.nickAndRoom.volumeIcon = ->
   else
     "icon-volume-up"
 
+Template.nickAndRoom.events
+  "click .change-nick-link": (event, template) ->
+    event.preventDefault()
+    changeNick()
+
 Template.nickModal.nick   = -> Session.get "nick"
 
 # Utility functions
+[isVisible, registerVisibilityChange] = (->
+  hidden = "hidden"
+  visibilityChange = "visibilitychange"
+  if typeof document.hidden isnt "undefined"
+    hidden = "hidden"
+    visibilityChange = "visibilitychange"
+  else if typeof document.mozHidden isnt "undefined"
+    hidden = "mozHidden"
+    visibilityChange = "mozvisibilitychange"
+  else if typeof document.msHidden isnt "undefined"
+    hidden = "msHidden"
+    visibilityChange = "msvisibilitychange"
+  else if typeof document.webkitHidden isnt "undefined"
+    hidden = "webkitHidden"
+    visibilityChange = "webkitvisibilitychange"
+  callbacks = []
+  register = (cb) -> callbacks.push cb
+  isVisible = -> document[hidden] or false
+  onVisibilityChange = (->
+    wasHidden = true
+    (e) ->
+      isHidden = isVisible()
+      return  if wasHidden is isHidden
+      wasHidden = isHidden
+      for cb in callbacks
+        cb isHidden
+  )()
+  document.addEventListener visibilityChange, onVisibilityChange, false
+  return [isVisible, register]
+)()
+
 prettyRoomName = ->
   type = Session.get('type')
   id = Session.get('id')
@@ -67,13 +103,18 @@ joinRoom = (type, id) ->
   Router.goToChat(type, id)
   scrollMessagesView()
   $("#messageInput").select()
-  Meteor.call "newMessage"
-    system: true
-    body: Session.get("nick") + " just joined the room."
-    room_name: Session.get "room_name"
+  keepalive = ->
+    Meteor.call "setPresence"
+      nick: Session.get('nick')
+      room_name: Session.get "room_name"
+      present: true
+      foreground: isVisible() # foreground/background tab status
+  keepalive()
+  # send a keep alive every four minutes
+  instachat.keepaliveInterval = Meteor.setInterval keepalive, 4*60*1000
 
 scrollMessagesView = ->
-  setTimeout ->
+  Meteor.setTimeout ->
     $("#messagesInner").scrollTop 10000
   , 200
 
@@ -161,7 +202,7 @@ $("#messageInput").live "focus", ->
 
 showUnreadMessagesAlert = ->
   return if instachat.messageAlertInterval
-  instachat.messageAlertInterval = window.setInterval ->
+  instachat.messageAlertInterval = Meteor.setInterval ->
     title = $("title")
     name = "Chat: "+prettyRoomName()
     if title.text() == name
@@ -173,7 +214,7 @@ showUnreadMessagesAlert = ->
 
 hideMessageAlert = ->
   return unless instachat.messageAlertInterval
-  window.clearInterval instachat.messageAlertInterval
+  Meteor.clearInterval instachat.messageAlertInterval
   instachat.messageAlertInterval = null
   $("title").text("Chat: "+prettyRoomName())
 
@@ -216,6 +257,11 @@ Meteor.methods
     return true
 """
 
+changeNick = (cb=(->)) ->
+  $('#nickPickModal').one('hide', cb)
+  $('#nickPickModal').modal keyboard: false, backdrop:"static"
+  $('#nickInput').select()
+
 ensureNick = (cb=(->)) ->
   if Session.get 'nick'
     cb()
@@ -223,9 +269,7 @@ ensureNick = (cb=(->)) ->
     Session.set 'nick', $.cookie('nick')
     cb()
   else
-    $('#nickPickModal').one('hide', cb)
-    $('#nickPickModal').modal keyboard: false, backdrop:"static"
-    $('#nickInput').select()
+    changeNick cb
 
 Template.chat.created = ->
   ensureNick ->
@@ -238,6 +282,13 @@ Template.chat.rendered = ->
   $(window).resize()
 Template.chat.destroyed = ->
   hideMessageAlert()
+  if instachat.keepaliveInterval
+    Meteor.clearInterval instachat.keepaliveInterval
+    instachat.keepaliveInterval = null
+  Meteor.call "setPresence"
+    nick: Session.get('nick')
+    room_name: Session.get "room_name"
+    present: false
 
 # App startup
 Meteor.startup ->

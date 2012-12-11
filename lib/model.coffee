@@ -17,6 +17,8 @@ OpLogs = new Meteor.Collection "oplogs"
 #   canon: canonicalized version of name, for searching
 #   tags: [ { name: "Status", canon: "status", value: "stuck" }, ... ]
 RoundGroups = new Meteor.Collection "roundgroups"
+if Meteor.isServer
+  RoundGroups._ensureIndex {canon: 1}, {unique:true, dropDups:true}
 
 # Rounds are:
 #   _id: mongodb id
@@ -28,6 +30,8 @@ RoundGroups = new Meteor.Collection "roundgroups"
 #   last_touch_by: _id of Nick
 #   tags: [ { name: "Status", canon: "status", value: "stuck" }, ... ]
 Rounds = new Meteor.Collection "rounds"
+if Meteor.isServer
+  Rounds._ensureIndex {canon: 1}, {unique:true, dropDups:true}
 
 # Puzzles are:
 #   _id: mongodb id
@@ -41,6 +45,8 @@ Rounds = new Meteor.Collection "rounds"
 #   tags: [ { name: "Status", canon: "status", value: "stuck" }, ... ]
 #   drive: google drive url or id
 Puzzles = new Meteor.Collection "puzzles"
+if Meteor.isServer
+  Puzzles._ensureIndex {canon: 1}, {unique:true, dropDups:true}
 
 # Nicks are:
 #   _id: mongodb id
@@ -48,6 +54,8 @@ Puzzles = new Meteor.Collection "puzzles"
 #   canon: canonicalized version of name, for searching
 #   tags: [ { name: "Real Name", canon: "real_name", value: "C. Scott Ananian" }, ... ]
 Nicks = new Meteor.Collection "nicks"
+if Meteor.isServer
+  Nicks._ensureIndex {canon: 1}, {unique:true, dropDups:true}
 
 # Messages
 #   body: string
@@ -56,6 +64,24 @@ Nicks = new Meteor.Collection "nicks"
 #   room_name: "<type>/<id>", ie "puzzle/1", "round/1". "general/0" for main chat.
 #   timestamp: timestamp
 Messages = new Meteor.Collection "messages"
+if Meteor.isServer
+  Messages._ensureIndex {timestamp:-1}, {}
+
+# Chat room presence
+#   nick: canonicalized string, as in Messages
+#   room_name: string, as in Messages
+#   timestamp: timestamp -- when user was last seen in room
+#   foreground: boolean (true if user's tab is still in foreground)
+Presence = new Meteor.Collection "presence"
+if Meteor.isServer
+  Presence._ensureIndex {nick: 1, room_name:1}, {unique:true, dropDups:true}
+  Presence._ensureIndex {timestamp:-1}, {}
+  # ensure old entries are timed out after 5 min
+  Meteor.setInterval ->
+    #console.log "Removing entries older than", (UTCNow() - 5*60*1000)
+    Presence.remove timestamp: $lt: (UTCNow() - 5*60*1000)
+  , 60*1000
+
 
 # Globals
 blackboard = {}
@@ -193,6 +219,48 @@ Meteor.methods
     id = Messages.insert newMsg
     return Messages.findOne(id)
 
+  setPresence: (args) ->
+    throw new Meteor.Error(400, "missing nick") unless args.nick
+    throw new Meteor.Error(400, "missing room") unless args.room_name
+    newPresence =
+      nick: canonical(args.nick)
+      room_name: args.room_name
+      timestamp: UTCNow()
+      foreground: args.foreground or false
+    existing = Presence.findOne
+      nick: newPresence.nick
+      room_name: newPresence.room_name
+    if args.present
+      # would be easier to use Mongo's "upsert" functionality, but
+      # meteor doesn't support it
+      if existing
+        Presence.update
+          nick: newPresence.nick
+          room_name: newPresence.room_name
+        ,
+          $set:
+            timestamp: newPresence.timestamp
+            foreground: newPresence.foreground
+      else
+        Presence.insert newPresence
+        Messages.insert
+          system: true
+          nick: ''
+          body: args.nick + " joined the room."
+          room_name: newPresence.room_name
+          timestamp: newPresence.timestamp
+    else
+      Presence.remove
+        nick: newPresence.nick
+        room_name: newPresence.room_name
+      if existing
+        Messages.insert
+          system: true
+          nick: ''
+          body: args.nick + " left the room."
+          room_name: newPresence.room_name
+          timestamp: newPresence.timestamp
+
   get: (type, id) ->
     throw new Meteor.Error(400, "missing id") unless args.id
     return collection(type).findOne(id)
@@ -303,4 +371,5 @@ Meteor.methods
 
 UTCNow = ->
   now = new Date()
-  Date.UTC(now.getFullYear(), now.getMonth(), now.getDate(), now.getHours(), now.getMinutes(), now.getSeconds(), now.getMilliseconds())
+  #Date.UTC(now.getFullYear(), now.getMonth(), now.getDate(), now.getHours(), now.getMinutes(), now.getSeconds(), now.getMilliseconds())
+  return now.getTime()
