@@ -13,7 +13,7 @@
     <span class="left">
     <strong>Last update:</strong>
     </span>
-    <span class="content">
+    <span class="center">
     New puzzles: <span class="bb-puzzle">MARIO
     CART</span>, <span class="bb-puzzle">LEGEND</span>.
     </span>
@@ -21,14 +21,19 @@
 <!-- Last chat bar -->
   <div class="bb-lastchat">
     <span class="right pull-right">
-    <a href="#" id="bb-more-chats">more...</a>
+      <a href="#" id="bb-more-chats">more...</a>
     </span>
-    <span class="left">
-    <strong>Last chat:</strong>
+    <span class="left pull-left">
+      <strong>Last chats:</strong>
     </span>
-    <span class="content">
-    <span class="bb-nick">cjb</span>: Any news?  Has the coin been
-    found?
+    <span class="center">
+    {{#each lastupdates}}
+    <p class="messageRow">
+    <span class="timestamp">{{pretty_ts timestamp}}</span>
+    <strong>{{nick}}:</strong>
+    {{body}}
+    </p>
+    {{/each}}
     </span>
   </div>
 

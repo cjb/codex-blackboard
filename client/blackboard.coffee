@@ -1,6 +1,16 @@
 Meteor.startup ->
   blackboard.newAnswerSound = new Audio "sound/that_was_easy.wav"
 
+Template.blackboard.lastupdates = ->
+  LIMIT = 2
+  m = Messages.find {room_name: "general/0", system: false}, \
+        {sort: [["timestamp","desc"]], limit_BUG: LIMIT}
+  # Meteor doesn't support the limit option yet.  So in a hacky workaround,
+  # limit the collection client-side
+  m = m.fetch().slice(0, LIMIT)
+  m.reverse()
+  return m
+Template.blackboard.pretty_ts = (ts) -> Template.messages.pretty_ts ts
 Template.blackboard.roundgroups = -> RoundGroups.find {}
 Template.blackboard.rounds = -> Rounds.find _id: $in: this.rounds
 Template.blackboard.rendered = ->
