@@ -82,13 +82,40 @@ Template.blackboard_puzzle.status = ->
 Template.blackboard_puzzle.whos_working = ->
   # XXX look at chat logs?
   return ""
-Template.blackboard_puzzle.last_update = ->
-  if this.solved
-    "solved " + Template.messages.pretty_ts(this.solved)
-  else
-    "added " + Template.messages.pretty_ts(this.created)
+
+Template.blackboard_puzzle.pretty_ts = (timestamp, brief) ->
+  duration = (Session.get('currentTime')||UTCNow()) - timestamp
+  seconds = Math.floor(duration/1000)
+  return "in the future" if seconds < 0
+  return "just now" if seconds < 60
+  [minutes, seconds] = [Math.floor(seconds/60), seconds % 60]
+  [hours,   minutes] = [Math.floor(minutes/60), minutes % 60]
+  [days,    hours  ] = [Math.floor(hours  /24), hours   % 24]
+  [weeks,   days   ] = [Math.floor(days   / 7), days    % 7]
+  ago = (s) -> (s.replace(/^\s+/,'') + " ago")
+  s = ""
+  s += " #{weeks} week" if weeks > 0
+  s += "s" if weeks > 1
+  return ago(s) if s and brief
+  s += " #{days} day" if days > 0
+  s += "s" if days > 1
+  return ago(s) if s and brief
+  s += " #{hours} hour" if hours > 0
+  s += "s" if hours > 1
+  return ago(s) if s and brief
+  s += " #{minutes} minute" if minutes > 0
+  s += "s" if minutes > 1
+  return ago(s)
+
 Template.blackboard_puzzle.events
   "click .puzzle-link": (event, template) ->
     event.preventDefault()
     puzzle = template.data
     Router.goToPuzzle puzzle
+
+# Update 'currentTime' every minute or so to allow pretty_ts to magically
+# update
+Meteor.startup ->
+  Meteor.setInterval ->
+    Session.set "currentTime", UTCNow()
+  , 60*1000

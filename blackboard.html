@@ -107,7 +107,11 @@
     <td class="puzzle-answer">{{#if answer}}<span class="answer">{{answer}}</span>{{/if}}</td>
     <td class="puzzle-status">{{status}}</td>
     <td class="puzzle-working">{{whos_working}}</td>
-    <td class="puzzle-update">{{last_update}}</td>
+    <td class="puzzle-update">
+      {{#if solved}}solved {{pretty_ts solved}}
+      {{else}}added {{pretty_ts created}}
+      {{/if}}
+    </td>
   </tr>
 </template>
 
