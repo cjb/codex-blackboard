@@ -1,3 +1,6 @@
+Meteor.startup ->
+  blackboard.newAnswerSound = new Audio "sound/that_was_easy.wav"
+
 Template.blackboard.roundgroups = -> RoundGroups.find {}
 Template.blackboard.rounds = -> Rounds.find _id: $in: this.rounds
 Template.blackboard.rendered = ->

@@ -53,6 +53,9 @@ Nicks = new Meteor.Collection "nicks"
 #   timestamp: timestamp
 Messages = new Meteor.Collection "messages"
 
+# Globals
+blackboard = {}
+
 unimplemented = -> throw new Meteor.Error(500, "Unimplemented")
 collection = (type) -> switch type
       when "puzzle" then Puzzles
@@ -249,6 +252,8 @@ Meteor.methods
       solved: now
       touched:now
       last_touch_by: who
+    if Meteor.isClient
+      blackboard.newAnswerSound.play()
     return true
 
   delAnswer: (puzzle, who="") ->
