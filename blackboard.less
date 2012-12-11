@@ -101,6 +101,8 @@
     .puzzle-name, .puzzle-answer { width: 35%; }
 
     .puzzle-working {
+      .nick::after { content: ","; }
+      .nick:last-child::after { content:""; }
       .background { color: #ccc; }
     }
   }

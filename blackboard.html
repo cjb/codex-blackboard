@@ -108,7 +108,7 @@
     <td class="puzzle-status">{{status}}</td>
     <td class="puzzle-working">
       {{#each whos_working}}
-        <span class="{{#unless foreground}}background{{/unless}}">{{nick}}</span>
+        <span class="nick {{#unless foreground}}background{{/unless}}">{{nick}}</span>
       {{/each}}
     </td>
     <td class="puzzle-update">
