@@ -50,6 +50,8 @@ Template.blackboard.pretty_ts = (ts) -> Template.messages.pretty_ts ts
 Template.blackboard.roundgroups = -> RoundGroups.find {}
 Template.blackboard.rounds = -> Rounds.find _id: $in: this.rounds
 Template.blackboard.rendered = ->
+  #  page title
+  $("title").text("Blackboard")
   $("#bb-sidebar").localScroll({ duration: 400 })
   $("body").scrollspy(target: "#bb-sidebar", offset: (NAVBAR_HEIGHT + 10))
   # update bootstrap "scroll spy" component when rounds list changes
@@ -61,9 +63,6 @@ Template.blackboard.rendered = ->
   # affix side menu
   # XXX disabled because it doesn't play nice with narrow screens
   #$("#bb-sidebar > .bb-sidenav").affix()
-Template.blackboard.rendered = ->
-  #  page title
-  $("title").text("Blackboard")
 
 Template.blackboard.events
   "click #bb-more-chats": (event, template) ->
