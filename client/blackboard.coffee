@@ -83,8 +83,10 @@ Template.blackboard_puzzle.whos_working = ->
   # XXX look at chat logs?
   return ""
 Template.blackboard_puzzle.last_update = ->
-  # look at various timestamps
-  return ""
+  if this.solved
+    "solved " + Template.messages.pretty_ts(this.solved)
+  else
+    "added " + Template.messages.pretty_ts(this.created)
 Template.blackboard_puzzle.events
   "click .puzzle-link": (event, template) ->
     event.preventDefault()
