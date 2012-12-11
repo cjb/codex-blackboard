@@ -17,28 +17,27 @@ BlackboardRouter = Backbone.Router.extend
 
   BlackboardPage: ->
     Session.set "currentPage", "blackboard"
-    $("title").text("Blackboard")
+    Session.set "type", "general"
+    Session.set "id", "0"
 
   RoundPage: (round) ->
     Session.set "currentPage", "round"
     Session.set "type", "round"
     Session.set "id", round
-    $("title").text("Round: "+Rounds.findOne(round).name)
 
   PuzzlePage: (puzzle) ->
     Session.set "currentPage", "puzzle"
     Session.set "type", "puzzle"
     Session.set "id", puzzle
-    $("title").text("Puzzle: "+Puzzles.findOne(puzzle).name)
 
   ChatPage: (type,id) ->
+    type = "puzzle" if type is "p"
+    type = "round" if type is "r"
+    id = "0" if type is "general"
     Session.set "currentPage", "chat"
     Session.set "type", type
     Session.set "id", id
-    name = if type is "general" then "General" else \
-      collection(type).findOne(id).name
-    $("title").text("Chat: "+name)
-
+    Session.set "room_name", (type+'/'+id)
 
   goToRound: (round) ->
     this.navigate("/r/"+round._id, {trigger:true})

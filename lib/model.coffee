@@ -14,42 +14,46 @@ OpLogs = new Meteor.Collection "oplogs"
 #   _id: mongodb id
 #   rounds: [ array of round _ids, in order ]
 #   name: string (special name '' for rounds w/o a group)
-#   tags: [ { name: "status", value: "stuck" }, ... ]
+#   canon: canonicalized version of name, for searching
+#   tags: [ { name: "Status", canon: "status", value: "stuck" }, ... ]
 RoundGroups = new Meteor.Collection "roundgroups"
 
 # Rounds are:
 #   _id: mongodb id
 #   name: string (special name '' for puzzles w/o a round)
+#   canon: canonicalized version of name, for searching
 #   puzzles: [ array of puzzle _ids, in order ]
 #   created: timestamp
 #   touched: timestamp -- for special "round" chat, usually metapuzzle
 #   last_touch_by: _id of Nick
-#   tags: [ { name: "status", value: "stuck" }, ... ]
+#   tags: [ { name: "Status", canon: "status", value: "stuck" }, ... ]
 Rounds = new Meteor.Collection "rounds"
 
 # Puzzles are:
 #   _id: mongodb id
 #   name: string
+#   canon: canonicalized version of name, for searching
 #   answer: string (field is null (not missing or undefined) if not solved)
 #   created: timestamp
 #   solved:  timestamp
 #   touched: timestamp
 #   last_touch_by: _id of Nick
-#   tags: [ { name: "status", value: "stuck" }, ... ]
+#   tags: [ { name: "Status", canon: "status", value: "stuck" }, ... ]
 #   drive: google drive url or id
 Puzzles = new Meteor.Collection "puzzles"
 
 # Nicks are:
 #   _id: mongodb id
 #   name: string
-#   tags: [ { name: "realname", value: "C. Scott Ananian" }, ... ]
+#   canon: canonicalized version of name, for searching
+#   tags: [ { name: "Real Name", canon: "real_name", value: "C. Scott Ananian" }, ... ]
 Nicks = new Meteor.Collection "nicks"
 
 # Messages
 #   body: string
-#   nick: string (may match entry in Nicks collection... or not)
+#   nick: canonicalized string (may match some Nicks.canon ... or not)
 #   system: boolean (true for system messages, false for user messages)
-#   room_name: "<type>/<id>", ie "puzzle/1", "round/1". "codex" for main chat.
+#   room_name: "<type>/<id>", ie "puzzle/1", "round/1". "general/0" for main chat.
 #   timestamp: timestamp
 Messages = new Meteor.Collection "messages"
 
@@ -68,14 +72,27 @@ oplog = (message, type="", id="") ->
   OpLogs.insert { timestamp:UTCNow(), message:message, type:type, id:id }
 
 getTag = (object, name) ->
-  (tag.value for tag in (object.tags or []) when tag.name is name)[0]
+  (tag.value for tag in (object.tags or []) when tag.canon is canonical(name))[0]
+
+# canonical names: lowercases, all non-alphanumerics replaced with '_'
+canonical = (s) ->
+  s = s.toLowerCase().replace(/^\s+/, '').replace(/\s+$/, '') # lower, strip
+  # suppress 's and 't
+  s = s.replace(/[\'\u2019]([st])\b/, "$1")
+  # replace all non-alphanumeric with _
+  s = s.replace(/[^a-z0-9]+/, '_').replace(/^_/,'').replace(/_$/,'')
+  return s
+
+canonicalTags = (tags) ->
+  ({name:tag.name,canon:canonical(tag.name),value:tag.value} for tag in tags)
 
 Meteor.methods
   newRoundGroup: (args) ->
     throw new Meteor.Error(400, "missing name") unless args.name
     newRoundGroup =
       name: args.name or ""
-      tags: args.tags or []
+      canon: canonical(args.name or "") # for lookup
+      tags: canonicalTags(args.tags or [])
       rounds: args.rounds or []
     id = RoundGroups.insert newRoundGroup
     oplog "Created new Round Group: "+args.name
@@ -97,7 +114,8 @@ Meteor.methods
     now = UTCNow()
     newRound =
       name: args.name or ""
-      tags: args.tags or []
+      canon: canonical(args.name or "") # for lookup
+      tags: canonicalTags(args.tags or [])
       puzzles: args.puzzles or []
       created: now
       touched: now
@@ -124,7 +142,8 @@ Meteor.methods
     now = UTCNow()
     newPuzzle =
       name: args.name or ""
-      tags: args.tags or []
+      canon: canonical(args.name or "") # for lookup
+      tags: canonicalTags(args.tags or [])
       answer: null
       created: now
       solved: null
@@ -155,7 +174,8 @@ Meteor.methods
     throw new Meteor.Error(400, "missing name") unless args.name
     newNick =
       name: args.name or ""
-      tags: args.tags or []
+      canon: canonical(args.name or "")
+      tags: canonicalTags(args.tags or [])
     id = Nicks.insert newNick
     return Nicks.findOne(id)
   delNick: (args) ->
@@ -166,7 +186,7 @@ Meteor.methods
   newMessage: (args)->
     newMsg =
       body: args.body or ""
-      nick: args.nick or ""
+      nick: canonical(args.nick or "")
       system: args.system or false
       room_name: args.room_name or "general/0"
       timestamp: UTCNow()
@@ -179,24 +199,26 @@ Meteor.methods
 
   setTag: (type, object, name, value) ->
     id = object._id or object
+    canon = canonical(name)
     throw new Meteor.Error(400, "missing object") unless id
     throw new Meteor.Error(400, "missing name") unless name
     tags = collection(type).findOne(id).tags
     # remove existing value for tag, if present
-    ntags = (tag for tag in tags when tag.name isnt name)
+    ntags = (tag for tag in tags when tag.canon isnt canon)
     # add new tag, but keep tags sorted
-    ntags.push {name:name, value:value}
-    ntags.sort (a, b) -> (a?.name or "").localeCompare (b?.name or "")
+    ntags.push {name:name, canon:canon, value:value}
+    ntags.sort (a, b) -> (a?.canon or "").localeCompare (b?.canon or "")
     # update the tag set only if there wasn't a race
     collection(type).update { _id: id, tags: tags }, { $set: { tags: ntags } }
     # XXX (on server) loop if this update failed?
     return true
   delTag: (type, object, name) ->
     id = object._id or object
+    canon = canonical(name)
     throw new Meteor.Error(400, "missing object") unless id
     throw new Meteor.Error(400, "missing name") unless name
     tags = collection(type).findOne(id).tags
-    ntags = (tag for tag in tags when tag.name isnt name)
+    ntags = (tag for tag in tags when tag.canon isnt canon)
     # update the tag set only if there wasn't a race
     collection(type).update { _id: id, tags: tags }, { $set: { tags: ntags } }
     # XXX (on server) loop if this update failed?

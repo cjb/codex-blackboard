@@ -21,7 +21,7 @@
 <!-- Last chat bar -->
   <div class="bb-lastchat">
     <span class="right pull-right">
-      <a href="#" id="bb-more-chats">more...</a>
+      <a href="/c/general/0" id="bb-more-chats">more...</a>
     </span>
     <span class="left pull-left">
       <strong>Last chats:</strong>
@@ -46,7 +46,7 @@
       {{#each roundgroups}}
       <li class="nav-header">{{name}}</li>
       {{#each rounds}}
-      <li><a href="#round{{_id}}"><i class="icon-chevron-right"></i>
+      <li><a href="#r{{_id}}"><i class="icon-chevron-right"></i>
       {{name}}</a></li>
       {{/each}}
       {{/each}}
@@ -72,8 +72,8 @@
 </template>
 
 <template name="blackboard_round">
-  <section id="round{{_id}}">
-  <h3><a href="#" class="round-link">{{name}}</a></h3>
+  <section id="r{{_id}}">
+  <h3><a href="/r/{{_id}}" class="round-link">{{name}}</a></h3>
 
   {{#if hasPuzzles}}
   <table class="table table-bordered table-condensed bb-puzzle">
@@ -98,7 +98,7 @@
 <template name="blackboard_puzzle">
   <tr><!-- {{id}} -->
     <td class="puzzle-name">
-      <a href="#" class="puzzle-link">{{name}}</a>
+      <a href="/p/{{_id}}" class="puzzle-link">{{name}}</a>
       {{>blackboard_puzzle_tags}}
     </td>
     <td class="puzzle-answer">{{#if answer}}<span class="answer">{{answer}}</span>{{/if}}</td>
@@ -117,7 +117,7 @@
 <template name="blackboard_puzzle_tags">
   <table class="bb-tag-table"><tbody>{{!
     }}{{#each tags}}{{!
-      }}{{#unless equal name "status"}}
+      }}{{#unless equal canon "status"}}
         <tr><td>{{name}}:</td><td>{{value}}</td></tr>
       {{/unless}}{{!
     }}{{/each}}{{!

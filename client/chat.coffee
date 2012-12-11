@@ -1,6 +1,10 @@
+GENERAL_ROOM = 'Ringhunters'
+
 Session.set 'room_name', "general/0"
 Session.set 'nick'     , ($.cookie("nick") || "")
 Session.set 'mute'     , $.cookie("mute")
+Session.set 'type'     , 'general'
+Session.set 'id'       , '0'
 
 # Globals
 instachat = {}
@@ -27,7 +31,7 @@ Meteor.autosubscribe ->
 """
 
 # Template Binding
-Template.messages.messages  = -> Messages.find()
+Template.messages.messages  = -> Messages.find(room_name: Session.get("room_name"))
 
 Template.messages.pretty_ts = (timestamp) ->
   return unless timestamp
@@ -38,7 +42,7 @@ Template.messages.pretty_ts = (timestamp) ->
 
 Template.nickAndRoom.nick = -> Session.get "nick"
 
-Template.nickAndRoom.room = -> Session.get "room_name"
+Template.nickAndRoom.room = -> prettyRoomName()
 
 Template.nickAndRoom.volumeIcon = ->
   if Session.get "mute"
@@ -49,12 +53,18 @@ Template.nickAndRoom.volumeIcon = ->
 Template.nickModal.nick   = -> Session.get "nick"
 
 # Utility functions
-joinRoom = (roomName) ->
+prettyRoomName = ->
+  type = Session.get('type')
+  id = Session.get('id')
+  name = if type is "general" then GENERAL_ROOM else \
+    collection(type)?.findOne(id)?.name
+  return (name or "unknown")
+
+joinRoom = (type, id) ->
+  roomName = type + '/' + id
   # xxx: could record the room name in a set here.
   Session.set "room_name", roomName
-  # Xxx: replace next two lines with call to Router.goToChat
-  $.cookie "room_name", roomName, {expires: 365}
-  Router.navigate('/c/'+roomName, true) # XXX necessary?
+  Router.goToChat(type, id)
   scrollMessagesView()
   $("#messageInput").select()
   Meteor.call "newMessage"
@@ -83,15 +93,33 @@ $("#mute").live "click", ->
   Session.set "mute", $.cookie "mute"
 
 $(window).resize ->
-  $("#content").height $(window).height() -
-    $("#content").offset().top -
-    $("#footer").height()
+  if Session.get("currentPage") is "chat"
+    $("#chat-content").height $(window).height() -
+      $("#chat-content").offset().top -
+      $("#chat-footer").height()
 
 # Form Interceptors
 $("#joinRoom").live "submit", ->
   roomName = $("#roomName").val()
-  return unless roomName
-  joinRoom roomName
+  if not roomName
+    # reset to old room name
+    $("#roomName").val prettyRoomName()
+  # is this the general room?
+  else if canonical(roomName) is canonical(GENERAL_ROOM)
+    joinRoom "general", "0"
+  else
+    # try to find room as a puzzle name
+    p = Puzzles.findOne(canon: canonical(roomName))
+    if p
+      joinRoom "puzzle", p._id
+    else
+      # try to find room as a round name
+      r = Rounds.findOne(canon: canonical(roomName))
+      if r
+        joinRoom "round", r._id
+      else
+        # reset to old room name
+        $("#roomName").val prettyRoomName()
   return false
 
 $("#nickPick").live "submit", ->
@@ -104,10 +132,7 @@ $("#nickPick").live "submit", ->
     $.cookie "nick", nick, {expires: 365}
     Session.set "nick", nick
     $('#nickPickModal').modal 'hide'
-    if $.cookie "room_name"
-      joinRoom($.cookie("room_name"))
-    else
-      joinRoom('General')
+    joinRoom Session.get('type'), Session.get('id')
 
   hideMessageAlert()
   return false
@@ -138,19 +163,19 @@ showUnreadMessagesAlert = ->
   return if instachat.messageAlertInterval
   instachat.messageAlertInterval = window.setInterval ->
     title = $("title")
-    if title.html() == "InstaChat"
+    name = "Chat: "+prettyRoomName()
+    if title.text() == name
       msg = if instachat.unreadMessages == 1 then "message" else "messages"
-      title.html(instachat.unreadMessages + " new " + msg + " - InstaChat")
+      title.text(instachat.unreadMessages + " new " + msg + " - " + name)
     else
-      title.html("InstaChat")
+      title.text(name)
   , 1000
 
 hideMessageAlert = ->
+  return unless instachat.messageAlertInterval
   window.clearInterval instachat.messageAlertInterval
   instachat.messageAlertInterval = null
-  window.setTimeout ->
-    $("title").html("InstaChat")
-  , 1000
+  $("title").text("Chat: "+prettyRoomName())
 
 unreadMessage = (doc)->
   unless doc["nick"] == Session.get("nick") || Session.get "mute"
@@ -191,9 +216,29 @@ Meteor.methods
     return true
 """
 
+ensureNick = (cb=(->)) ->
+  if Session.get 'nick'
+    cb()
+  else if $.cookie('nick')
+    Session.set 'nick', $.cookie('nick')
+    cb()
+  else
+    $('#nickPickModal').one('hide', cb)
+    $('#nickPickModal').modal keyboard: false, backdrop:"static"
+    $('#nickInput').select()
+
+Template.chat.created = ->
+  ensureNick ->
+    type = Session.get('type')
+    id = Session.get('id')
+    joinRoom type, id
+
+Template.chat.rendered = ->
+  $("title").text("Chat: "+prettyRoomName())
+  $(window).resize()
+Template.chat.destroyed = ->
+  hideMessageAlert()
+
 # App startup
 Meteor.startup ->
   instachat.unreadMessageSound = new Audio "/sound/Electro_-S_Bainbr-7955.wav"
-  $(window).resize()
-  $('#nickPickModal').modal keyboard: false, backdrop:"static"
-  $('#nickInput').select()

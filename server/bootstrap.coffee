@@ -8,9 +8,15 @@ SAMPLE_DATA = [
       { name: "Hint", value: "answers contain notes (do, re, mi)" }
       { name: "Meta answer", value: "BLUE SHIFT" }
     ]
+    chats: [
+      { nick: "cscott", body: "This round is wack." }
+    ]
     puzzles: [
       name: "Meta testing"
       answer: "BACKSOLVER"
+      chats: [
+        { nick: "cscott", body: "Let's do some Meta Testing!" }
+      ]
     ,
       name: "Timbales"
       answer: "ACTAPILATI"
@@ -368,6 +374,13 @@ SAMPLE_DATA = [
     ]
   ]
 ]
+SAMPLE_CHATS = [
+  nick: "cscott"
+  body: "Have we found the coin yet?  Seriously."
+,
+  nick: "cscott"
+  body: "This is a very very long line which should hopefully wrap and that will show that we're doing all this correctly. Let's keep going here. More and more stuff! Wow."
+]
 
 Meteor.startup ->
   if RoundGroups.find().count() is 0
@@ -377,7 +390,17 @@ Meteor.startup ->
         for round in roundgroup.rounds
           Meteor.call "newRound", round, (error, r) ->
             Meteor.call "addRoundToGroup", r, rg
+            for chat in (round.chats or [])
+              chat.room_name = "round/" + r._id
+              Meteor.call "newMessage", chat
             for puzzle in round.puzzles
               Meteor.call "newPuzzle", puzzle, (error, p) ->
                 Meteor.call "addPuzzleToRound", p, r
                 Meteor.call "setAnswer", p._id, puzzle.answer if puzzle.answer
+                for chat in (puzzle.chats or [])
+                  chat.room_name = "puzzle/" + p._id
+                  Meteor.call "newMessage", chat
+    # add some general chats
+    for chat in SAMPLE_CHATS
+      chat.room_name = "general/0"
+      Meteor.call "newMessage", chat

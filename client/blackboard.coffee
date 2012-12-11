@@ -1,3 +1,5 @@
+NAVBAR_HEIGHT = 73 # keep in sync with @navbar-height in blackboard.less
+
 Meteor.startup ->
   blackboard.newAnswerSound = new Audio "sound/that_was_easy.wav"
 
@@ -14,7 +16,7 @@ Template.blackboard.pretty_ts = (ts) -> Template.messages.pretty_ts ts
 Template.blackboard.roundgroups = -> RoundGroups.find {}
 Template.blackboard.rounds = -> Rounds.find _id: $in: this.rounds
 Template.blackboard.rendered = ->
-  $("body").scrollspy(target: "#bb-sidebar", offset: (81+10))
+  $("body").scrollspy(target: "#bb-sidebar", offset: (NAVBAR_HEIGHT + 10))
   # update bootstrap "scroll spy" component when rounds list changes
   ss = $("body").data("scrollspy")
   ss.refresh()
@@ -24,6 +26,9 @@ Template.blackboard.rendered = ->
   # affix side menu
   # XXX disabled because it doesn't play nice with narrow screens
   #$("#bb-sidebar > .bb-sidenav").affix()
+Template.blackboard.rendered = ->
+  #  page title
+  $("title").text("Blackboard")
 
 Template.blackboard.events
   "click #bb-more-chats": (event, template) ->
