@@ -1,35 +1,37 @@
 . Rework schema to move away from ordered lists in round/roundgroups
   since MongoDB doesn't preserve the order of arrays
 . Better design for main blackboard page
-  - fix layout of "last update", "last chat"
+  x fix layout of "last update", "last chat"
   - make table cells have consistent widths from round to round
-  - fix the bootstrap "affix" component, which isn't properly tracking
+    (use spanX or fixed width blocks instead of tables?)
+  x fix the bootstrap "affix" component, which isn't properly tracking
     main page scroll position
-  - fix tag layout; compress per-puzzle tags a lot
+  x fix tag layout; compress per-puzzle tags a lot
 . Design puzzle information page
   - chat log at top, google drive at bottom, links to full-screen these
 . Design round information page
   - like puzzle info page?
-. Implement full-window chat screen (port InstaChat), link from blackboard
+x Implement full-window chat screen (port InstaChat), link from blackboard
 . Implement paginated chat log archive page
+  - and truncate full-window log at the same time
 . Implement paginated database operation log page, link from blackboard
 . Finish implementing functionality of spec.txt in lib/model.coffee
   - carefully implement puzzle/round reordering functions, use
     MongoDB findAndModify() operation to avoid race conditions when
     rewriting reordered array
      (http://docs.mongodb.org/manual/tutorial/isolate-sequence-of-operations/)
-  - add unique indexes to ensure nicks/rounds/etc are unique
+  x add unique indexes to ensure nicks/rounds/etc are unique
      (http://docs.mongodb.org/manual/core/indexes/#index-type-unique
-  - add logging operation so that we can show the "last N operations"
+  x add logging operation so that we can show the "last N operations"
 . Hook up google drive to newPuzzle/renamePuzzle/delPuzzle in the model
   - google drive operations should happen on server only, not in client
     stuff (test Meteor.isServer()) -- and be careful, since 'drive' field
     will probably not be set immediately in client.  Make sure we cleanly
     handle that case.
-. Hook up Instachat code
-  - use puzzle/round ids as room names, so we don't have to rename them?
+x Hook up Instachat code
+  x use puzzle/round ids as room names, so we don't have to rename them?
 x Add schema for database operation logging
-  - tweak schema to allow condensing N "added puzzle X" messages into
+  x tweak schema to allow condensing N "added puzzle X" messages into
     single update line
 . use puzzle/round name instead of id in url
   - automatically do a Router.navigate() if name changes
