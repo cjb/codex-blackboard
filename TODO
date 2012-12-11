@@ -33,4 +33,9 @@ x Add schema for database operation logging
     single update line
 . use puzzle/round name instead of id in url
   - automatically do a Router.navigate() if name changes
-
+. Smooth relative scrolling when clicking on sidebar links, perhaps using
+  jquery's $.localScroll()
+. PLay audio on the local machine when a puzzle is solved or a new puzzle
+  is added.  (Any other events?  We don't want to make it too spammy, but
+  getting an answer correct is a time everyone in the room will be cheering
+  out loud anyway.)
