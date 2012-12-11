@@ -1,7 +1,4 @@
-Rooms       = new Meteor.Collection "rooms"
-Messages    = new Meteor.Collection "messages"
-
-Session.set 'room_name', null 
+Session.set 'room_name', "general/0"
 Session.set 'nick'     , ($.cookie("nick") || "")
 Session.set 'mute'     , $.cookie("mute")
 
@@ -13,6 +10,7 @@ instachat["messageAlertInterval"]    = null
 instachat["unreadMessages"]          = 0
 
 # Collection Subscriptions
+""" XXX CSA commented out because we're autosubscribing still XXX
 Meteor.subscribe 'rooms'
 
 Meteor.autosubscribe ->
@@ -23,9 +21,10 @@ Meteor.autosubscribe ->
   Messages.find
     room_name: Session.get("room_name")
   .observe
-    added: (item) -> 
+    added: (item) ->
       scrollMessagesView()
       unreadMessage(item) unless item.system
+"""
 
 # Template Binding
 Template.messages.messages  = -> Messages.find()
@@ -51,11 +50,11 @@ Template.nickModal.nick   = -> Session.get "nick"
 
 # Utility functions
 joinRoom = (roomName) ->
-  room = Rooms.findOne name: roomName
-  Rooms.insert name: roomName unless room
+  # xxx: could record the room name in a set here.
   Session.set "room_name", roomName
+  # Xxx: replace next two lines with call to Router.goToChat
   $.cookie "room_name", roomName, {expires: 365}
-  Router.goToRoom roomName
+  Router.navigate('/c/'+roomName, true) # XXX necessary?
   scrollMessagesView()
   $("#messageInput").select()
   Meteor.call "newMessage"
@@ -68,10 +67,11 @@ scrollMessagesView = ->
     $("#messagesInner").scrollTop 10000
   , 200
 
+"""
 UTCNow = ->
   now = new Date()
   Date.UTC(now.getFullYear(), now.getMonth(), now.getDate(), now.getHours(), now.getMinutes(), now.getSeconds(), now.getMilliseconds())
-
+"""
 
 # Event Handlers
 $("#mute").live "click", ->
@@ -81,10 +81,10 @@ $("#mute").live "click", ->
     $.cookie "mute", true, {expires: 365}
 
   Session.set "mute", $.cookie "mute"
-  
+
 $(window).resize ->
-  $("#content").height $(window).height() - 
-    $("#content").offset().top - 
+  $("#content").height $(window).height() -
+    $("#content").offset().top -
     $("#footer").height()
 
 # Form Interceptors
@@ -117,7 +117,7 @@ $("#messageForm").live "submit", (e) ->
   message  = $message.val()
   $message.val ""
   if message
-    Meteor.call 'newMessage', { 
+    Meteor.call 'newMessage', {
       nick: Session.get "nick"
       body: message
       room_name: Session.get "room_name"}
@@ -161,6 +161,7 @@ unreadMessage = (doc)->
     showUnreadMessagesAlert()
 
 
+"""
 ## Router
 InstaChatRouter = Backbone.Router.extend
 
@@ -188,7 +189,7 @@ Meteor.methods
 
     Messages.insert newMsg
     return true
-
+"""
 
 # App startup
 Meteor.startup ->
@@ -196,4 +197,3 @@ Meteor.startup ->
   $(window).resize()
   $('#nickPickModal').modal keyboard: false, backdrop:"static"
   $('#nickInput').select()
-

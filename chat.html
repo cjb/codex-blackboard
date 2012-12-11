@@ -1,11 +1,7 @@
-<head>
-  <title>InstaChat</title>
-</head>
 
+<template name="chat">
+<div id="chat-background"></div>
 
-
-<body>
-  
   <div id="header">
     <div class="container" id="headerInner">
       <h2 id="logo" class="pull-left brand">
@@ -26,7 +22,7 @@
 
   {{> nickModal}}
 
-</body>
+</template>
 
 
 <template name="nickModal">
@@ -39,7 +35,7 @@
       <form id="nickPick">
         <div class="warning"></div>
         <p><input type="text" id="nickInput" class="span5" value="{{nick}}">
-          <br><input type="submit" value="Start Chatting" class="span1"></p>
+          <br><input type="submit" value="Start Chatting"></p>
       </form>
     </div>
   </div>

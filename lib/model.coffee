@@ -165,7 +165,7 @@ Meteor.methods
       body: args.body or ""
       nick: args.nick or ""
       system: args.system or false
-      room_name: args.room_name or "general"
+      room_name: args.room_name or "general/0"
       timestamp: UTCNow()
     id = Messages.insert newMsg
     return Messages.findOne(id)
