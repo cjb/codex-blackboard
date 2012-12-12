@@ -97,13 +97,19 @@
     }
     td,th { padding-top: 0; padding-bottom: 0; }
     /* try to make table spacing more-or-less consistent */
-    td,th { width: 10%; }
-    .puzzle-name, .puzzle-answer { width: 35%; }
+    td,th {
+      width: 10%;
+      &.puzzle-name, &.puzzle-answer { width: 35%; }
+      &.puzzle-update { width: 100px; min-width: 100px; }
+    }
 
     .puzzle-working {
       .nick::after { content: ","; }
       .nick:last-child::after { content:""; }
       .background { color: #ccc; }
+    }
+    td.puzzle-update {
+      font-size: 85%;
     }
   }
 }
