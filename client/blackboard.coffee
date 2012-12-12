@@ -74,6 +74,9 @@ Template.blackboard.rendered = ->
   # affix side menu
   # XXX disabled because it doesn't play nice with narrow screens
   #$("#bb-sidebar > .bb-sidenav").affix()
+  # tooltips
+  $('#bb-sidebar .nav > li > a').tooltip placement: 'right'
+  $('#bb-tables .bb-puzzle .puzzle-name > a').tooltip placement: 'left'
 
 Template.blackboard.events
   "click #bb-more-chats": (event, template) ->
