@@ -113,8 +113,8 @@ joinRoom = (type, id) ->
       present: true
       foreground: isVisible() # foreground/background tab status
   instachat.keepalive()
-  # send a keep alive every four minutes
-  instachat.keepaliveInterval = Meteor.setInterval instachat.keepalive, 4*60*1000
+  # send a keep alive every N minutes
+  instachat.keepaliveInterval = Meteor.setInterval instachat.keepalive, (PRESENCE_KEEPALIVE_MINUTES*60*1000)
 
 scrollMessagesView = ->
   Meteor.setTimeout ->

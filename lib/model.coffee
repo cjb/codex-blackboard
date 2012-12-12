@@ -1,6 +1,10 @@
 # Blackboard -- data model
 # Loaded on both the client and the server
 
+# how often we send keep alive presence messages.  increase/decrease to adjust
+# client/server load.
+PRESENCE_KEEPALIVE_MINUTES = 2
+
 # OpLogs are:
 #   _id: mongodb id
 #   timestamp: timestamp
@@ -77,10 +81,12 @@ Presence = new Meteor.Collection "presence"
 if Meteor.isServer
   Presence._ensureIndex {nick: 1, room_name:1}, {unique:true, dropDups:true}
   Presence._ensureIndex {timestamp:-1}, {}
-  # ensure old entries are timed out after 5 min
+  # ensure old entries are timed out after 2*PRESENCE_KEEPALIVE_MINUTES
+  # some leeway here to account for client/server time drift
   Meteor.setInterval ->
     #console.log "Removing entries older than", (UTCNow() - 5*60*1000)
-    Presence.remove timestamp: $lt: (UTCNow() - 5*60*1000)
+    removeBefore = UTCNow() - (2*PRESENCE_KEEPALIVE_MINUTES*60*1000)
+    Presence.remove timestamp: $lt: removeBefore
   , 60*1000
 
 
