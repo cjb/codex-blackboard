@@ -55,9 +55,11 @@ Template.blackboard.lastchats = ->
   m.reverse()
   return m
 Template.blackboard.pretty_ts = (ts) -> Template.messages.pretty_ts ts
-Template.blackboard.roundgroups = -> RoundGroups.find {}
-# XXX: the find operation on the next line is not order-preserving
-Template.blackboard.rounds = -> Rounds.find _id: $in: this.rounds
+Template.blackboard.roundgroups = -> RoundGroups.find {}, sort: ["created"]
+# the following is a map() instead of a direct find() to preserve order
+Template.blackboard.rounds = ->
+  ({ round_num: 1+index+this.round_start, round: Rounds.findOne(id) }\
+   for id, index in this.rounds)
 Template.blackboard.rendered = ->
   #  page title
   $("title").text("Blackboard")
@@ -78,23 +80,28 @@ Template.blackboard.events
     event.preventDefault()
     Router.goToChat "general", "0"
 
-Template.blackboard_round.hasPuzzles = -> (this.puzzles.length > 0)
-# XXX: the find operation on the next line is not order-preserving
-Template.blackboard_round.puzzles = -> Puzzles.find _id: $in: this.puzzles
+Template.blackboard_round.hasPuzzles = -> (this.round.puzzles.length > 0)
+# the following is a map() instead of a direct find() to preserve order
+Template.blackboard_round.puzzles = ->
+  ({
+    round_num: this.round_num
+    puzzle_num: 1 + index
+    puzzle: Puzzles.findOne(id)
+   } for id, index in this.round.puzzles)
 Template.blackboard_round.events
   "click .round-link": (event, template) ->
     event.preventDefault()
-    round = template.data
+    round = template.data.round
     Router.goToRound round
 
 Template.blackboard_puzzle.status = ->
-  return (getTag this, "status") or ""
+  return (getTag this.puzzle, "status") or ""
 Template.blackboard_puzzle.whos_working = ->
   # note that server should automatically be pruning keepalives older than
   # 5 minutes, but we do some proactive pruning on client-side just in case
   # client drifts out of sync
   return Presence.find
-    room_name: ("puzzle/"+this._id)
+    room_name: ("puzzle/"+this.puzzle._id)
     timestamp: $gt: (UTCNow() - 15*60*100) # within a quarter hour
 
 Template.blackboard_puzzle.pretty_ts = (timestamp, brief) ->
@@ -124,7 +131,7 @@ Template.blackboard_puzzle.pretty_ts = (timestamp, brief) ->
 Template.blackboard_puzzle.events
   "click .puzzle-link": (event, template) ->
     event.preventDefault()
-    puzzle = template.data
+    puzzle = template.data.puzzle
     Router.goToPuzzle puzzle
 
 # Update 'currentTime' every minute or so to allow pretty_ts to magically

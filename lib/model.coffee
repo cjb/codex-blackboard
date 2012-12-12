@@ -21,15 +21,26 @@ OpLogs = BBCollection.oplogs = new Meteor.Collection "oplogs"
 #   _id: mongodb id
 #   name: string
 #   canon: canonicalized version of name, for searching
-#   created: timestamp
+#   created: timestamp (sort key)
 #   created_by: _id of Nick
 #   touched: timestamp -- records edits to tag, order, group, etc.
 #   touched_by: _id of Nick with last touch
 #   tags: [ { name: "Status", canon: "status", value: "stuck" }, ... ]
 #   rounds: [ array of round _ids, in order ]
+#   (next fields is a bit racy, oh well)
+#   round_start: integer, indicating how many rounds total are in all
+#                preceding round groups (a bit racy, but server fixes it up)
 RoundGroups = BBCollection.roundgroups = new Meteor.Collection "roundgroups"
 if Meteor.isServer
   RoundGroups._ensureIndex {canon: 1}, {unique:true, dropDups:true}
+  # periodically go through and sync up round_start field
+  Meteor.setInterval ->
+    round_start = 0
+    RoundGroups.find({}, sort: ["created"]).forEach (rg) ->
+        if rg.round_start isnt round_start
+          RoundGroups.update rg._id, $set: round_start: round_start
+        round_start += rg.rounds.length
+  , 60*1000
 
 # Rounds are:
 #   _id: mongodb id
@@ -211,6 +222,7 @@ canonical = (s) ->
     newRoundGroup: (args) ->
       newObject "roundgroups", args,
         rounds: args.rounds or []
+        round_start: Rounds.find({}).count() # approx; server will fix up
     renameRoundGroup: (args) ->
       renameObject "roundgroups", args
     deleteRoundGroup: (args) ->

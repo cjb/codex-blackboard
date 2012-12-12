@@ -1,14 +1,14 @@
 <template name="round">
   <!-- this the information about a given round -->
-{{#with round}}
-<h1>Round <small>{{name}}</small></h1>
+{{#with data}}
+<h1>Round <small>{{round.name}} (r{{round_num}}meta)</small></h1>
 
-{{> blackboard_tags }}
+{{#with round}}{{> blackboard_tags }}{{/with}}
 
 <ul>
-<li><a href="/c/rounds/{{_id}}" class="chat-link">Chat room for this puzzle</a></li>
+<li><a href="/c/rounds/{{round._id}}" class="chat-link">Chat room for this puzzle</a></li>
 
-<li><a href="{{drive}}">Google drive folder for this puzzle</a></li>
+<li><a href="{{round.drive}}">Google drive folder for this puzzle</a></li>
 </ul>
 
  {{/with}}

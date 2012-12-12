@@ -1,4 +1,10 @@
-Template.round.round = -> Rounds.findOne(Session.get "id")
+Template.round.data = ->
+  r = {}
+  round = r.round = Rounds.findOne Session.get("id")
+  group = r.group = RoundGroups.findOne rounds: round?._id
+  r.round_num = 1 + group?.round_start + \
+                (group?.rounds or []).indexOf(round?._id)
+  return r
 Template.round.rendered = ->
   type = Session.get('type')
   id = Session.get('id')

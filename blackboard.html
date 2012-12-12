@@ -49,8 +49,8 @@
       {{#each roundgroups}}
       <li class="nav-header">{{name}}</li>
       {{#each rounds}}
-      <li><a href="#r{{_id}}"><i class="icon-chevron-right"></i>
-      {{name}}</a></li>
+      <li><a title="r{{round_num}}" href="#r{{round._id}}"><i class="icon-chevron-right"></i>
+      {{round.name}}</a></li>
       {{/each}}
       {{/each}}
     </ul>
@@ -75,8 +75,10 @@
 </template>
 
 <template name="blackboard_round">
-  <section id="r{{_id}}">
-  <h3><a href="/r/{{_id}}" class="round-link">{{name}}</a></h3>
+  <section id="r{{round._id}}">
+  <h3><a href="/r/{{round._id}}" class="round-link">{{round.name}}</a>
+      <small>(r{{round_num}})</small>
+  </h3>
 
   {{#if hasPuzzles}}
   <table class="table table-bordered table-condensed bb-puzzle">
@@ -94,17 +96,17 @@
   {{else}}
   <i>No puzzles in this round yet.</i>
   {{/if}}
-  {{>blackboard_tags}}
+  {{#with round}}{{>blackboard_tags}}{{/with}}
   </section>
 </template>
 
 <template name="blackboard_puzzle">
   <tr><!-- {{id}} -->
     <td class="puzzle-name">
-      <a href="/p/{{_id}}" class="puzzle-link">{{name}}</a>
-      {{>blackboard_puzzle_tags}}
+      <a href="/p/{{puzzle._id}}" title="r{{round_num}}p{{puzzle_num}}" class="puzzle-link">{{puzzle.name}}</a>
+      {{#with puzzle}}{{>blackboard_puzzle_tags}}{{/with}}
     </td>
-    <td class="puzzle-answer">{{#if answer}}<span class="answer">{{answer}}</span>{{/if}}</td>
+    <td class="puzzle-answer">{{#if puzzle.answer}}<span class="answer">{{puzzle.answer}}</span>{{/if}}</td>
     <td class="puzzle-status">{{status}}</td>
     <td class="puzzle-working">
       {{#each whos_working}}
@@ -112,8 +114,8 @@
       {{/each}}
     </td>
     <td class="puzzle-update">
-      {{#if solved}}solved {{pretty_ts solved}}
-      {{else}}added {{pretty_ts created}}
+      {{#if puzzle.solved}}solved {{pretty_ts puzzle.solved}}
+      {{else}}added {{pretty_ts puzzle.created}}
       {{/if}}
     </td>
   </tr>
