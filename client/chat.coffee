@@ -49,9 +49,8 @@ Template.messages.body = ->
 
 
 Template.messages.nick = ->
-  body = this.body
   nick = this.nick
-  if (body.slice(0,4) == "/me ")
+  if this.action
     "* " + nick
   else
     nick + ":"
@@ -205,6 +204,7 @@ $("#messageForm").live "submit", (e) ->
     Meteor.call 'newMessage', {
       nick: Session.get "nick"
       body: message
+      action: (message.slice(0,4) is "/me ")
       room_name: Session.get "room_name"}
 
   return false
