@@ -58,6 +58,7 @@ if Meteor.isServer
 #   name: string
 #   canon: canonicalized version of name, for searching
 #   tags: [ { name: "Real Name", canon: "real_name", value: "C. Scott Ananian" }, ... ]
+# valid tags include "Real Name", "Gravatar" (email address to use for photos)
 Nicks = new Meteor.Collection "nicks"
 if Meteor.isServer
   Nicks._ensureIndex {canon: 1}, {unique:true, dropDups:true}
@@ -66,6 +67,7 @@ if Meteor.isServer
 #   body: string
 #   nick: canonicalized string (may match some Nicks.canon ... or not)
 #   system: boolean (true for system messages, false for user messages)
+#   action: boolean (true for /me commands)
 #   room_name: "<type>/<id>", ie "puzzle/1", "round/1". "general/0" for main chat.
 #   timestamp: timestamp
 Messages = new Meteor.Collection "messages"
@@ -224,6 +226,7 @@ Meteor.methods
       body: args.body or ""
       nick: canonical(args.nick or "")
       system: args.system or false
+      action: args.action or false
       room_name: args.room_name or "general/0"
       timestamp: UTCNow()
     id = Messages.insert newMsg
