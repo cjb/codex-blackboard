@@ -40,6 +40,22 @@ Template.messages.pretty_ts = (timestamp) ->
   min = if min < 10 then "0" + min else min
   d.getHours() + ":" + min
 
+Template.messages.body = ->
+  body = this.body
+  if (body.slice(0,4) == "/me ")
+    body.slice(4)
+  else
+    body
+
+
+Template.messages.nick = ->
+  body = this.body
+  nick = this.nick
+  if (body.slice(0,4) == "/me ")
+    "* " + nick
+  else
+    nick + ":"
+
 Template.nickAndRoom.nick = -> Session.get "nick"
 
 Template.nickAndRoom.room = -> prettyRoomName()
