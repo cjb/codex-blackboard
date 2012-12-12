@@ -79,3 +79,6 @@ x Play audio on the local machine when a puzzle is solved or a new puzzle
   - link nicks in log to popover of nick info, including picture?
 - chatbot (based on hubot?) [talk to cjb]
 - IRC or Jabber gateway
+- fix round/puzzle ordering bug in blackboard
+- fix smooth scrolling leak
+- add rXpY numbering
