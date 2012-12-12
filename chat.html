@@ -74,7 +74,8 @@
           {{#if system}}
             <p class="systemRow">⊕ {{pretty_ts timestamp}} {{body}}</p>
           {{else}}
-            <p class="messageRow"><span class="timestamp">{{pretty_ts timestamp}}</span> <strong>{{nick}}:</strong>{{body}}</p>
+            <p class="messageRow"><span class="timestamp">{{pretty_ts timestamp}}</span>
+            <strong>{{nick}}</strong>{{body}}</p>
           {{/if}}
         {{/each}}
     </div>
