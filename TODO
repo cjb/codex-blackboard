@@ -1,20 +1,44 @@
+. Import as much as possible of the 2011 hunt database (esp including
+  chat logs) in order to stress test meteor scaling.
+  - step 1 is probably to import into an arbitrary JSON format, then
+  - step 2 is to read the JSON to populate the meteor db
 . Rework schema to move away from ordered lists in round/roundgroups
   since MongoDB doesn't preserve the order of arrays
+  (go back to rXpY numbering, even though it means we need to lock all
+  the puzzles in a round in order to update the order)
 . Better design for main blackboard page
   x fix layout of "last update", "last chat"
-  - make table cells have consistent widths from round to round
-    (use spanX or fixed width blocks instead of tables?)
   x fix the bootstrap "affix" component, which isn't properly tracking
     main page scroll position
   x fix tag layout; compress per-puzzle tags a lot
+  - make table cells have consistent widths from round to round
+    (use spanX or fixed width blocks instead of tables?)
+  - continue to make blackboard more compact, so we can see more of the hunt
+    at once
+  - add 'mute' and 'admin' buttons to top header.  (admin should enable
+    editing functionality, as well as the ensureNick template)
+  - also display current nick (if any) in top header, allow logout/switching
+  - add 'edit' links or buttons or somesuch to add new round/puzzle/tag
+    (only visible when in 'admin mode')
+  - separate "zoomed out" view where puzzles are a big color-coded grid,
+    and you can easily see which puzzles are not solved?
+  - option to reverse-sort the rounds so that recently-added stuff appears
+    at the top.
+  - display rXpY info for each puzzle in a subtle manner (tooltip?)
 . Design puzzle information page
   - chat log at top, google drive at bottom, links to full-screen these
+  - display rXpY info (subtly) just in case things go pear-shaped
 . Design round information page
   - like puzzle info page?
+  - display rXmeta info (subtly) just in case things go pear-shaped
 x Implement full-window chat screen (port InstaChat), link from blackboard
 . Implement paginated chat log archive page
   - and truncate full-window log at the same time
 . Implement paginated database operation log page, link from blackboard
+. Implement 'nick' page, edit real name, set tags, set picture?
+. Improve the 'ensureNick' modal, do nick completion and allow display
+  and (optional) setting full name associated with nick; this will help
+  disambiguate if you accidentally choose the same nick as someone else.
 . Finish implementing functionality of spec.txt in lib/model.coffee
   - carefully implement puzzle/round reordering functions, use
     MongoDB findAndModify() operation to avoid race conditions when
@@ -50,3 +74,8 @@ x Play audio on the local machine when a puzzle is solved or a new puzzle
     (i think hubot-scripts uses some functionality like this)
   - file upload via the google drive folder attached to the puzzle/round
   - nick completion (@foo?)
+  - show who's in the room
+  - add "last updates" notification bar?
+  - link nicks in log to popover of nick info, including picture?
+- chatbot (based on hubot?) [talk to cjb]
+- IRC or Jabber gateway
