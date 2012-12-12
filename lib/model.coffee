@@ -52,6 +52,7 @@ if Meteor.isServer
 #   touched_by: _id of Nick with last touch
 #   tags: [ { name: "Status", canon: "status", value: "stuck" }, ... ]
 #   puzzles: [ array of puzzle _ids, in order ]
+#   drive: google drive url or id
 Rounds = BBCollection.rounds = new Meteor.Collection "rounds"
 if Meteor.isServer
   Rounds._ensureIndex {canon: 1}, {unique:true, dropDups:true}
@@ -231,10 +232,12 @@ canonical = (s) ->
     newRound: (args) ->
       newObject "rounds", args,
         puzzles: args.puzzles or []
+        drive: args.drive or null
     renameRound: (args) ->
       renameObject "rounds", args
     deleteRound: (args) ->
       r = deleteObject "rounds", args
+      # XXX: delete google drive folder
       # XXX: delete chat room logs?
       return r
 
