@@ -309,35 +309,42 @@ canonical = (s) ->
 
     setTag: (type, object, name, value, who) ->
       id = object._id or object
-      canon = canonical(name)
       throw new Meteor.Error(400, "missing object") unless id
       throw new Meteor.Error(400, "missing name") unless name
       throw new Meteor.Error(400, "missing who") unless who
+      now = UTCNow()
+      canon = canonical(name)
       tags = collection(type).findOne(id).tags
       # remove existing value for tag, if present
       ntags = (tag for tag in tags when tag.canon isnt canon)
       # add new tag, but keep tags sorted
-      ntags.push {name:name, canon:canon, value:value}
+      ntags.push
+        name:name
+        canon:canon
+        value:value
+        touched: now
+        touched_by: canonical(who)
       ntags.sort (a, b) -> (a?.canon or "").localeCompare (b?.canon or "")
       # update the tag set only if there wasn't a race
       collection(type).update { _id: id, tags: tags }, $set:
         tags: ntags
-        touched: UTCNow()
+        touched: now
         touched_by: canonical(who)
       # XXX (on server) loop if this update failed?
       return true
     deleteTag: (type, object, name, who) ->
       id = object._id or object
-      canon = canonical(name)
       throw new Meteor.Error(400, "missing object") unless id
       throw new Meteor.Error(400, "missing name") unless name
       throw new Meteor.Error(400, "missing who") unless who
+      now = UTCNow()
+      canon = canonical(name)
       tags = collection(type).findOne(id).tags
       ntags = (tag for tag in tags when tag.canon isnt canon)
       # update the tag set only if there wasn't a race
       collection(type).update { _id: id, tags: tags }, $set:
         tags: ntags
-        touched: UTCNow()
+        touched: now
         touched_by: canonical(who)
       # XXX (on server) loop if this update failed?
       return true
