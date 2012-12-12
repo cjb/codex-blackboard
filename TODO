@@ -78,3 +78,4 @@ x Play audio on the local machine when a puzzle is solved or a new puzzle
 x fix round/puzzle ordering bug in blackboard
 - fix smooth scrolling leak
 x add rXpY numbering
+- appropriately link puzzle/round names appearing in the update log.
