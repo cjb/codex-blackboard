@@ -5,6 +5,8 @@
 # client/server load.
 PRESENCE_KEEPALIVE_MINUTES = 2
 
+BBCollection = Object.create(null) # create new object w/o any inherited cruft
+
 # OpLogs are:
 #   _id: mongodb id
 #   timestamp: timestamp
@@ -13,28 +15,33 @@ PRESENCE_KEEPALIVE_MINUTES = 2
 #   type: string
 #   id: string -- type/id give a mongodb reference to the object modified
 #                 so we can hyperlink to it.
-OpLogs = new Meteor.Collection "oplogs"
+OpLogs = BBCollection.oplogs = new Meteor.Collection "oplogs"
 
 # RoundGroups are:
 #   _id: mongodb id
-#   rounds: [ array of round _ids, in order ]
-#   name: string (special name '' for rounds w/o a group)
+#   name: string
 #   canon: canonicalized version of name, for searching
+#   created: timestamp
+#   created_by: _id of Nick
+#   touched: timestamp -- records edits to tag, order, group, etc.
+#   touched_by: _id of Nick with last touch
 #   tags: [ { name: "Status", canon: "status", value: "stuck" }, ... ]
-RoundGroups = new Meteor.Collection "roundgroups"
+#   rounds: [ array of round _ids, in order ]
+RoundGroups = BBCollection.roundgroups = new Meteor.Collection "roundgroups"
 if Meteor.isServer
   RoundGroups._ensureIndex {canon: 1}, {unique:true, dropDups:true}
 
 # Rounds are:
 #   _id: mongodb id
-#   name: string (special name '' for puzzles w/o a round)
+#   name: string
 #   canon: canonicalized version of name, for searching
-#   puzzles: [ array of puzzle _ids, in order ]
 #   created: timestamp
-#   touched: timestamp -- for special "round" chat, usually metapuzzle
-#   last_touch_by: _id of Nick
+#   created_by: _id of Nick
+#   touched: timestamp -- records edits to tag, order, group, etc.
+#   touched_by: _id of Nick with last touch
 #   tags: [ { name: "Status", canon: "status", value: "stuck" }, ... ]
-Rounds = new Meteor.Collection "rounds"
+#   puzzles: [ array of puzzle _ids, in order ]
+Rounds = BBCollection.rounds = new Meteor.Collection "rounds"
 if Meteor.isServer
   Rounds._ensureIndex {canon: 1}, {unique:true, dropDups:true}
 
@@ -44,14 +51,16 @@ if Meteor.isServer
 #   canon: canonicalized version of name, for searching
 #   answer: string (field is null (not missing or undefined) if not solved)
 #   created: timestamp
-#   solved:  timestamp
+#   created_by: _id of Nick
 #   touched: timestamp
-#   last_touch_by: _id of Nick
+#   touched_by: _id of Nick with last touch
+#   solved:  timestamp
+#   solved_by:  timestamp of Nick who confirmed the answer
 #   tags: [ { name: "Status", canon: "status", value: "stuck" }, ... ]
 #   drive: google drive url or id
-Puzzles = new Meteor.Collection "puzzles"
+Puzzles = BBCollection.puzzles = new Meteor.Collection "puzzles"
 if Meteor.isServer
-  Puzzles._ensureIndex {canon: 1}, {unique:true, dropDups:true}
+   Puzzles._ensureIndex {canon: 1}, {unique:true, dropDups:true}
 
 # Nicks are:
 #   _id: mongodb id
@@ -59,7 +68,7 @@ if Meteor.isServer
 #   canon: canonicalized version of name, for searching
 #   tags: [ { name: "Real Name", canon: "real_name", value: "C. Scott Ananian" }, ... ]
 # valid tags include "Real Name", "Gravatar" (email address to use for photos)
-Nicks = new Meteor.Collection "nicks"
+Nicks = BBCollection.nicks = new Meteor.Collection "nicks"
 if Meteor.isServer
   Nicks._ensureIndex {canon: 1}, {unique:true, dropDups:true}
 
@@ -70,7 +79,7 @@ if Meteor.isServer
 #   action: boolean (true for /me commands)
 #   room_name: "<type>/<id>", ie "puzzle/1", "round/1". "general/0" for main chat.
 #   timestamp: timestamp
-Messages = new Meteor.Collection "messages"
+Messages = BBCollection.messages = new Meteor.Collection "messages"
 if Meteor.isServer
   Messages._ensureIndex {timestamp:-1}, {}
 
@@ -79,7 +88,8 @@ if Meteor.isServer
 #   room_name: string, as in Messages
 #   timestamp: timestamp -- when user was last seen in room
 #   foreground: boolean (true if user's tab is still in foreground)
-Presence = new Meteor.Collection "presence"
+#   present: boolean (true if user is present, false if not)
+Presence = BBCollection.presence = new Meteor.Collection "presence"
 if Meteor.isServer
   Presence._ensureIndex {nick: 1, room_name:1}, {unique:true, dropDups:true}
   Presence._ensureIndex {timestamp:-1}, {}
@@ -90,21 +100,41 @@ if Meteor.isServer
     removeBefore = UTCNow() - (2*PRESENCE_KEEPALIVE_MINUTES*60*1000)
     Presence.remove timestamp: $lt: removeBefore
   , 60*1000
+  # generate automatic "<nick> entered <room>" and <nick> left room" messages
+  # as the presence set changes
+  Presence.remove {} # on server restart, begin with no presence
+  Presence.find(present: true).observe
+    added: (presence, beforeIndex) ->
+      #console.log "#{presence.nick} entered #{presence.room_name}"
+      Messages.insert
+        system: true
+        nick: ''
+        body: presence.nick + " joined the room."
+        room_name: presence.room_name
+        timestamp: UTCNow()
+    removed: (presence, atIndex) ->
+      #console.log "#{presence.nick} left #{presence.room_name}"
+      Messages.insert
+        system: true
+        nick: ''
+        body: presence.nick + " left the room."
+        room_name: presence.room_name
+        timestamp: UTCNow()
 
+# this reverses the name given to Meteor.Collection; that is the
+# 'type' argument is the name of a server-side Mongo collection.
+collection = (type) ->
+  if Object::hasOwnProperty.call(BBCollection, type)
+    BBCollection[type]
+  else
+    throw new Meteor.Error(400, "Bad collection type: "+type)
 
-# Globals
-blackboard = {}
-
-unimplemented = -> throw new Meteor.Error(500, "Unimplemented")
-collection = (type) -> switch type
-      when "puzzle" then Puzzles
-      when "round" then Rounds
-      when "roundgroup" then RoundGroups
-      when "nick" then Nicks
-      else throw new Meteor.Error(400, "Bad collection type")
-
-oplog = (message, type="", id="", who="") ->
-  OpLogs.insert { timestamp:UTCNow(), message:message, type:type, id:id, nick:canonical(who) }
+# pretty name for (one of) this collection
+pretty_collection = (type) ->
+  switch type
+    when "oplogs" then "operation log"
+    when "roundgroups" then "round group"
+    else type.replace(/s$/, '')
 
 getTag = (object, name) ->
   (tag.value for tag in (object.tags or []) when tag.canon is canonical(name))[0]
@@ -118,273 +148,264 @@ canonical = (s) ->
   s = s.replace(/[^a-z0-9]+/, '_').replace(/^_/,'').replace(/_$/,'')
   return s
 
-canonicalTags = (tags) ->
-  ({name:tag.name,canon:canonical(tag.name),value:tag.value} for tag in tags)
+(->
+  # private helpers, not exported
+  unimplemented = -> throw new Meteor.Error(500, "Unimplemented")
 
-Meteor.methods
-  newRoundGroup: (args) ->
-    throw new Meteor.Error(400, "missing name") unless args.name
-    newRoundGroup =
-      name: args.name or ""
-      canon: canonical(args.name or "") # for lookup
-      tags: canonicalTags(args.tags or [])
-      rounds: args.rounds or []
-    id = RoundGroups.insert newRoundGroup
-    oplog "Added", "roundgroup", id, (args.who or "")
-    return RoundGroups.findOne(id)
-  renameRoundGroup: (args) ->
-    throw new Meteor.Error(400, "missing id") unless args.id
-    throw new Meteor.Error(400, "missing name") unless args.name
-    RoundGroups.update args.id, $set: name: args.name
-    oplog "Renamed", "roundgroup", id, (args.who or "")
-    return true
-  delRoundGroup: (args) ->
-    throw new Meteor.Error(400, "missing id") unless args.id
-    oplog "Deleted Round Group "+RoundGrounds.findOne(args.id).name, \
-        "roundgroup", null, (args.who or "")
-    RoundGroups.remove(args.id)
-    return true
+  canonicalTags = (tags) ->
+    ({name:tag.name,canon:canonical(tag.name),value:tag.value} for tag in tags)
 
-  newRound: (args) ->
-    throw new Meteor.Error(400, "missing name") unless args.name
-    now = UTCNow()
-    newRound =
-      name: args.name or ""
-      canon: canonical(args.name or "") # for lookup
-      tags: canonicalTags(args.tags or [])
-      puzzles: args.puzzles or []
-      created: now
-      touched: now
-      last_touch_by: args.who or ""
-    id = Rounds.insert newRound
-    oplog "Added", "round", id, (args.who or "")
-    return Rounds.findOne(id)
-  renameRound: (args) ->
-    throw new Meteor.Error(400, "missing id") unless args.id
-    throw new Meteor.Error(400, "missing name") unless args.name
-    Rounds.update args.id, $set: name: args.name
-    oplog "Renamed", "round", id, (args.who or "")
-    # XXX: rename chat room logs?
-    return true
-  delRound: (args) ->
-    throw new Meteor.Error(400, "missing id") unless args.id
-    oplog "Deleted Round "+Rounds.findOne(args.id).name, \
-        "round", null, (args.who or "")
-    Rounds.remove(args.id)
-    # XXX: delete chat room logs?
-    return true
-
-  newPuzzle: (args) ->
-    throw new Meteor.Error(400, "missing name") unless args.name
-    now = UTCNow()
-    newPuzzle =
-      name: args.name or ""
-      canon: canonical(args.name or "") # for lookup
-      tags: canonicalTags(args.tags or [])
-      answer: null
-      created: now
-      solved: null
-      touched: now
-      last_touch_by: args.who or ""
-      drive: args.drive or null
-    id = Puzzles.insert newPuzzle
-    # XXX: create google drive folder
-    oplog "Added", "puzzle", id, (args.who or "")
-    return Puzzles.findOne(id)
-  renamePuzzle: (args) ->
-    throw new Meteor.Error(400, "missing id") unless args.id
-    throw new Meteor.Error(400, "missing name") unless args.name
-    Puzzles.update args.id, $set: name: args.name
-    oplog "Renamed", "puzzle", id, (args.who or "")
-    # XXX: rename google drive folder
-    # XXX: rename chat room logs?
-    return true
-  delPuzzle: (args) ->
-    throw new Meteor.Error(400, "missing id") unless args.id
-    oplog "Deleted puzzle: "+Puzzles.findOne(args.id).name, \
-        "puzzle", null, (args.who or "")
-    Puzzles.remove(args.id)
-    # XXX: delete google drive folder
-    # XXX: delete chat room logs?
-    return true
-
-  newNick: (args) ->
-    throw new Meteor.Error(400, "missing name") unless args.name
-    newNick =
-      name: args.name or ""
-      canon: canonical(args.name or "")
-      tags: canonicalTags(args.tags or [])
-    id = Nicks.insert newNick
-    return Nicks.findOne(id)
-  delNick: (args) ->
-    throw new Meteor.Error(400, "missing id") unless args.id
-    Nicks.remove(args.id)
-    return true
-
-  newMessage: (args)->
-    newMsg =
-      body: args.body or ""
-      nick: canonical(args.nick or "")
-      system: args.system or false
-      action: args.action or false
-      room_name: args.room_name or "general/0"
+  oplog = (message, type="", id="", who="") ->
+    OpLogs.insert
       timestamp: UTCNow()
-    id = Messages.insert newMsg
-    return Messages.findOne(id)
+      message: message
+      type:type
+      id:id
+      nick: canonical(who)
 
-  setPresence: (args) ->
-    throw new Meteor.Error(400, "missing nick") unless args.nick
-    throw new Meteor.Error(400, "missing room") unless args.room_name
-    newPresence =
-      nick: canonical(args.nick)
-      room_name: args.room_name
-      timestamp: UTCNow()
-      foreground: args.foreground or false
-    existing = Presence.findOne
-      nick: newPresence.nick
-      room_name: newPresence.room_name
-    if args.present
-      # would be easier to use Mongo's "upsert" functionality, but
-      # meteor doesn't support it
-      if existing
-        Presence.update
-          nick: newPresence.nick
-          room_name: newPresence.room_name
-        ,
-          $set:
-            timestamp: newPresence.timestamp
-            foreground: newPresence.foreground
-      else
-        Presence.insert newPresence
-        Messages.insert
-          system: true
-          nick: ''
-          body: args.nick + " joined the room."
-          room_name: newPresence.room_name
-          timestamp: newPresence.timestamp
-    else
-      Presence.remove
-        nick: newPresence.nick
-        room_name: newPresence.room_name
-      if existing
-        Messages.insert
-          system: true
-          nick: ''
-          body: args.nick + " left the room."
-          room_name: newPresence.room_name
-          timestamp: newPresence.timestamp
+  newObject = (type, args, extra, suppressLog=false) ->
+    throw new Meteor.Error(400, "missing name") unless args.name
+    throw new Meteor.Error(400, "missing who") unless args.who
+    now = UTCNow()
+    object =
+      name: args.name
+      canon: canonical(args.name) # for lookup
+      created: now
+      created_by: canonical(args.who)
+      touched: now
+      touched_by: canonical(args.who)
+      tags: canonicalTags(args.tags or [])
+    for own key,value of (extra or Object.create(null))
+       object[key] = value
+    object._id = collection(type).insert object
+    unless suppressLog
+      oplog "Added", type, object._id, args.who
+    return object
 
-  get: (type, id) ->
+  renameObject = (type, args, suppressLog=false) ->
     throw new Meteor.Error(400, "missing id") unless args.id
-    return collection(type).findOne(id)
-
-  setTag: (type, object, name, value) ->
-    id = object._id or object
-    canon = canonical(name)
-    throw new Meteor.Error(400, "missing object") unless id
-    throw new Meteor.Error(400, "missing name") unless name
-    tags = collection(type).findOne(id).tags
-    # remove existing value for tag, if present
-    ntags = (tag for tag in tags when tag.canon isnt canon)
-    # add new tag, but keep tags sorted
-    ntags.push {name:name, canon:canon, value:value}
-    ntags.sort (a, b) -> (a?.canon or "").localeCompare (b?.canon or "")
-    # update the tag set only if there wasn't a race
-    collection(type).update { _id: id, tags: tags }, { $set: { tags: ntags } }
-    # XXX (on server) loop if this update failed?
-    return true
-  delTag: (type, object, name) ->
-    id = object._id or object
-    canon = canonical(name)
-    throw new Meteor.Error(400, "missing object") unless id
-    throw new Meteor.Error(400, "missing name") unless name
-    tags = collection(type).findOne(id).tags
-    ntags = (tag for tag in tags when tag.canon isnt canon)
-    # update the tag set only if there wasn't a race
-    collection(type).update { _id: id, tags: tags }, { $set: { tags: ntags } }
-    # XXX (on server) loop if this update failed?
-    return true
-
-  addRoundToGroup: (round, group) ->
-    # remove round from all other groups
-    RoundGroups.find(rounds: round._id).forEach (rg) ->
-      RoundGroups.update rg._id, $pull: rounds: round._id
-    # add round to the given group
-    RoundGroups.update group._id, $addToSet: rounds: round._id
-    return true
-
-  addPuzzleToRound: (puzzle, round) ->
-    # remove puzzle from all other rounds
-    Rounds.find(puzzles: puzzle._id).forEach (r) ->
-      Rounds.update r._id, $pull: puzzles: puzzle._id
-    # add puzzle to the given round
-    Rounds.update round._id, $addToSet: puzzles: puzzle._id
-    return true
-
-  getRoundForPuzzle: (puzzle) ->
-    id = puzzle._id or puzzle
-    throw new Meteor.Error(400, "missing puzzle") unless id
-    return Rounds.findOne(puzzles: id)
-
-  getGroupForRound: (round) ->
-    id = round._id or round
-    throw new Meteor.Error(400, "missing round") unless id
-    return RoundGroups.findOne(rounds: id)
-
-  reorderPuzzle: (puzzle, args) ->
-    id = puzzle._id or puzzle
-    throw new Meteor.Error(400, "missing puzzle") unless id
-    throw new Meteor.Error(400, "missing position") unless args.before or
-                                                           args.after
-    unimplemented()
-
-  reorderRound: (round, args) ->
-    id = round._id or round
-    throw new Meteor.Error(400, "missing round") unless id
-    throw new Meteor.Error(400, "missing position") unless args.before or
-                                                           args.after
-    unimplemented()
-
-  setAnswer: (puzzle, answer, who="") ->
-    id = puzzle._id or puzzle
-    throw new Meteor.Error(400, "missing puzzle") unless id
-    throw new Meteor.Error(400, "missing answer") unless answer
+    throw new Meteor.Error(400, "missing name") unless args.name
+    throw new Meteor.Error(400, "missing who") unless args.who
     now = UTCNow()
-    Puzzles.update id, $set:
-      answer: answer
-      solved: now
-      touched:now
-      last_touch_by: who
-    oplog "Found an answer to", "puzzle", id, (who or "")
-    if Meteor.isClient
-      blackboard.newAnswerSound.play()
+    collection(type).update args.id, $set:
+      name: args.name
+      canon: canonical(args.name)
+      touched: now
+      touched_by: canonical(args.who)
+    unless suppressLog
+      oplog "Renamed", type, args.id, args.who
     return true
 
-  delAnswer: (puzzle, who="") ->
-    id = puzzle._id or puzzle
-    throw new Meteor.Error(400, "missing puzzle") unless id
-    now = UTCNow()
-    Puzzles.update id, $set:
-      answer: null
-      solved: null
-      touched:now
-      last_touch_by: who
-    oplog "Deleted answer", "puzzle", id, (who or "")
+  deleteObject = (type, args, suppressLog=false) ->
+    throw new Meteor.Error(400, "missing id") unless args.id
+    throw new Meteor.Error(400, "missing who") unless args.who
+    name = collection(type)?.findOne(args.id)?.name
+    return false unless name
+    unless suppressLog
+      oplog "Deleted "+pretty_collection(type)+" "+name, \
+          type, null, args.who
+    collection(type).remove(args.id)
     return true
 
-  touch: (type, id, who) ->
-   collection(type).update id, $set:
-     touched: UTCNow()
-     last_touch_by: who
+  Meteor.methods
+    newRoundGroup: (args) ->
+      newObject "roundgroups", args,
+        rounds: args.rounds or []
+    renameRoundGroup: (args) ->
+      renameObject "roundgroups", args
+    deleteRoundGroup: (args) ->
+      deleteObject "roundgroups", args
 
-  getChatLog: (type, id, from=0) ->
-    # get LIMIT entries of chat log corresponding to type/id, starting
-    # from (but not including) from timestamp, if nonzero
-    # this allows us to page back in time by passing in the timestamp of
-    # the earliest message from the previous call
-    unimplemented()
+    newRound: (args) ->
+      newObject "rounds", args,
+        puzzles: args.puzzles or []
+    renameRound: (args) ->
+      renameObject "rounds", args
+    deleteRound: (args) ->
+      r = deleteObject "rounds", args
+      # XXX: delete chat room logs?
+      return r
+
+    newPuzzle: (args) ->
+      p = newObject "puzzles", args,
+        answer: null
+        solved: null
+        solved_by: null
+        drive: args.drive or null
+      # XXX: create google drive folder (server only)
+      return p
+    renamePuzzle: (args) ->
+      r = renameObject "puzzles", args
+      # XXX: rename google drive folder
+      return r
+    deletePuzzle: (args) ->
+      r = deleteObject "puzzles", args
+      # XXX: delete google drive folder
+      # XXX: delete chat room logs?
+      return r
+
+    newNick: (args) ->
+      # a bit of a stretch but let's reuse the object type
+      newObject "nicks",
+        name: args.name
+        who: args.name
+        tags: args.tags
+      , {}, "suppressLog"
+    renameNick: (args) ->
+      renameObject "nicks", args, "suppressLog"
+    deleteNick: (args) ->
+       deleteObject "nicks", args, "suppressLog"
+
+    newMessage: (args)->
+      newMsg =
+        body: args.body or ""
+        nick: canonical(args.nick or "")
+        system: args.system or false
+        action: args.action or false
+        room_name: args.room_name or "general/0"
+        timestamp: UTCNow()
+      newMsg._id = Messages.insert newMsg
+      return newMsg
+
+    setPresence: (args) ->
+      throw new Meteor.Error(400, "missing nick") unless args.nick
+      throw new Meteor.Error(400, "missing room") unless args.room_name
+      return unless Meteor.isServer
+      # we're going to do the db operation only on the server, so that we
+      # can safely use mongo's 'upsert' functionality.  otherwise
+      # Meteor seems to get a little confused as it creates presence
+      # entries on the client that don't exist on the server.
+      # (meteor does better when it's reconciling the *contents* of
+      # documents, not their existence) (this is also why we added the
+      # 'presence' field instead of deleting entries outright when
+      # a user goes away)
+      Presence.update
+        nick: canonical(args.nick)
+        room_name: args.room_name
+      , $set:
+          timestamp: UTCNow()
+          foreground: args.foreground or false
+          present: args.present or false
+      , { upsert: true }
+
+    get: (type, id) ->
+      throw new Meteor.Error(400, "missing id") unless args.id
+      return collection(type).findOne(id)
+
+    setTag: (type, object, name, value, who) ->
+      id = object._id or object
+      canon = canonical(name)
+      throw new Meteor.Error(400, "missing object") unless id
+      throw new Meteor.Error(400, "missing name") unless name
+      throw new Meteor.Error(400, "missing who") unless who
+      tags = collection(type).findOne(id).tags
+      # remove existing value for tag, if present
+      ntags = (tag for tag in tags when tag.canon isnt canon)
+      # add new tag, but keep tags sorted
+      ntags.push {name:name, canon:canon, value:value}
+      ntags.sort (a, b) -> (a?.canon or "").localeCompare (b?.canon or "")
+      # update the tag set only if there wasn't a race
+      collection(type).update { _id: id, tags: tags }, $set:
+        tags: ntags
+        touched: UTCNow()
+        touched_by: canonical(who)
+      # XXX (on server) loop if this update failed?
+      return true
+    deleteTag: (type, object, name, who) ->
+      id = object._id or object
+      canon = canonical(name)
+      throw new Meteor.Error(400, "missing object") unless id
+      throw new Meteor.Error(400, "missing name") unless name
+      throw new Meteor.Error(400, "missing who") unless who
+      tags = collection(type).findOne(id).tags
+      ntags = (tag for tag in tags when tag.canon isnt canon)
+      # update the tag set only if there wasn't a race
+      collection(type).update { _id: id, tags: tags }, $set:
+        tags: ntags
+        touched: UTCNow()
+        touched_by: canonical(who)
+      # XXX (on server) loop if this update failed?
+      return true
+
+    addRoundToGroup: (round, group, who) ->
+      rid = round._id or round
+      gid = group._id or group
+      # remove round from all other groups
+      RoundGroups.update { rounds: rid },{ $pull: rounds: rid },{ multi: true }
+      # add round to the given group
+      RoundGroups.update gid, $addToSet: rounds: rid
+      return true
+
+    addPuzzleToRound: (puzzle, round, who) ->
+      pid = puzzle._id or puzzle
+      rid = round._id or round
+      # remove puzzle from all other rounds
+      Rounds.update { puzzles: pid },{ $pull: puzzles: pid },{ multi: true }
+      # add puzzle to the given round
+      Rounds.update rid, $addToSet: puzzles: pid
+      return true
+
+    getRoundForPuzzle: (puzzle) ->
+      id = puzzle._id or puzzle
+      throw new Meteor.Error(400, "missing puzzle") unless id
+      return Rounds.findOne(puzzles: id)
+
+    getGroupForRound: (round) ->
+      id = round._id or round
+      throw new Meteor.Error(400, "missing round") unless id
+      return RoundGroups.findOne(rounds: id)
+
+    reorderPuzzle: (puzzle, args) ->
+      id = puzzle._id or puzzle
+      throw new Meteor.Error(400, "missing puzzle") unless id
+      throw new Meteor.Error(400, "missing position") unless args.before or
+                                                             args.after
+      unimplemented()
+
+    reorderRound: (round, args) ->
+      id = round._id or round
+      throw new Meteor.Error(400, "missing round") unless id
+      throw new Meteor.Error(400, "missing position") unless args.before or
+                                                             args.after
+      unimplemented()
+
+    setAnswer: (puzzle, answer, who) ->
+      id = puzzle._id or puzzle
+      throw new Meteor.Error(400, "missing puzzle") unless id
+      throw new Meteor.Error(400, "missing answer") unless answer
+      throw new Meteor.Error(400, "missing who") unless who
+      now = UTCNow()
+      Puzzles.update id, $set:
+        answer: answer
+        solved: now
+        solved_by: canonical(who)
+        touched: now
+        touched_by: canonical(who)
+      oplog "Found an answer to", "puzzles", id, who
+      return true
+
+    deleteAnswer: (puzzle, who) ->
+      id = puzzle._id or puzzle
+      throw new Meteor.Error(400, "missing puzzle") unless id
+      throw new Meteor.Error(400, "missing who") unless who
+      now = UTCNow()
+      Puzzles.update id, $set:
+        answer: null
+        solved: null
+        solved_by: null
+        touched: now
+        touched_by: canonical(who)
+      oplog "Deleted answer", "puzzles", id, who
+      return true
+
+    getChatLog: (type, id, from=0) ->
+      # get LIMIT entries of chat log corresponding to type/id, starting
+      # from (but not including) from timestamp, if nonzero
+      # this allows us to page back in time by passing in the timestamp of
+      # the earliest message from the previous call
+      unimplemented()
+)()
 
 UTCNow = ->
   now = new Date()
-  #Date.UTC(now.getFullYear(), now.getMonth(), now.getDate(), now.getHours(), now.getMinutes(), now.getSeconds(), now.getMilliseconds())
   return now.getTime()

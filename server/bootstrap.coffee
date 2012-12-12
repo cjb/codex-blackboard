@@ -385,18 +385,30 @@ SAMPLE_CHATS = [
 Meteor.startup ->
   if RoundGroups.find().count() is 0
     # note that Meteor.call is async... this causes some slight issues...
+    WHO='cscott'
+    extend = (a,b) ->
+      r = Object.create(null)
+      for own key, value of a
+        r[key] = value
+      for own key, value of b
+        r[key] = value
+      return r
     for roundgroup in SAMPLE_DATA
-      Meteor.call "newRoundGroup", roundgroup, (error, rg) ->
+      Meteor.call "newRoundGroup", extend(roundgroup,{who:WHO,rounds:null}), (error, rg) ->
+        throw error if error
         for round in roundgroup.rounds
-          Meteor.call "newRound", round, (error, r) ->
-            Meteor.call "addRoundToGroup", r, rg
+          Meteor.call "newRound", extend(round,{who:WHO,puzzles:null}), (error, r) ->
+            throw error if error
+            Meteor.call "addRoundToGroup", r, rg, WHO
             for chat in (round.chats or [])
               chat.room_name = "round/" + r._id
               Meteor.call "newMessage", chat
             for puzzle in round.puzzles
-              Meteor.call "newPuzzle", puzzle, (error, p) ->
-                Meteor.call "addPuzzleToRound", p, r
-                Meteor.call "setAnswer", p._id, puzzle.answer if puzzle.answer
+              Meteor.call "newPuzzle", extend(puzzle,{who:WHO}), (error, p) ->
+                throw error if error
+                Meteor.call "addPuzzleToRound", p, r, WHO
+                if puzzle.answer
+                  Meteor.call "setAnswer", p._id, puzzle.answer, WHO
                 for chat in (puzzle.chats or [])
                   chat.room_name = "puzzle/" + p._id
                   Meteor.call "newMessage", chat

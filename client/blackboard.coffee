@@ -1,7 +1,18 @@
 NAVBAR_HEIGHT = 73 # keep in sync with @navbar-height in blackboard.less
 
+blackboard = {} # store page global state
+
 Meteor.startup ->
   blackboard.newAnswerSound = new Audio "sound/that_was_easy.wav"
+  # set up a persistent query so we can play the sound whenever we get a new
+  # answer
+  query = Puzzles.find $and: [ {answer: $ne: null}, {answer: $exists: true} ]
+  query.observe
+    added: (p, beforeIndex) ->
+      # check the solved timestamp -- if it's within the last minute
+      # (fudge factor) play the sound.
+      if p.solved and p.solved > (UTCNow() - 1*60*1000)
+        blackboard.newAnswerSound.play()
 
 Template.blackboard.lastupdates = ->
   LIMIT = 10
@@ -21,11 +32,8 @@ Template.blackboard.lastupdates = ->
       break
   type = ''
   if message[0].id
-    type = (switch message[0].type
-      when 'puzzle' then ' puzzle'
-      when 'round' then ' round'
-      when 'roundgroup' then ' round group'
-      else ' unknown item') + (if message.length > 1 then 's ' else ' ')
+    type = ' ' + pretty_collection(message[0].type) + \
+      (if message.length > 1 then 's ' else ' ')
   desc = message.map (ol) ->
     return '' unless ol.id
     (collection(ol.type)?.findOne(ol.id)?.name or '')
@@ -48,6 +56,7 @@ Template.blackboard.lastchats = ->
   return m
 Template.blackboard.pretty_ts = (ts) -> Template.messages.pretty_ts ts
 Template.blackboard.roundgroups = -> RoundGroups.find {}
+# XXX: the find operation on the next line is not order-preserving
 Template.blackboard.rounds = -> Rounds.find _id: $in: this.rounds
 Template.blackboard.rendered = ->
   #  page title
@@ -70,6 +79,7 @@ Template.blackboard.events
     Router.goToChat "general", "0"
 
 Template.blackboard_round.hasPuzzles = -> (this.puzzles.length > 0)
+# XXX: the find operation on the next line is not order-preserving
 Template.blackboard_round.puzzles = -> Puzzles.find _id: $in: this.puzzles
 Template.blackboard_round.events
   "click .round-link": (event, template) ->
@@ -90,7 +100,7 @@ Template.blackboard_puzzle.whos_working = ->
 Template.blackboard_puzzle.pretty_ts = (timestamp, brief) ->
   duration = (Session.get('currentTime')||UTCNow()) - timestamp
   seconds = Math.floor(duration/1000)
-  return "in the future" if seconds < 0
+  return "in the future" if seconds < -60
   return "just now" if seconds < 60
   [minutes, seconds] = [Math.floor(seconds/60), seconds % 60]
   [hours,   minutes] = [Math.floor(minutes/60), minutes % 60]

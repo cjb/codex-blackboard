@@ -7,4 +7,4 @@ Template.round.rendered = ->
 Template.round.events
   "click .chat-link": (event, template) ->
     event.preventDefault()
-    Router.goToChat "round", Session.get('id')
+    Router.goToChat "rounds", Session.get('id')

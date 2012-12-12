@@ -170,12 +170,12 @@ $("#joinRoom").live "submit", ->
     # try to find room as a puzzle name
     p = Puzzles.findOne(canon: canonical(roomName))
     if p
-      joinRoom "puzzle", p._id
+      joinRoom "puzzles", p._id
     else
       # try to find room as a round name
       r = Rounds.findOne(canon: canonical(roomName))
       if r
-        joinRoom "round", r._id
+        joinRoom "rounds", r._id
       else
         # reset to old room name
         $("#roomName").val prettyRoomName()

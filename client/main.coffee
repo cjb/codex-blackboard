@@ -22,17 +22,17 @@ BlackboardRouter = Backbone.Router.extend
 
   RoundPage: (round) ->
     Session.set "currentPage", "round"
-    Session.set "type", "round"
+    Session.set "type", "rounds"
     Session.set "id", round
 
   PuzzlePage: (puzzle) ->
     Session.set "currentPage", "puzzle"
-    Session.set "type", "puzzle"
+    Session.set "type", "puzzles"
     Session.set "id", puzzle
 
   ChatPage: (type,id) ->
-    type = "puzzle" if type is "p"
-    type = "round" if type is "r"
+    type = "puzzles" if type is "p"
+    type = "rounds" if type is "r"
     id = "0" if type is "general"
     Session.set "currentPage", "chat"
     Session.set "type", type

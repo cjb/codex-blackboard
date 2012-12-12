@@ -7,4 +7,4 @@ Template.puzzle.rendered = ->
 Template.puzzle.events
   "click .chat-link": (event, template) ->
     event.preventDefault()
-    Router.goToChat "puzzle", Session.get('id')
+    Router.goToChat "puzzles", Session.get('id')
