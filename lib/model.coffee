@@ -149,7 +149,7 @@ pretty_collection = (type) ->
     else type.replace(/s$/, '')
 
 getTag = (object, name) ->
-  (tag.value for tag in (object.tags or []) when tag.canon is canonical(name))[0]
+  (tag.value for tag in (object?.tags or []) when tag.canon is canonical(name))[0]
 
 # canonical names: lowercases, all non-alphanumerics replaced with '_'
 canonical = (s) ->

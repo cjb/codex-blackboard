@@ -16,3 +16,15 @@ Template.puzzle.events
   "click .chat-link": (event, template) ->
     event.preventDefault()
     Router.goToChat "puzzles", Session.get('id')
+
+# presumably we also want to subscribe to the puzzle's chat room
+# and presence information at some point.
+Meteor.autosubscribe ->
+  return unless Session.get("currentPage") is "puzzle"
+  puzzle_id = Session.get('id')
+  return unless puzzle_id
+  Meteor.subscribe 'puzzle-by-id', puzzle_id
+  Meteor.subscribe 'round-for-puzzle', puzzle_id
+  round = Rounds.findOne puzzles: puzzle_id
+  return unless round
+  Meteor.subscribe 'roundgroup-for-round', round._id

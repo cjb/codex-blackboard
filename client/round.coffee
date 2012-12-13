@@ -14,3 +14,12 @@ Template.round.events
   "click .chat-link": (event, template) ->
     event.preventDefault()
     Router.goToChat "rounds", Session.get('id')
+
+# presumably we also want to subscribe to the round's chat room
+# and presence information at some point.
+Meteor.autosubscribe ->
+  return unless Session.get("currentPage") is "round"
+  round_id = Session.get('id')
+  return unless round_id
+  Meteor.subscribe 'round-by-id', round_id
+  Meteor.subscribe 'roundgroup-for-round', round_id

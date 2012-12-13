@@ -8,6 +8,10 @@ Meteor.startup ->
   blackboard.newAnswerSound = new Audio "sound/that_was_easy.wav"
   # set up a persistent query so we can play the sound whenever we get a new
   # answer
+  # note that this observe 'leaks' -- we're not seeing it up/tearing it
+  # down with the blackboard page, we're going to play the sound whatever
+  # page the user is currently on.  This is "fun".  Trust us...
+  Meteor.subscribe 'newly-answered-puzzles'
   query = Puzzles.find $and: [ {answer: $ne: null}, {answer: $exists: true} ]
   query.observe
     added: (p, beforeIndex) ->
@@ -17,6 +21,8 @@ Meteor.startup ->
         if (UTCNow() - blackboard.initialPageLoad) > SOUND_THRESHOLD_MS
           blackboard.newAnswerSound.play()
 
+
+############## operation log in header ####################
 Template.blackboard.lastupdates = ->
   LIMIT = 10
   ologs = OpLogs.find {}, \
@@ -48,6 +54,11 @@ Template.blackboard.lastupdates = ->
     names: desc.join(',')
   }
 
+Meteor.autosubscribe ->
+  return unless Session.get("currentPage") is "blackboard"
+  Meteor.subscribe 'recent-oplogs'
+
+############## chat log in header ####################
 Template.blackboard.lastchats = ->
   LIMIT = 2
   m = Messages.find {room_name: "general/0", system: false}, \
@@ -58,6 +69,12 @@ Template.blackboard.lastchats = ->
   m.reverse()
   return m
 Template.blackboard.pretty_ts = (ts) -> Template.messages.pretty_ts ts
+
+Meteor.autosubscribe ->
+  return unless Session.get("currentPage") is "blackboard"
+  Meteor.subscribe 'recent-messages', 'general/0'
+
+############## groups, rounds, and puzzles ####################
 Template.blackboard.roundgroups = -> RoundGroups.find {}, sort: ["created"]
 # the following is a map() instead of a direct find() to preserve order
 Template.blackboard.rounds = ->
@@ -86,7 +103,7 @@ Template.blackboard.events
     event.preventDefault()
     Router.goToChat "general", "0"
 
-Template.blackboard_round.hasPuzzles = -> (this.round.puzzles.length > 0)
+Template.blackboard_round.hasPuzzles = -> (this.round?.puzzles?.length > 0)
 # the following is a map() instead of a direct find() to preserve order
 Template.blackboard_round.puzzles = ->
   ({
@@ -107,8 +124,9 @@ Template.blackboard_puzzle.whos_working = ->
   # 5 minutes, but we do some proactive pruning on client-side just in case
   # client drifts out of sync
   return Presence.find
-    room_name: ("puzzle/"+this.puzzle._id)
+    room_name: ("puzzle/"+this.puzzle?._id)
     timestamp: $gt: (UTCNow() - 15*60*100) # within a quarter hour
+    present: true
 
 Template.blackboard_puzzle.pretty_ts = (timestamp, brief) ->
   duration = (Session.get('currentTime')||UTCNow()) - timestamp
@@ -139,6 +157,15 @@ Template.blackboard_puzzle.events
     event.preventDefault()
     puzzle = template.data.puzzle
     Router.goToPuzzle puzzle
+
+# Subscribe to all group, round, and puzzle information
+Meteor.autosubscribe ->
+  return unless Session.get("currentPage") is "blackboard"
+  Meteor.subscribe 'all-roundgroups'
+  Meteor.subscribe 'all-rounds'
+  Meteor.subscribe 'all-puzzles'
+  # also subscribe to all presence information
+  Meteor.subscribe 'all-presence'
 
 # Update 'currentTime' every minute or so to allow pretty_ts to magically
 # update
