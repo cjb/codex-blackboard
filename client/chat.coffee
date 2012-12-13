@@ -43,11 +43,13 @@ Template.messages.pretty_ts = (timestamp) ->
 
 Template.messages.body = ->
   body = this.body
+  body = Handlebars._escape(body)
+  body = convertURLsToLinksAndImages(body)
+  body = highlightNick(body)
   if (body.slice(0,4) == "/me ")
-    body.slice(4)
+    new Handlebars.SafeString(body.slice(4))
   else
-    body
-
+    new Handlebars.SafeString(body)
 
 Template.messages.nick = ->
   nick = this.nick
@@ -74,6 +76,23 @@ Template.nickAndRoom.events
 Template.nickModal.nick   = -> Session.get "nick"
 
 # Utility functions
+
+linkOrLinkedImage = (url) ->
+  if url.match(/.(png|jpg|jpeg|gif)$/)
+    "<a href=\"" + url + "\"><img src=\"" + url + "\" class=\"inline-image\"></a>"
+  else
+    "<a href=\"" + url + "\">" + url + "</a>"
+
+convertURLsToLinksAndImages = (html) ->
+  html.replace(/(http(s?):\/\/[^ ]+)/, linkOrLinkedImage)
+
+highlightNick = (html) ->
+  nickRE = new RegExp(Session.get("nick"))
+  if html.match(nickRE)
+    html = "<span class=\"highlight-nick\">" + html + "</span>"
+  else
+    html
+
 [isVisible, registerVisibilityChange] = (->
   hidden = "hidden"
   visibilityChange = "visibilitychange"
