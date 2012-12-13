@@ -19,8 +19,13 @@ Meteor.startup ->
       # (fudge factor), and the page isn't newly-loaded, play the sound.
       if p.solved and p.solved > (UTCNow() - SOUND_THRESHOLD_MS)
         if (UTCNow() - blackboard.initialPageLoad) > SOUND_THRESHOLD_MS
-          blackboard.newAnswerSound.play()
+          unless Session.get 'mute'
+            blackboard.newAnswerSound.play()
 
+Template.blackboard.volumeIcon = ->
+  Template.nickAndRoom.volumeIcon()
+Template.blackboard.sessionNick = -> Session.get 'nick'
+Template.blackboard.canEdit = -> Session.get 'canEdit'
 
 ############## operation log in header ####################
 Template.blackboard.lastupdates = ->
@@ -97,8 +102,27 @@ Template.blackboard.rendered = ->
   # tooltips
   $('#bb-sidebar .nav > li > a').tooltip placement: 'right'
   $('#bb-tables .bb-puzzle .puzzle-name > a').tooltip placement: 'left'
+  # 'canEdit' radio buttons
+  setCanEdit (Session.get('canEdit') and Session.get('nick'))
+
+setCanEdit = (canEdit) ->
+  Session.set 'canEdit', if canEdit then true else null
+  $('.bb-buttonbar input:radio[name=editable]').val([
+        if canEdit then 'true' else 'false'
+  ])
 
 Template.blackboard.events
+  "click .canEdit-true": (event, template) ->
+    setCanEdit true
+    event.preventDefault()
+  "click .canEdit-false": (event, template) ->
+    setCanEdit false
+    event.preventDefault()
+  "click .logout": (event, template) ->
+    setCanEdit false
+    Session.set 'nick', null
+    $.cookie 'nick', null
+    event.preventDefault()
   "click #bb-more-chats": (event, template) ->
     event.preventDefault()
     Router.goToChat "general", "0"

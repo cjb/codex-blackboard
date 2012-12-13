@@ -10,15 +10,21 @@
   padding-top: @navbar-height;
 
   @left-size: 85px;
-  @right-size: 50px;
+  @right-size: 45px;
   @vert-padding: 4px;
 
+  .bb-buttonbar {
+    text-align: right;
+    button, .btn-group { margin-right: 5px; }
+    .btn-group { text-align: left; }
+    .logout { padding-left: 40px; }
+  }
   .bb-lastchat, .bb-lastupdate {
     margin-bottom: @vert-padding;
     margin-top: @vert-padding;
-    padding: 0 (35px + @right-size) 0 (14px + @left-size);
+    padding: 0 (15px + @right-size) 0 (14px + @left-size);
     .left { margin-left: (-@left-size); }
-    .right { margin-right: (-@right-size)px; }
+    .right { margin-right: (-@right-size); }
     &, .messageRow { .ellipsis; }
   }
   .bb-lastchat .messageRow {

@@ -5,6 +5,47 @@
 
 <div class="navbar navbar-inverse navbar-fixed-top bb-topbar">
   <div class="navbar-inner">
+<!-- login/mute buttons -->
+  <div class="bb-buttonbar pull-right">
+   <div>
+    {{#if sessionNick}}
+     <div class="btn-group">
+      <a class="btn btn-small btn-inverse dropdown-toggle"
+	 data-toggle="dropdown" href="#">
+       <i class="icon-user icon-white"></i> {{sessionNick}}
+       <span class="caret"></span>
+      </a>
+      <ul class="dropdown-menu pull-right">
+       <li><a class="canEdit-true">
+       <label class="radio inline">
+	<i class="icon-pencil"></i>
+	<input type="radio" name="editable" value="true"/> Allow edits
+       </label>
+       </a></li>
+       <li><a class="canEdit-false">
+       <label class="radio">
+	<i class="icon-lock"></i>
+	<input type="radio" name="editable" value="false"/> Protect page
+       </label>
+       </a></li>
+
+       <li class="divider"></li>
+       <li><a href="#" class="logout"><i class="icon-off"></i> Log out</a></li>
+      </ul>
+     </div>
+    {{else}}
+    <button class="btn btn-small btn-inverse">
+     <i class="icon-user icon-white"></i>
+     Log in to edit
+    </button>
+    {{/if}}
+   </div>
+   <div>
+    <button class="mute btn btn-small btn-inverse">
+     <span class="{{volumeIcon}} icon-white"></span>
+    </button>
+   </div>
+  </div>
 <!-- Last update bar -->
   <div class="bb-lastupdate">
     <span class="right pull-right">

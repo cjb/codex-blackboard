@@ -147,7 +147,7 @@ UTCNow = ->
 """
 
 # Event Handlers
-$("#mute").live "click", ->
+$("button.mute").live "click", ->
   if Session.get "mute"
     $.cookie "mute", null
   else
