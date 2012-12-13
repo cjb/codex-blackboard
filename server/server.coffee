@@ -1,7 +1,13 @@
 Meteor.publish 'all-roundgroups', -> RoundGroups.find()
 Meteor.publish 'all-rounds', -> Rounds.find()
 Meteor.publish 'all-puzzles', -> Puzzles.find()
-Meteor.publish 'all-presence', -> Presence.find()
+Meteor.publish 'all-presence', ->
+  # strip out unnecessary fields from presence (esp timestamp) to avoid wasted
+  # updates to clients
+  Presence.find {present: true}, fields:
+    timestamp: 0
+    foreground_uuid: 0
+    present: 0
 
 # this is for the "that was easy" sound effect
 # everyone is subscribed to this all the time

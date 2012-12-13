@@ -128,6 +128,7 @@ joinRoom = (type, id) ->
       room_name: Session.get "room_name"
       present: true
       foreground: isVisible() # foreground/background tab status
+      foreground_uuid: CLIENT_UUID # identify this tab
   instachat.keepalive()
   # send a keep alive every N minutes
   instachat.keepaliveInterval = Meteor.setInterval instachat.keepalive, (PRESENCE_KEEPALIVE_MINUTES*60*1000)

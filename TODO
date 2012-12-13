@@ -85,11 +85,11 @@ x add rXpY numbering
 - add 'all-names' subscription which merges names from puzzles/rounds/groups
   - fix chat room title breakage introduced w/ recent pub/sub refactor.
 - always subscribe to all-rounds, all-groups, and all-names
-- add 'foreground uuid' field to presence, and only set foreground=false
+x add 'foreground uuid' field to presence, and only set foreground=false
   if current app's uuid matched foreground uuid.  this prevents bouncing
   if user has one tab in foreground and one in background
   (if foreground=true in update, unilaterally set foreground uuid as well)
-- strip unnecessary fields from presence publication to limit updates
+x strip unnecessary fields from presence publication to limit updates
   (ie, timestamp, foreground uuid, etc)
 - make nick modal universal
 - make navbar universal.  suppress group chat iff we're on group chat page

@@ -100,6 +100,7 @@ if Meteor.isServer
 #   room_name: string, as in Messages
 #   timestamp: timestamp -- when user was last seen in room
 #   foreground: boolean (true if user's tab is still in foreground)
+#   foreground_uuid: identity of client with tab in foreground
 #   present: boolean (true if user is present, false if not)
 Presence = BBCollection.presence = new Meteor.Collection "presence"
 if Meteor.isServer
@@ -299,9 +300,27 @@ canonical = (s) ->
         room_name: args.room_name
       , $set:
           timestamp: UTCNow()
-          foreground: args.foreground or false
           present: args.present or false
       , { upsert: true }
+      return unless args.present
+      # only set foreground if true or foreground_uuid matches; this
+      # prevents bouncing if user has two tabs open, and one is foregrounded
+      # and the other is not.
+      if args.foreground
+        Presence.update
+          nick: canonical(args.nick)
+          room_name: args.room_name
+        , $set:
+          foreground: true
+          foreground_uuid: args.uuid
+      else # only update 'foreground' if uuid matches
+        Presence.update
+          nick: canonical(args.nick)
+          room_name: args.room_name
+          foreground_uuid: args.uuid
+        , $set:
+          foreground: args.foreground or false
+      return
 
     get: (type, id) ->
       throw new Meteor.Error(400, "missing id") unless args.id

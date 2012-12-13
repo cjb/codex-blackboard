@@ -1,11 +1,14 @@
-# Three "top level" templates:
+# "Top level" templates:
 #   "blackboard" -- main blackboard page
 #   "puzzle"     -- puzzle information page
 #   "round"      -- round information (much like the puzzle page)
+#   "chat"       -- chat room
 
 Template.page.currentPage = -> (Session.get "currentPage") or "blackboard"
 
 Handlebars.registerHelper "equal", (a, b) -> a is b
+
+CLIENT_UUID = Meteor.uuid() # this identifies this particular client instance
 
 # Router
 BlackboardRouter = Backbone.Router.extend

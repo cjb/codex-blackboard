@@ -144,13 +144,8 @@ Template.blackboard_round.events
 Template.blackboard_puzzle.status = ->
   return (getTag this.puzzle, "status") or ""
 Template.blackboard_puzzle.whos_working = ->
-  # note that server should automatically be pruning keepalives older than
-  # 5 minutes, but we do some proactive pruning on client-side just in case
-  # client drifts out of sync
   return Presence.find
     room_name: ("puzzle/"+this.puzzle?._id)
-    timestamp: $gt: (UTCNow() - 15*60*100) # within a quarter hour
-    present: true
 
 Template.blackboard_puzzle.pretty_ts = (timestamp, brief) ->
   duration = (Session.get('currentTime')||UTCNow()) - timestamp
