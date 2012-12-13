@@ -79,3 +79,24 @@ x fix round/puzzle ordering bug in blackboard
 - fix smooth scrolling leak
 x add rXpY numbering
 - appropriately link puzzle/round names appearing in the update log.
+  - add general 'link' helper which takes a type/id and generates the
+    proper URL (type='nicks', type='puzzles', type='rounds', etc)
+    (use all-names to get link text and type from id?)
+- add 'all-names' subscription which merges names from puzzles/rounds/groups
+  - fix chat room title breakage introduced w/ recent pub/sub refactor.
+- always subscribe to all-rounds, all-groups, and all-names
+- add 'foreground uuid' field to presence, and only set foreground=false
+  if current app's uuid matched foreground uuid.  this prevents bouncing
+  if user has one tab in foreground and one in background
+  (if foreground=true in update, unilaterally set foreground uuid as well)
+- strip unnecessary fields from presence publication to limit updates
+  (ie, timestamp, foreground uuid, etc)
+- make nick modal universal
+- make navbar universal.  suppress group chat iff we're on group chat page
+- switch to button bar for edit/protect.  clicking on username (always a
+  button) brings up nick modal and allows editing full name, etc.
+- refactor some subscriptions to being done in template create/destroy
+  ie, nick modal should subscribe to Nicks for completion, etc;
+  oplog header should subscribe to recent oplogs,
+  chat header should take care of its own subscription to recent-messages, etc.
+- fix chat presence breakage on main page (maybe related to pub/sub refactor)
