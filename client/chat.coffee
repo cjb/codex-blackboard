@@ -112,7 +112,7 @@ prettyRoomName = ->
   type = Session.get('type')
   id = Session.get('id')
   name = if type is "general" then GENERAL_ROOM else \
-    collection(type)?.findOne(id)?.name
+    Names.findOne(id)?.name
   return (name or "unknown")
 
 joinRoom = (type, id) ->
@@ -172,18 +172,13 @@ $("#joinRoom").live "submit", ->
   else if canonical(roomName) is canonical(GENERAL_ROOM)
     joinRoom "general", "0"
   else
-    # try to find room as a puzzle name
-    p = Puzzles.findOne(canon: canonical(roomName))
-    if p
-      joinRoom "puzzles", p._id
+    # try to find room as a group, round, or puzzle name
+    n = Names.findOne canon: canonical(roomName)
+    if n
+      joinRoom n.type, n._id
     else
-      # try to find room as a round name
-      r = Rounds.findOne(canon: canonical(roomName))
-      if r
-        joinRoom "rounds", r._id
-      else
-        # reset to old room name
-        $("#roomName").val prettyRoomName()
+      # reset to old room name
+      $("#roomName").val prettyRoomName()
   return false
 
 $("#nickPick").live "submit", ->

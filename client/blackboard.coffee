@@ -145,7 +145,7 @@ Template.blackboard_puzzle.status = ->
   return (getTag this.puzzle, "status") or ""
 Template.blackboard_puzzle.whos_working = ->
   return Presence.find
-    room_name: ("puzzle/"+this.puzzle?._id)
+    room_name: ("puzzles/"+this.puzzle?._id)
 
 Template.blackboard_puzzle.pretty_ts = (timestamp, brief) ->
   duration = (Session.get('currentTime')||UTCNow()) - timestamp

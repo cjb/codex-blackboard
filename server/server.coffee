@@ -47,3 +47,31 @@ Meteor.publish 'paged-oplogs', (timestamp) ->
   OpLogs.find {timestamp: $lte: timestamp},
      sort: [['timestamp','desc']]
      limit: OPLOG_PAGE
+
+# synthetic 'all-names' collection which maps ids to type/name/canon
+Meteor.publish 'all-names', ->
+  self = this
+  handles = [ 'roundgroups', 'rounds', 'puzzles' ].map (type) ->
+    collection(type).find({}).observe
+      added: (doc, idx) ->
+        self.set 'names', doc._id,
+          type: type
+          name: doc.name
+          canon: canonical(doc.name)
+        self.flush()
+      removed: (doc,idx) ->
+        self.unset 'names', doc._id, ['_id','type','name','canon']
+        self.flush()
+      changed: (doc,idx,olddoc) ->
+        return unless doc.name isnt olddoc.name
+        self.set 'names', doc._id,
+          name: doc.name
+          canon: canonical(doc.name)
+        self.flush()
+  # observe only returns after initial added callbacks have run.  So now
+  # mark the subscription as ready
+  self.complete()
+  self.flush()
+  # stop observing the various cursors when client unsubs
+  self.onStop ->
+    handles.map (h) -> h.stop()

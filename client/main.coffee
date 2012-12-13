@@ -10,6 +10,9 @@ Handlebars.registerHelper "equal", (a, b) -> a is b
 
 CLIENT_UUID = Meteor.uuid() # this identifies this particular client instance
 
+# subscribe to the all-names feed all the time
+Meteor.subscribe 'all-names'
+
 # Router
 BlackboardRouter = Backbone.Router.extend
   routes:

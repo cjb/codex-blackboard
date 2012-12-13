@@ -82,8 +82,8 @@ x add rXpY numbering
   - add general 'link' helper which takes a type/id and generates the
     proper URL (type='nicks', type='puzzles', type='rounds', etc)
     (use all-names to get link text and type from id?)
-- add 'all-names' subscription which merges names from puzzles/rounds/groups
-  - fix chat room title breakage introduced w/ recent pub/sub refactor.
+x add 'all-names' subscription which merges names from puzzles/rounds/groups
+  x fix chat room title breakage introduced w/ recent pub/sub refactor.
 - always subscribe to all-rounds, all-groups, and all-names
 x add 'foreground uuid' field to presence, and only set foreground=false
   if current app's uuid matched foreground uuid.  this prevents bouncing
@@ -99,4 +99,4 @@ x strip unnecessary fields from presence publication to limit updates
   ie, nick modal should subscribe to Nicks for completion, etc;
   oplog header should subscribe to recent oplogs,
   chat header should take care of its own subscription to recent-messages, etc.
-- fix chat presence breakage on main page (maybe related to pub/sub refactor)
+x fix chat presence breakage on main page (maybe related to pub/sub refactor)

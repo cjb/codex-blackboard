@@ -17,6 +17,15 @@ BBCollection = Object.create(null) # create new object w/o any inherited cruft
 #                 so we can hyperlink to it.
 OpLogs = BBCollection.oplogs = new Meteor.Collection "oplogs"
 
+# Names is a synthetic collection created by the server which indexes
+# the names and ids of RoundGroups, Rounds, and Puzzles:
+#   _id: mongodb id (of a element in RoundGroups, Rounds, or Puzzles)
+#   type: string ("roundgroups", "rounds", "puzzles")
+#   name: string
+#   canon: canonicalized version of name, for searching
+Names = BBCollection.names = \
+  if Meteor.isClient then new Meteor.Collection 'names' else null
+
 # RoundGroups are:
 #   _id: mongodb id
 #   name: string
