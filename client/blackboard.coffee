@@ -1,5 +1,5 @@
 NAVBAR_HEIGHT = 73 # keep in sync with @navbar-height in blackboard.less
-SOUND_THRESHOLD = 30*1000 # 30 seconds
+SOUND_THRESHOLD_MS = 30*1000 # 30 seconds
 
 blackboard = {} # store page global state
 
@@ -13,8 +13,8 @@ Meteor.startup ->
     added: (p, beforeIndex) ->
       # check the solved timestamp -- if it's within the last minute
       # (fudge factor), and the page isn't newly-loaded, play the sound.
-      if p.solved and p.solved > (UTCNow() - SOUND_THRESHOLD)
-        if (UTCNow() - blackboard.initialPageLoad) > SOUND_THRESHOLD
+      if p.solved and p.solved > (UTCNow() - SOUND_THRESHOLD_MS)
+        if (UTCNow() - blackboard.initialPageLoad) > SOUND_THRESHOLD_MS
           blackboard.newAnswerSound.play()
 
 Template.blackboard.lastupdates = ->
