@@ -141,12 +141,6 @@ scrollMessagesView = ->
     $("#messagesInner").scrollTop 10000
   , 200
 
-"""
-UTCNow = ->
-  now = new Date()
-  Date.UTC(now.getFullYear(), now.getMonth(), now.getDate(), now.getHours(), now.getMinutes(), now.getSeconds(), now.getMilliseconds())
-"""
-
 # Event Handlers
 $("button.mute").live "click", ->
   if Session.get "mute"
@@ -250,36 +244,6 @@ unreadMessage = (doc)->
     instachat.unreadMessages += 1
     showUnreadMessagesAlert()
 
-
-"""
-## Router
-InstaChatRouter = Backbone.Router.extend
-
-  routes:
-    "room/:roomName": "changeRoom"
-
-  changeRoom: (roomName) ->
-    $.cookie "room_name", roomName, {expires: 365}
-
-  goToRoom: (roomName) ->
-    this.navigate("/room/"+roomName, true)
-
-Router = new InstaChatRouter()
-Backbone.history.start {pushState: true}
-
-#stubs
-Meteor.methods
-  newMessage: (args)->
-    newMsg = {}
-    newMsg["body"] = args.body
-    newMsg["nick"] = args.nick if args.nick
-    newMsg["system"] = args.system if args.system
-    newMsg["room_name"] = args.room_name
-    newMsg["timestamp"] = UTCNow()
-
-    Messages.insert newMsg
-    return true
-"""
 
 changeNick = (cb=(->)) ->
   $('#nickPickModal').one('hide', cb)

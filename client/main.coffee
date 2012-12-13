@@ -55,22 +55,5 @@ BlackboardRouter = Backbone.Router.extend
     this.navigate("/c/"+type+"/"+id, {trigger:true})
     $.cookie "room_name", type+"/"+id, {expires: 365}
 
-# Subscriptions
-#Meteor.subscribe "roundgroups"
-#Meteor.subscribe "rounds"
-#Meteor.subscribe "puzzles"
-
-#Meteor.autosubscribe ->
-#  round = Session.get 'round'
-#  Meteor.subscribe 'puzzles', round if round
-#  Meteor.subscribe 'rounds'
-#
-#Meteor.autosubscribe ->
-#  Puzzles.find
-#    round: Session.get "round"
-#  .observe
-#    added: (item) ->
-#      console.log(item)
-
 Router = new BlackboardRouter()
 Backbone.history.start {pushState: true}
