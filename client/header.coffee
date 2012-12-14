@@ -27,22 +27,70 @@ Template.header_loginmute.rendered = ->
   setCanEdit (Session.get('canEdit') and Session.get('nick'))
 Template.header_loginmute.events
   "click .canEdit-true": (event, template) ->
+    event.preventDefault()
     setCanEdit true
-    event.preventDefault()
   "click .canEdit-false": (event, template) ->
-    setCanEdit false
     event.preventDefault()
-  "click .logout": (event, template) ->
+    setCanEdit false
+  "click .bb-login": (event, template) ->
+    event.preventDefault()
+    ensureNick()
+  "click .bb-logout": (event, template) ->
+    event.preventDefault()
     setCanEdit false
     Session.set 'nick', null
     $.removeCookie 'nick'
-    event.preventDefault()
 
 setCanEdit = (canEdit) ->
   Session.set 'canEdit', if canEdit then true else null
   $('.bb-buttonbar input:radio[name=editable]').val([
         if canEdit then 'true' else 'false'
   ])
+
+############## nick selection ####################
+Template.header_nickmodal.nickModalVisible = -> Session.get 'nickModalVisible'
+Template.header_nickmodal_contents.currentPage = -> Session.get "currentPage"
+Template.header_nickmodal_contents.nick = -> Session.get "nick" or ''
+Template.header_nickmodal_contents.created = ->
+  this.afterFirstRender = ->
+    $('#nickPickModal').one 'hide', ->
+      Session.set 'nickModalVisible', false
+    $('#nickPickModal').modal keyboard: false, backdrop:"static"
+    $('#nickInput').select()
+  this.sub = Meteor.subscribe 'all-nicks'
+Template.header_nickmodal_contents.rendered = ->
+  this.afterFirstRender?()
+  this.afterFirstRender = null
+Template.header_nickmodal_contents.destroyed = ->
+  this.sub.stop()
+
+$("#nickPick").live "submit", ->
+  $warning = $(this).find ".warning"
+  nick = $("#nickInput").val().replace(/^\s+|\s+$/g,"") #trim
+  $warning.html ""
+  if not nick || nick.length > 20
+    $warning.html("Your nickname must be between 1 and 20 characters long!");
+  else
+    $.cookie "nick", nick, {expires: 365}
+    Session.set "nick", nick
+    $('#nickPickModal').modal 'hide'
+    joinRoom Session.get('type'), Session.get('id')
+
+  hideMessageAlert()
+  return false
+
+changeNick = (cb=(->)) ->
+  $('#nickPickModal').one 'hide', -> cb
+  Session.set 'nickModalVisible',true
+
+ensureNick = (cb=(->)) ->
+  if Session.get 'nick'
+    cb()
+  else if $.cookie('nick')
+    Session.set 'nick', $.cookie('nick')
+    cb()
+  else
+    changeNick cb
 
 
 ############## operation log in header ####################

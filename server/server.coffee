@@ -1,6 +1,7 @@
 Meteor.publish 'all-roundgroups', -> RoundGroups.find()
 Meteor.publish 'all-rounds', -> Rounds.find()
 Meteor.publish 'all-puzzles', -> Puzzles.find()
+Meteor.publish 'all-nicks', -> Nicks.find()
 Meteor.publish 'all-presence', ->
   # strip out unnecessary fields from presence (esp timestamp) to avoid wasted
   # updates to clients

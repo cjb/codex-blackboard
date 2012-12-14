@@ -73,8 +73,6 @@ Template.nickAndRoom.events
     event.preventDefault()
     changeNick()
 
-Template.nickModal.nick   = -> Session.get "nick"
-
 # Utility functions
 
 linkOrLinkedImage = (url) ->
@@ -194,21 +192,6 @@ $("#joinRoom").live "submit", ->
       $("#roomName").val prettyRoomName()
   return false
 
-$("#nickPick").live "submit", ->
-  $warning = $(this).find ".warning"
-  nick = $("#nickInput").val().replace(/^\s+|\s+$/g,"") #trim
-  $warning.html ""
-  if not nick || nick.length > 20
-    $warning.html("Your nickname must be between 1 and 20 characters long!");
-  else
-    $.cookie "nick", nick, {expires: 365}
-    Session.set "nick", nick
-    $('#nickPickModal').modal 'hide'
-    joinRoom Session.get('type'), Session.get('id')
-
-  hideMessageAlert()
-  return false
-
 $("#messageForm").live "submit", (e) ->
   $message = $ "#messageInput"
   message  = $message.val()
@@ -263,20 +246,6 @@ unreadMessage = (doc)->
     instachat.unreadMessages += 1
     showUnreadMessagesAlert()
 
-
-changeNick = (cb=(->)) ->
-  $('#nickPickModal').one('hide', cb)
-  $('#nickPickModal').modal keyboard: false, backdrop:"static"
-  $('#nickInput').select()
-
-ensureNick = (cb=(->)) ->
-  if Session.get 'nick'
-    cb()
-  else if $.cookie('nick')
-    Session.set 'nick', $.cookie('nick')
-    cb()
-  else
-    changeNick cb
 
 Template.chat.created = ->
   this.afterFirstRender = ->
