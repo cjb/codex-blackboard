@@ -163,7 +163,7 @@ scrollMessagesView = ->
 # Event Handlers
 $("button.mute").live "click", ->
   if Session.get "mute"
-    $.cookie "mute", null
+    $.removeCookie "mute"
   else
     $.cookie "mute", true, {expires: 365}
 

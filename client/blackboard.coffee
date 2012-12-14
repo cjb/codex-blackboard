@@ -120,7 +120,7 @@ Template.blackboard.events
   "click .logout": (event, template) ->
     setCanEdit false
     Session.set 'nick', null
-    $.cookie 'nick', null
+    $.removeCookie 'nick'
     event.preventDefault()
 
 Template.blackboard_round.hasPuzzles = -> (this.round?.puzzles?.length > 0)
