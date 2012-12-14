@@ -22,58 +22,7 @@ Meteor.startup ->
           unless Session.get 'mute'
             blackboard.newAnswerSound.play()
 
-Template.blackboard.volumeIcon = ->
-  Template.nickAndRoom.volumeIcon()
-Template.blackboard.sessionNick = -> Session.get 'nick'
 Template.blackboard.canEdit = -> Session.get 'canEdit'
-
-############## operation log in header ####################
-Template.blackboard.lastupdates = ->
-  LIMIT = 10
-  ologs = OpLogs.find {}, \
-        {sort: [["timestamp","desc"]], limit_BUG: LIMIT}
-  # Meteor doesn't support the limit option yet.  So in a hacky workaround,
-  # limit the collection client-side
-  ologs = ologs.fetch().slice(0, LIMIT)
-  # now look through the entries and collect similar logs
-  # this way we can say "New puzzles: X, Y, and Z" instead of just "New Puzzle: Z"
-  return '' unless ologs && ologs.length
-  message = [ ologs[0] ]
-  for ol in ologs[1..]
-    if ol.message is message[0].message and ol.type is message[0].type
-      message.push ol
-    else
-      break
-  type = ''
-  if message[0].id
-    type = ' ' + pretty_collection(message[0].type) + \
-      (if message.length > 1 then 's ' else ' ')
-  return {
-    timestamp: message[0].timestamp
-    message: message[0].message + type
-    nick: message[0].nick
-    objects: ({type:m.type,id:m.id} for m in message)
-  }
-
-Meteor.autosubscribe ->
-  return unless Session.get("currentPage") is "blackboard"
-  Meteor.subscribe 'recent-oplogs'
-
-############## chat log in header ####################
-Template.blackboard.lastchats = ->
-  LIMIT = 2
-  m = Messages.find {room_name: "general/0", system: false}, \
-        {sort: [["timestamp","desc"]], limit_BUG: LIMIT}
-  # Meteor doesn't support the limit option yet.  So in a hacky workaround,
-  # limit the collection client-side
-  m = m.fetch().slice(0, LIMIT)
-  m.reverse()
-  return m
-Template.blackboard.pretty_ts = (ts) -> Template.messages.pretty_ts ts
-
-Meteor.autosubscribe ->
-  return unless Session.get("currentPage") is "blackboard"
-  Meteor.subscribe 'recent-messages', 'general/0'
 
 ############## groups, rounds, and puzzles ####################
 Template.blackboard.roundgroups = -> RoundGroups.find {}, sort: ["created"]
@@ -81,7 +30,7 @@ Template.blackboard.roundgroups = -> RoundGroups.find {}, sort: ["created"]
 Template.blackboard.rounds = ->
   ({
     round_num: 1+index+this.round_start
-    round: Rounds.findOne(id)
+    round: Rounds.findOne(id) or { _id: id, name: Names.findOne(id)?.name }
     rX: "r#{1+index+this.round_start}"
    } for id, index in this.rounds)
 Template.blackboard.rendered = ->
@@ -108,7 +57,7 @@ Template.blackboard_round.puzzles = ->
   ({
     round_num: this.round_num
     puzzle_num: 1 + index
-    puzzle: Puzzles.findOne(id)
+    puzzle: Puzzles.findOne(id) or { _id: id }
     rXpY: "r#{this.round_num}p#{1+index}"
    } for id, index in this.round.puzzles)
 
