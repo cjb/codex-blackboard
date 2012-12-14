@@ -1,5 +1,8 @@
 <template name="round">
   <!-- this the information about a given round -->
+<div id="bb-body"><div class="container-fluid bb-content">
+  {{> header }}
+
 {{#with data}}
 <h1>Round <small>{{round.name}} (r{{round_num}}meta)</small></h1>
 
@@ -12,4 +15,6 @@
 </ul>
 
  {{/with}}
+
+</div></div>
 </template>

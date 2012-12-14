@@ -1,5 +1,8 @@
 <template name="puzzle">
  <!-- this is a puzzle page -->
+<div id="bb-body"><div class="container-fluid bb-content">
+  {{> header }}
+
 {{#with data}}
 <h1>Puzzle <small>{{puzzle.name}} (r{{round_num}}p{{puzzle_num}})</small></h1>
 
@@ -14,4 +17,5 @@
 
 {{/with}}
 
+</div></div>
 </template>

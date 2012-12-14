@@ -1,0 +1,96 @@
+<template name="header">
+
+<div class="navbar navbar-inverse navbar-fixed-top bb-topbar">
+  <div class="navbar-inner">
+    {{> header_loginmute}}
+    {{> header_lastupdates}}
+    {{> header_lastchats}}
+  </div>
+</div>
+
+</template>
+
+<template name="header_loginmute">
+<!-- login/mute buttons -->
+  <div class="bb-buttonbar pull-right">
+   <div>
+    {{#if sessionNick}}
+     <div class="btn-group">
+      <a class="btn btn-small btn-inverse dropdown-toggle"
+         data-toggle="dropdown" href="#">
+       <i class="icon-user icon-white"></i> {{sessionNick}}
+       <span class="caret"></span>
+      </a>
+      <ul class="dropdown-menu pull-right">
+       <li><a class="canEdit-true">
+       <label class="radio inline">
+        <i class="icon-pencil"></i>
+        <input type="radio" name="editable" value="true"/> Allow edits
+       </label>
+       </a></li>
+       <li><a class="canEdit-false">
+       <label class="radio">
+        <i class="icon-lock"></i>
+        <input type="radio" name="editable" value="false"/> Protect page
+       </label>
+       </a></li>
+
+       <li class="divider"></li>
+       <li><a href="#" class="logout"><i class="icon-off"></i> Log out</a></li>
+      </ul>
+     </div>
+    {{else}}
+    <button class="btn btn-small btn-inverse">
+     <i class="icon-user icon-white"></i>
+     Log in to edit
+    </button>
+    {{/if}}
+   </div>
+   <div>
+    <button class="mute btn btn-small btn-inverse">
+     <span class="{{volumeIcon}} icon-white"></span>
+    </button>
+   </div>
+  </div>
+</template>
+
+<template name="header_lastupdates">
+<!-- Last update bar -->
+  <div class="bb-lastupdate">
+    <span class="right pull-right">
+    <a href="#" id="bb-more-updates">more...</a>
+    </span>
+    <span class="left">
+    <strong>Last update:</strong>
+    </span>
+    <span class="center">
+    {{#with lastupdates}}
+    <span class="timestamp">{{pretty_ts timestamp}}</span>
+    {{message}}
+    <span class="comma-list">{{#each objects}}{{link id}}{{/each}}</span>
+    {{#if nick}} (<strong>{{nick}}</strong>){{/if}}
+    {{/with}}
+    </span>
+  </div>
+</template>
+
+<template name="header_lastchats">
+<!-- Last chat bar -->
+  <div class="bb-lastchat">
+    <span class="right pull-right">
+      <a href="/chat/general/0" class="chat-link">more...</a>
+    </span>
+    <span class="left pull-left">
+      <strong>Last chats:</strong>
+    </span>
+    <span class="center">
+    {{#each lastchats}}
+    <p class="messageRow">
+    <span class="timestamp">{{pretty_ts timestamp}}</span>
+    <strong>{{nick}}:</strong>
+    {{body}}
+    </p>
+    {{/each}}
+    </span>
+  </div>
+</template>

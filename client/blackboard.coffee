@@ -101,27 +101,6 @@ Template.blackboard.rendered = ->
   # tooltips
   $('#bb-sidebar .nav > li > a').tooltip placement: 'right'
   $('#bb-tables .bb-puzzle .puzzle-name > a').tooltip placement: 'left'
-  # 'canEdit' radio buttons
-  setCanEdit (Session.get('canEdit') and Session.get('nick'))
-
-setCanEdit = (canEdit) ->
-  Session.set 'canEdit', if canEdit then true else null
-  $('.bb-buttonbar input:radio[name=editable]').val([
-        if canEdit then 'true' else 'false'
-  ])
-
-Template.blackboard.events
-  "click .canEdit-true": (event, template) ->
-    setCanEdit true
-    event.preventDefault()
-  "click .canEdit-false": (event, template) ->
-    setCanEdit false
-    event.preventDefault()
-  "click .logout": (event, template) ->
-    setCanEdit false
-    Session.set 'nick', null
-    $.removeCookie 'nick'
-    event.preventDefault()
 
 Template.blackboard_round.hasPuzzles = -> (this.round?.puzzles?.length > 0)
 # the following is a map() instead of a direct find() to preserve order
