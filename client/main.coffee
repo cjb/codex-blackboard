@@ -17,9 +17,9 @@ Meteor.subscribe 'all-names'
 BlackboardRouter = Backbone.Router.extend
   routes:
     "": "BlackboardPage"
-    "r/:round": "RoundPage"
-    "p/:puzzle": "PuzzlePage"
-    "c/:type/:id": "ChatPage"
+    "rounds/:round": "RoundPage"
+    "puzzles/:puzzle": "PuzzlePage"
+    "chat/:type/:id": "ChatPage"
 
   BlackboardPage: ->
     Session.set "currentPage", "blackboard"
@@ -45,14 +45,19 @@ BlackboardRouter = Backbone.Router.extend
     Session.set "id", id
     Session.set "room_name", (type+'/'+id)
 
+  urlFor: (type,id) ->
+    "/#{type}/#{id}"
+  chatUrlFor: (type, id) ->
+    "/chat" + this.urlFor(type,id)
+
   goToRound: (round) ->
-    this.navigate("/r/"+round._id, {trigger:true})
+    this.navigate(this.urlFor("rounds",round._id), {trigger:true})
 
   goToPuzzle: (puzzle) ->
-    this.navigate("/p/"+puzzle._id, {trigger:true})
+    this.navigate(this.urlFor("puzzles",puzzle._id), {trigger:true})
 
   goToChat: (type, id) ->
-    this.navigate("/c/"+type+"/"+id, {trigger:true})
+    this.navigate(this.chatUrlFor(type, id), {trigger:true})
     $.cookie "room_name", type+"/"+id, {expires: 365}
 
 Router = new BlackboardRouter()

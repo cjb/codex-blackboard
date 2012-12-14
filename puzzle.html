@@ -6,7 +6,8 @@
 {{#with puzzle}}{{> blackboard_tags }}{{/with}}
 
 <ul>
-<li><a href="/c/puzzles/{{puzzle._id}}" class="chat-link">Chat room for this puzzle</a></li>
+<li>Round: {{link id=round._id}}</li>
+<li><a href="/chat/puzzles/{{puzzle._id}}" class="chat-link">Chat room for this puzzle</a></li>
 
 <li><a href="{{puzzle.drive}}">Google drive folder for this puzzle</a></li>
 </ul>

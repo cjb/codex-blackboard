@@ -78,8 +78,8 @@ x Play audio on the local machine when a puzzle is solved or a new puzzle
 x fix round/puzzle ordering bug in blackboard
 - fix smooth scrolling leak
 x add rXpY numbering
-- appropriately link puzzle/round names appearing in the update log.
-  - add general 'link' helper which takes a type/id and generates the
+x appropriately link puzzle/round names appearing in the update log.
+  x add general 'link' helper which takes a type/id and generates the
     proper URL (type='nicks', type='puzzles', type='rounds', etc)
     (use all-names to get link text and type from id?)
 x add 'all-names' subscription which merges names from puzzles/rounds/groups

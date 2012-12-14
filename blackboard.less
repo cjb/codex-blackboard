@@ -3,6 +3,10 @@
   text-overflow: ellipsis;
   white-space: nowrap;
 }
+.comma-list {
+  & > *::after { content: ", "; }
+  & > *:last-child::after { content:""; }
+}
 
 @navbar-height: 73px;
 
@@ -37,7 +41,7 @@
     .timestamp { color: #555; }
   }
   .bb-lastupdate {
-    .object-names { text-transform: uppercase; }
+    .comma-list { text-transform: uppercase; }
   }
 }
 #bb-sidebar {
@@ -110,8 +114,6 @@
     }
 
     .puzzle-working {
-      .nick::after { content: ","; }
-      .nick:last-child::after { content:""; }
       .background { color: #ccc; }
     }
     td.puzzle-update {

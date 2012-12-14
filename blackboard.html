@@ -57,7 +57,8 @@
     <span class="center">
     {{#with lastupdates}}
     <span class="timestamp">{{pretty_ts timestamp}}</span>
-    {{message}}{{type}}<span class="object-names">{{names}}</span>
+    {{message}}
+    <span class="comma-list">{{#each objects}}{{link id}}{{/each}}</span>
     {{#if nick}} (<strong>{{nick}}</strong>){{/if}}
     {{/with}}
     </span>
@@ -65,7 +66,7 @@
 <!-- Last chat bar -->
   <div class="bb-lastchat">
     <span class="right pull-right">
-      <a href="/c/general/0" id="bb-more-chats">more...</a>
+      <a href="/chat/general/0" class="chat-link">more...</a>
     </span>
     <span class="left pull-left">
       <strong>Last chats:</strong>
@@ -117,8 +118,8 @@
 
 <template name="blackboard_round">
   <section id="r{{round._id}}">
-  <h3><a href="/r/{{round._id}}" class="round-link">{{round.name}}</a>
-      <small>(r{{round_num}})</small>
+  <h3>{{link id=round._id title=rX}}
+      <small>({{rX}})</small>
   </h3>
 
   {{#if hasPuzzles}}
@@ -144,15 +145,17 @@
 <template name="blackboard_puzzle">
   <tr><!-- {{id}} -->
     <td class="puzzle-name">
-      <a href="/p/{{puzzle._id}}" title="r{{round_num}}p{{puzzle_num}}" class="puzzle-link">{{puzzle.name}}</a>
+      {{link id=puzzle._id title=rXpY}}
       {{#with puzzle}}{{>blackboard_puzzle_tags}}{{/with}}
     </td>
     <td class="puzzle-answer">{{#if puzzle.answer}}<span class="answer">{{puzzle.answer}}</span>{{/if}}</td>
     <td class="puzzle-status">{{status}}</td>
     <td class="puzzle-working">
+      <span class="comma-list">
       {{#each whos_working}}
         <span class="nick {{#unless foreground}}background{{/unless}}">{{nick}}</span>
       {{/each}}
+      </span>
     </td>
     <td class="puzzle-update">
       {{#if puzzle.solved}}solved {{pretty_ts puzzle.solved}}

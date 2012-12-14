@@ -10,10 +10,6 @@ Template.round.rendered = ->
   id = Session.get('id')
   name = collection(type)?.findOne(id)?.name
   $("title").text("Round: "+name)
-Template.round.events
-  "click .chat-link": (event, template) ->
-    event.preventDefault()
-    Router.goToChat "rounds", Session.get('id')
 
 # presumably we also want to subscribe to the round's chat room
 # and presence information at some point.

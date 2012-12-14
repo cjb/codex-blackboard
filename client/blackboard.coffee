@@ -48,15 +48,11 @@ Template.blackboard.lastupdates = ->
   if message[0].id
     type = ' ' + pretty_collection(message[0].type) + \
       (if message.length > 1 then 's ' else ' ')
-  desc = message.map (ol) ->
-    return '' unless ol.id
-    (collection(ol.type)?.findOne(ol.id)?.name or '')
   return {
     timestamp: message[0].timestamp
-    message: message[0].message
+    message: message[0].message + type
     nick: message[0].nick
-    type: type
-    names: desc.join(',')
+    objects: ({type:m.type,id:m.id} for m in message)
   }
 
 Meteor.autosubscribe ->
@@ -83,8 +79,11 @@ Meteor.autosubscribe ->
 Template.blackboard.roundgroups = -> RoundGroups.find {}, sort: ["created"]
 # the following is a map() instead of a direct find() to preserve order
 Template.blackboard.rounds = ->
-  ({ round_num: 1+index+this.round_start, round: Rounds.findOne(id) }\
-   for id, index in this.rounds)
+  ({
+    round_num: 1+index+this.round_start
+    round: Rounds.findOne(id)
+    rX: "r#{1+index+this.round_start}"
+   } for id, index in this.rounds)
 Template.blackboard.rendered = ->
   #  page title
   $("title").text("Blackboard")
@@ -123,9 +122,6 @@ Template.blackboard.events
     Session.set 'nick', null
     $.cookie 'nick', null
     event.preventDefault()
-  "click #bb-more-chats": (event, template) ->
-    event.preventDefault()
-    Router.goToChat "general", "0"
 
 Template.blackboard_round.hasPuzzles = -> (this.round?.puzzles?.length > 0)
 # the following is a map() instead of a direct find() to preserve order
@@ -134,12 +130,8 @@ Template.blackboard_round.puzzles = ->
     round_num: this.round_num
     puzzle_num: 1 + index
     puzzle: Puzzles.findOne(id)
+    rXpY: "r#{this.round_num}p#{1+index}"
    } for id, index in this.round.puzzles)
-Template.blackboard_round.events
-  "click .round-link": (event, template) ->
-    event.preventDefault()
-    round = template.data.round
-    Router.goToRound round
 
 Template.blackboard_puzzle.status = ->
   return (getTag this.puzzle, "status") or ""
@@ -170,12 +162,6 @@ Template.blackboard_puzzle.pretty_ts = (timestamp, brief) ->
   s += " #{minutes} minute" if minutes > 0
   s += "s" if minutes > 1
   return ago(s)
-
-Template.blackboard_puzzle.events
-  "click .puzzle-link": (event, template) ->
-    event.preventDefault()
-    puzzle = template.data.puzzle
-    Router.goToPuzzle puzzle
 
 # Subscribe to all group, round, and puzzle information
 Meteor.autosubscribe ->

@@ -12,10 +12,6 @@ Template.puzzle.rendered = ->
   id = Session.get('id')
   name = collection(type)?.findOne(id)?.name
   $("title").text("Puzzle: "+name)
-Template.puzzle.events
-  "click .chat-link": (event, template) ->
-    event.preventDefault()
-    Router.goToChat "puzzles", Session.get('id')
 
 # presumably we also want to subscribe to the puzzle's chat room
 # and presence information at some point.
