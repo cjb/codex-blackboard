@@ -58,7 +58,6 @@ BlackboardRouter = Backbone.Router.extend
 
   goToChat: (type, id) ->
     this.navigate(this.chatUrlFor(type, id), {trigger:true})
-    $.cookie "room_name", type+"/"+id, {expires: 365}
 
 Router = new BlackboardRouter()
 Backbone.history.start {pushState: true}
