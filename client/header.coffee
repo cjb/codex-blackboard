@@ -18,10 +18,27 @@ $('a.puzzles-link, a.rounds-link, a.chat-link').live 'click', (event) ->
   event.preventDefault()
   Router.navigate $(this).attr('href'), {trigger:true}
 
+# gravatars
+Handlebars.registerHelper 'gravatar', (args) ->
+  args = if typeof(args) is 'string' then {id:args} else args.hash
+  g = $.gravatar(args.id, args)
+  # hacky cross-platform version of 'outerHTML'
+  html = $('<div>').append( g.eq(0).clone() ).html();
+  return new Handlebars.SafeString(html)
+
 ############## log in/protect/mute panel ####################
 Template.header_loginmute.volumeIcon = ->
   Template.nickAndRoom.volumeIcon()
-Template.header_loginmute.sessionNick = -> Session.get 'nick'
+Template.header_loginmute.sessionNick = ->
+  nick = Session.get 'nick'
+  return nick unless nick
+  n = Nicks.findOne canon: canonical(nick)
+  return {
+    name: n?.name or nick
+    canon: n?.canon or canonical(nick)
+    realname: getTag n, 'Real Name'
+    gravatar: getTag n, 'Gravatar'
+  }
 Template.header_loginmute.rendered = ->
   # 'canEdit' radio buttons
   setCanEdit (Session.get('canEdit') and Session.get('nick'))
@@ -77,6 +94,16 @@ Template.header_nickmodal_contents.created = ->
     gravatar = getTag n, 'Gravatar'
     $('#nickRealname').val(realname or '')
     $('#nickEmail').val(gravatar or '')
+    this.updateGravatar()
+  this.updateGravatar = () =>
+    gravatar = $.gravatar $('#nickEmail').val(),
+      image: 'wavatar' # 'monsterid'
+      classes: 'img-polaroid'
+    container = $(this.find('.gravatar'))
+    if container.find('img').length
+        container.find('img').attr('src', gravatar.attr('src'))
+    else
+        container.append(gravatar)
 Template.header_nickmodal_contents.rendered = ->
   this.afterFirstRender?()
   this.afterFirstRender = null
@@ -93,6 +120,8 @@ Template.header_nickmodal_contents.events
     $('#nickEmail').select() if event.which is 13
   "keydown #nickEmail": (event, template) ->
     $('#nickPick').submit() if event.which is 13
+  "input #nickEmail": (event, template) ->
+    template.updateGravatar()
 
 $("#nickPick").live "submit", ->
   $warningGroup = $(this).find '#nickInputGroup'
@@ -119,7 +148,6 @@ $("#nickPick").live "submit", ->
       tagsetter realname, 'Real Name', ->
         tagsetter gravatar, 'Gravatar'
     $('#nickPickModal').modal 'hide'
-    joinRoom Session.get('type'), Session.get('id')
 
   hideMessageAlert()
   return false
