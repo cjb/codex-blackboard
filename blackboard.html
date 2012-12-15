@@ -20,7 +20,12 @@
   <div id="bb-tables" class="span10">
     <!-- content div -->
     <h1>Codex Puzzle Blackboard</h1>
-
+<div class="btn-group pull-right bb-sort-order">
+  <button class="btn btn-small {{#if sortReverse}}active{{/if}}"
+          data-sortReverse="true">Newest rounds first</button>
+  <button class="btn btn-small {{#unless sortReverse}}active{{/unless}}"
+          data-sortReverse="false">Oldest rounds first</button>
+</div>
     {{#each roundgroups}}
     <section id="group{{_id}}">
     <h2>{{name}}</h2>

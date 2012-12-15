@@ -18,7 +18,7 @@
     (only visible when in 'admin mode')
   - separate "zoomed out" view where puzzles are a big color-coded grid,
     and you can easily see which puzzles are not solved?
-  - option to reverse-sort the rounds so that recently-added stuff appears
+  x option to reverse-sort the rounds so that recently-added stuff appears
     at the top.
   x display rXpY info for each puzzle in a subtle manner (tooltip?)
 . Design puzzle information page

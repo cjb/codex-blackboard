@@ -23,16 +23,21 @@ Meteor.startup ->
             blackboard.newAnswerSound.play()
 
 Template.blackboard.canEdit = -> Session.get 'canEdit'
+Template.blackboard.sortReverse = -> Session.get 'sortReverse'
 
 ############## groups, rounds, and puzzles ####################
-Template.blackboard.roundgroups = -> RoundGroups.find {}, sort: ["created"]
+Template.blackboard.roundgroups = ->
+  dir = if Session.get 'sortReverse' then 'desc' else 'asc'
+  RoundGroups.find {}, sort: [["created", dir]]
 # the following is a map() instead of a direct find() to preserve order
 Template.blackboard.rounds = ->
-  ({
+  r = ({
     round_num: 1+index+this.round_start
     round: Rounds.findOne(id) or { _id: id, name: Names.findOne(id)?.name }
     rX: "r#{1+index+this.round_start}"
    } for id, index in this.rounds)
+   r.reverse() if Session.get 'sortReverse'
+   return r
 Template.blackboard.rendered = ->
   #  page title
   $("title").text("Blackboard")
@@ -50,6 +55,10 @@ Template.blackboard.rendered = ->
   # tooltips
   $('#bb-sidebar .nav > li > a').tooltip placement: 'right'
   $('#bb-tables .bb-puzzle .puzzle-name > a').tooltip placement: 'left'
+Template.blackboard.events
+  "click .bb-sort-order button": (event, template) ->
+     reverse = $(event.target).attr('data-sortReverse') is 'true'
+     Session.set 'sortReverse', reverse
 
 Template.blackboard_round.hasPuzzles = -> (this.round?.puzzles?.length > 0)
 # the following is a map() instead of a direct find() to preserve order
