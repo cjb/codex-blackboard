@@ -26,28 +26,25 @@ BlackboardRouter = Backbone.Router.extend
     "chat/:type/:id": "ChatPage"
 
   BlackboardPage: ->
-    Session.set "currentPage", "blackboard"
-    Session.set "type", "general"
-    Session.set "id", "0"
+    this.Page("blackboard", "general", "0")
 
   RoundPage: (round) ->
-    Session.set "currentPage", "round"
-    Session.set "type", "rounds"
-    Session.set "id", round
+    this.Page("round", "rounds", id)
 
   PuzzlePage: (puzzle) ->
-    Session.set "currentPage", "puzzle"
-    Session.set "type", "puzzles"
-    Session.set "id", puzzle
+    this.Page("puzzle", "puzzles", id)
 
   ChatPage: (type,id) ->
-    type = "puzzles" if type is "p"
-    type = "rounds" if type is "r"
     id = "0" if type is "general"
-    Session.set "currentPage", "chat"
+    this.Page("chat", type, id)
+    Session.set "room_name", (type+'/'+id)
+
+  Page: (page, type, id) ->
+    Session.set "currentPage", page
     Session.set "type", type
     Session.set "id", id
-    Session.set "room_name", (type+'/'+id)
+    # cancel modal if it was active
+    $('#nickPickModal').modal 'hide'
 
   urlFor: (type,id) ->
     "/#{type}/#{id}"
