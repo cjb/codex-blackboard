@@ -52,27 +52,72 @@ Template.header_nickmodal.nickModalVisible = -> Session.get 'nickModalVisible'
 Template.header_nickmodal_contents.currentPage = -> Session.get "currentPage"
 Template.header_nickmodal_contents.nick = -> Session.get "nick" or ''
 Template.header_nickmodal_contents.created = ->
-  this.afterFirstRender = ->
+  this.sub = Meteor.subscribe 'all-nicks'
+  this.afterFirstRender = =>
     $('#nickPickModal').one 'hide', ->
       Session.set 'nickModalVisible', false
     $('#nickPickModal').modal keyboard: false, backdrop:"static"
     $('#nickInput').select()
-  this.sub = Meteor.subscribe 'all-nicks'
+    firstNick = Session.get 'nick' or ''
+    $('#nickInput').val firstNick
+    this.update firstNick, force:true
+    $('#nickInput').typeahead
+      source: this.typeaheadSource
+      updater: (item) =>
+        this.update(item)
+        return item
+  this.typeaheadSource = (query,process) =>
+    this.update(query)
+    (n.name for n in Nicks.find({}).fetch())
+  this.update = (query, options) =>
+    # can we find an existing nick matching this?
+    n = if query then Nicks.findOne canon: canonical(query) else null
+    return unless (n or options?.force)
+    realname = getTag n, 'Real Name'
+    gravatar = getTag n, 'Gravatar'
+    $('#nickRealname').val(realname or '')
+    $('#nickEmail').val(gravatar or '')
 Template.header_nickmodal_contents.rendered = ->
   this.afterFirstRender?()
   this.afterFirstRender = null
 Template.header_nickmodal_contents.destroyed = ->
   this.sub.stop()
+Template.header_nickmodal_contents.events
+  "click .bb-submit": (event, template) ->
+    $('#nickPick').submit()
+  "keydown #nickInput": (event, template) ->
+    # implicit submit on <enter> if typeahead isn't shown
+    if event.which is 13 and not $('#nickInput').data('typeahead').shown
+      $('#nickPick').submit()
+  "keydown #nickRealname": (event, template) ->
+    $('#nickEmail').select() if event.which is 13
+  "keydown #nickEmail": (event, template) ->
+    $('#nickPick').submit() if event.which is 13
 
 $("#nickPick").live "submit", ->
-  $warning = $(this).find ".warning"
+  $warningGroup = $(this).find '#nickInputGroup'
+  $warning = $(this).find "#nickInputGroup .help-inline"
   nick = $("#nickInput").val().replace(/^\s+|\s+$/g,"") #trim
   $warning.html ""
+  $warningGroup.removeClass('error')
   if not nick || nick.length > 20
-    $warning.html("Your nickname must be between 1 and 20 characters long!");
+    $warning.html("Nickname must be between 1 and 20 characters long!");
+    $warningGroup.addClass('error')
   else
     $.cookie "nick", nick, {expires: 365}
     Session.set "nick", nick
+    realname = $('#nickRealname').val()
+    gravatar = $('#nickEmail').val()
+    Meteor.call 'newNick', {name: nick}, (error,n) ->
+      tagsetter = (value, tagname, cb=(->)) ->
+        value = value.replace(/^\s+|\s+$/g,"") # strip
+        if getTag(n, tagname) is value
+          cb()
+        else
+          Meteor.call 'setTag', 'nicks', n._id, tagname, value, n.canon, ->
+            cb()
+      tagsetter realname, 'Real Name', ->
+        tagsetter gravatar, 'Gravatar'
     $('#nickPickModal').modal 'hide'
     joinRoom Session.get('type'), Session.get('id')
 

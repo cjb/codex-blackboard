@@ -185,7 +185,7 @@ canonical = (s) ->
       id:id
       nick: canonical(who)
 
-  newObject = (type, args, extra, suppressLog=false) ->
+  newObject = (type, args, extra, options={}) ->
     throw new Meteor.Error(400, "missing name") unless args.name
     throw new Meteor.Error(400, "missing who") unless args.who
     now = UTCNow()
@@ -199,12 +199,18 @@ canonical = (s) ->
       tags: canonicalTags(args.tags or [])
     for own key,value of (extra or Object.create(null))
        object[key] = value
-    object._id = collection(type).insert object
-    unless suppressLog
+    try
+      object._id = collection(type).insert object
+    catch error
+      if Meteor.isServer and error?.name is 'MongoError' and error?.code==11000
+        # duplicate key, fetch the real thing
+        return collection(type).findOne({canon:canonical(args.name)})
+      throw error # something went wrong, who knows what, pass it on
+    unless options.suppressLog
       oplog "Added", type, object._id, args.who
     return object
 
-  renameObject = (type, args, suppressLog=false) ->
+  renameObject = (type, args, options={}) ->
     throw new Meteor.Error(400, "missing id") unless args.id
     throw new Meteor.Error(400, "missing name") unless args.name
     throw new Meteor.Error(400, "missing who") unless args.who
@@ -214,16 +220,16 @@ canonical = (s) ->
       canon: canonical(args.name)
       touched: now
       touched_by: canonical(args.who)
-    unless suppressLog
+    unless options.suppressLog
       oplog "Renamed", type, args.id, args.who
     return true
 
-  deleteObject = (type, args, suppressLog=false) ->
+  deleteObject = (type, args, options={}) ->
     throw new Meteor.Error(400, "missing id") unless args.id
     throw new Meteor.Error(400, "missing who") unless args.who
     name = collection(type)?.findOne(args.id)?.name
     return false unless name
-    unless suppressLog
+    unless options.suppressLog
       oplog "Deleted "+pretty_collection(type)+" "+name, \
           type, null, args.who
     collection(type).remove(args.id)
@@ -275,11 +281,11 @@ canonical = (s) ->
         name: args.name
         who: args.name
         tags: args.tags
-      , {}, "suppressLog"
+      , {}, {suppressLog:true}
     renameNick: (args) ->
-      renameObject "nicks", args, "suppressLog"
+      renameObject "nicks", args, {suppressLog:true}
     deleteNick: (args) ->
-       deleteObject "nicks", args, "suppressLog"
+       deleteObject "nicks", args, {suppressLog:true}
 
     newMessage: (args)->
       newMsg =
@@ -334,6 +340,20 @@ canonical = (s) ->
     get: (type, id) ->
       throw new Meteor.Error(400, "missing id") unless args.id
       return collection(type).findOne(id)
+
+    setField: (type, object, fields, who) ->
+      id = object._id or object
+      throw new Meteor.Error(400, "missing id") unless id
+      throw new Meteor.Error(400, "missing who") unless args.who
+      throw new Meteor.Error(400, "bad fields") unless typeof(fields)=='object'
+      now = UTCNow()
+      # bad modifications to the following fields
+      for f in ['name','canon','created','created_by','tags']
+        delete fields[f]
+      fields.touched = now
+      fields.touched_by = canonical(who)
+      collection(type).update id, $set: fields
+      return true
 
     setTag: (type, object, name, value, who) ->
       id = object._id or object

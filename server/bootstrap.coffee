@@ -381,6 +381,18 @@ SAMPLE_CHATS = [
   nick: "cscott"
   body: "This is a very very long line which should hopefully wrap and that will show that we're doing all this correctly. Let's keep going here. More and more stuff! Wow."
 ]
+SAMPLE_NICKS = [
+  name: "cscott"
+  tags: [
+    { name: "Real Name", value: "C. Scott" }
+    { name: "Gravatar", value: "user@host.org" }
+  ]
+,
+  name: "zachary"
+  tags: [
+    { name: "Gravatar", value: "z@x.org" }
+  ]
+]
 
 Meteor.startup ->
   if RoundGroups.find().count() is 0
@@ -416,3 +428,7 @@ Meteor.startup ->
     for chat in SAMPLE_CHATS
       chat.room_name = "general/0"
       Meteor.call "newMessage", chat
+    # add some user ids
+    for nick in SAMPLE_NICKS
+      Meteor.call "newNick", nick, (error, n) ->
+        throw error if error

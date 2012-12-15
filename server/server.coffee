@@ -24,6 +24,8 @@ Meteor.publish 'round-by-id', (id) -> Rounds.find _id: id
 Meteor.publish 'round-for-puzzle', (id) -> Rounds.find puzzles: id
 Meteor.publish 'roundgroup-for-round', (id) -> RoundGroups.find rounds: id
 
+Meteor.publish 'my-nick', (nick) -> Nicks.find canon: canonical(nick)
+
 MESSAGE_PAGE = 150 # a page is 150 messages
 # only publish last page of messages
 Meteor.publish 'recent-messages', (room_name) ->

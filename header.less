@@ -1,0 +1,16 @@
+form#nickPick {
+  @label-spacing: 130px;
+  &.form-horizontal {
+    .control-label {
+      width: @label-spacing - 20px;
+    }
+    .controls {
+      margin-left: @label-spacing;
+    }
+    .form-actions {
+      padding-left: @label-spacing;
+    }
+  }
+}
+/* ensure typeahead is shown over modals */
+ul.typeahead { z-index: 1099; }

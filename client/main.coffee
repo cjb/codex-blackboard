@@ -12,6 +12,10 @@ CLIENT_UUID = Meteor.uuid() # this identifies this particular client instance
 
 # subscribe to the all-names feed all the time
 Meteor.subscribe 'all-names'
+# always subscribe to your own nick
+Meteor.autosubscribe ->
+  return unless Session.get('nick')
+  Meteor.subscribe 'my-nick', Session.get('nick')
 
 # Router
 BlackboardRouter = Backbone.Router.extend

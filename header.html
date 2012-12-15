@@ -111,13 +111,43 @@
       <h3>Pick a Nick Name</h3>
     </div>
     <div class="modal-body">
-      <form id="nickPick">
-        <div class="warning"></div>
-        <p><input type="text" id="nickInput" class="span5" value="{{nick}}">
-        </p>
+      <form id="nickPick" class="form-horizontal">
+        <div class="control-group" id="nickInputGroup">
+          <label class="control-label" for="nickInput">Nick</label>
+          <div class="controls">
+            <div class="input-prepend">
+              <span class="add-on">@</span>
+              <input type="text" id="nickInput" autocomplete="nickname"
+                     inputmode="verbatim"
+                     placeholder="nick" autofocus />
+            </div>
+            <span class="help-inline"></span>
+          </div>
+        </div>
+        <div class="control-group">
+          <label class="control-label" for="nickRealname">Real Name</label>
+          <div class="controls">
+            <input type="text" id="nickRealname" autocomplete="name"
+                   inputmode="latin-name"
+                   placeholder="J. Random Codexian" />
+            <span class="help-inline">(optional)</span>
+          </div>
+        </div>
+        <div class="control-group">
+          <label class="control-label" for="nickEmail">Email</label>
+          <div class="controls">
+            <input type="email" id="nickEmail" autocomplete="email"
+                   placeholder="user@host.org" />
+            <span class="help-inline">(optional)</span>
+            <span class="help-block">Only used to look up
+            <a href="http://gravatar.com">Gravatar</a></span>
+          </div>
+        </div>
       </form>
     </div>
     <div class="modal-footer">
-      <input type="submit" class="btn btn-primary" value="Start Chatting">
+      <button type="button" class="btn btn-primary bb-submit">
+      Start Chatting
+      </button>
     </div>
 </template>
