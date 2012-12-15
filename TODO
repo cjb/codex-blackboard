@@ -100,3 +100,16 @@ x refactor some subscriptions to being done in template create/destroy
   oplog header should subscribe to recent oplogs,
   chat header should take care of its own subscription to recent-messages, etc.
 x fix chat presence breakage on main page (maybe related to pub/sub refactor)
+
+- newline support in chat
+  - shift-return or paste in the new message box should turn it into a
+    text box
+  - when displaying messages, replace \n with <br>
+- private messages?
+  - 'pm' field in messages collection; only people whose nicks match
+    the pm field get those messages
+  - codexbot's help should be a pm
+  - /msg support?
+- completion of nicks in the message compose box
+- mouseover images should also scroll up if necessary
+- DDP unset support (if unset leaves an empty object, remove the object)
