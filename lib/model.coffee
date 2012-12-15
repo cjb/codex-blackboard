@@ -341,14 +341,21 @@ canonical = (s) ->
       throw new Meteor.Error(400, "missing id") unless args.id
       return collection(type).findOne(id)
 
+    getByName: (name, optional_type=null) ->
+      for type in ['roundgroups','rounds','puzzles','nicks']
+        continue if optional_type and optional_type isnt type
+        o = collection(type).findOne canon: canonical(name)
+        return {type:type,object:o} if o
+      return null # no match found
+
     setField: (type, object, fields, who) ->
       id = object._id or object
       throw new Meteor.Error(400, "missing id") unless id
       throw new Meteor.Error(400, "missing who") unless args.who
       throw new Meteor.Error(400, "bad fields") unless typeof(fields)=='object'
       now = UTCNow()
-      # bad modifications to the following fields
-      for f in ['name','canon','created','created_by','tags']
+      # disallow modifications to the following fields; use other APIs for these
+      for f in ['name','canon','created','created_by','tags','rounds','puzzles']
         delete fields[f]
       fields.touched = now
       fields.touched_by = canonical(who)
