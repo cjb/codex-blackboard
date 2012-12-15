@@ -133,7 +133,7 @@ $("#nickPick").live "submit", ->
     $warning.html("Nickname must be between 1 and 20 characters long!");
     $warningGroup.addClass('error')
   else
-    $.cookie "nick", nick, {expires: 365}
+    $.cookie "nick", nick, {expires: 365, path: '/'}
     Session.set "nick", nick
     realname = $('#nickRealname').val()
     gravatar = $('#nickEmail').val()

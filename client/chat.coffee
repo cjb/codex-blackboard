@@ -163,7 +163,7 @@ $("button.mute").live "click", ->
   if Session.get "mute"
     $.removeCookie "mute"
   else
-    $.cookie "mute", true, {expires: 365}
+    $.cookie "mute", true, {expires: 365, path: '/'}
 
   Session.set "mute", $.cookie "mute"
 
