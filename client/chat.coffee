@@ -76,7 +76,7 @@ Template.nickAndRoom.events
 # Utility functions
 
 linkOrLinkedImage = (url) ->
-  if url.match(/.(png|jpg|jpeg|gif)$/)
+  if url.match(/.(png|jpg|jpeg|gif)$/i)
     "<a href=\"" + url + "\"><img src=\"" + url + "\" class=\"inline-image\"></a>"
   else
     "<a href=\"" + url + "\">" + url + "</a>"
