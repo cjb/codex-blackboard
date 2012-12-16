@@ -6,6 +6,7 @@
 
 <!-- puzzles w/ index -->
 <div class="row-fluid">
+  {{#isolate}}
   <div id="bb-sidebar" class="span2">
     <ul class="nav nav-list bb-sidenav span2">
       {{#each roundgroups}}
@@ -17,6 +18,7 @@
       {{/each}}
     </ul>
   </div>
+  {{/isolate}}
   <div id="bb-tables" class="span10">
     <!-- content div -->
     <h1>Codex Puzzle Blackboard</h1>
@@ -83,9 +85,11 @@
       </span>
     </td>
     <td class="puzzle-update">
+      {{#isolate}}
       {{#if puzzle.solved}}solved {{pretty_ts puzzle.solved}}
       {{else}}added {{pretty_ts puzzle.created}}
       {{/if}}
+      {{/isolate}}
     </td>
   </tr>
 </template>
