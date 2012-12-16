@@ -39,30 +39,25 @@ Template.header_loginmute.sessionNick = ->
     realname: getTag n, 'Real Name'
     gravatar: getTag n, 'Gravatar'
   }
+Template.header_loginmute.canEdit = ->
+  (Session.get 'nick') and (Session.get 'canEdit')
 Template.header_loginmute.rendered = ->
-  # 'canEdit' radio buttons
-  setCanEdit (Session.get('canEdit') and Session.get('nick'))
+  # tool tips
+  $(this.findAll('.bb-buttonbar *[title]')).tooltip placement: 'bottom'
+# preserve buttons with tooltips, so they don't leak
+Template.header_loginmute.preserve
+  '.bb-buttonbar *[title]': (node) -> node.title
 Template.header_loginmute.events
-  "click .canEdit-true": (event, template) ->
-    event.preventDefault()
-    setCanEdit true
-  "click .canEdit-false": (event, template) ->
-    event.preventDefault()
-    setCanEdit false
   "click .bb-login": (event, template) ->
     event.preventDefault()
     ensureNick()
   "click .bb-logout": (event, template) ->
     event.preventDefault()
-    setCanEdit false
     Session.set 'nick', null
     $.removeCookie 'nick', {path:'/'}
-
-setCanEdit = (canEdit) ->
-  Session.set 'canEdit', if canEdit then true else null
-  $('.bb-buttonbar input:radio[name=editable]').val([
-        if canEdit then 'true' else 'false'
-  ])
+  "click .bb-protect, click .bb-unprotect": (event, template) ->
+    canEdit = $(event.currentTarget).attr('data-canEdit') is 'true'
+    Session.set 'canEdit', canEdit
 
 ############## nick selection ####################
 Template.header_nickmodal.nickModalVisible = -> Session.get 'nickModalVisible'

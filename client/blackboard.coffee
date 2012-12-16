@@ -57,7 +57,7 @@ Template.blackboard.rendered = ->
   $('#bb-tables .bb-puzzle .puzzle-name > a').tooltip placement: 'left'
 Template.blackboard.events
   "click .bb-sort-order button": (event, template) ->
-     reverse = $(event.target).attr('data-sortReverse') is 'true'
+     reverse = $(event.currentTarget).attr('data-sortReverse') is 'true'
      Session.set 'sortReverse', reverse
 
 Template.blackboard_round.hasPuzzles = -> (this.round?.puzzles?.length > 0)
