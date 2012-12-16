@@ -66,6 +66,7 @@ setCanEdit = (canEdit) ->
 
 ############## nick selection ####################
 Template.header_nickmodal.nickModalVisible = -> Session.get 'nickModalVisible'
+Template.header_nickmodal.preserve ['#nickPickModal']
 Template.header_nickmodal_contents.currentPage = -> Session.get "currentPage"
 Template.header_nickmodal_contents.nick = -> Session.get "nick" or ''
 Template.header_nickmodal_contents.created = ->
@@ -153,7 +154,7 @@ $("#nickPick").live "submit", ->
   return false
 
 changeNick = (cb=(->)) ->
-  $('#nickPickModal').one 'hide', -> cb
+  $('#nickPickModal').one 'hide', -> cb()
   Session.set 'nickModalVisible',true
 
 ensureNick = (cb=(->)) ->
