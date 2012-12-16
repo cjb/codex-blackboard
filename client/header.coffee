@@ -56,7 +56,7 @@ Template.header_loginmute.events
     event.preventDefault()
     setCanEdit false
     Session.set 'nick', null
-    $.removeCookie 'nick'
+    $.removeCookie 'nick', {path:'/'}
 
 setCanEdit = (canEdit) ->
   Session.set 'canEdit', if canEdit then true else null
