@@ -32,7 +32,7 @@ BlackboardRouter = Backbone.Router.extend
     this.Page("round", "rounds", id)
 
   PuzzlePage: (puzzle) ->
-    this.Page("puzzle", "puzzles", id)
+    this.Page("puzzle", "puzzles", puzzle)
 
   ChatPage: (type,id) ->
     id = "0" if type is "general"
