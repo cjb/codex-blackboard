@@ -45,7 +45,7 @@ Template.messages.body = ->
   body = this.body
   body = Handlebars._escape(body)
   body = convertURLsToLinksAndImages(body)
-  body = highlightNick(body)
+  body = highlightNick(body) unless this.system
   if (body.slice(0,4) == "/me ")
     new Handlebars.SafeString(body.slice(4))
   else
@@ -239,7 +239,7 @@ hideMessageAlert = ->
   $("title").text("Chat: "+prettyRoomName())
 
 unreadMessage = (doc)->
-  unless doc["nick"] == Session.get("nick") || Session.get "mute"
+  unless doc["nick"] == Session.get("nick") || doc.system || Session.get "mute"
     instachat.unreadMessageSound.play()
 
   if instachat.alertWhenUnreadMessages
