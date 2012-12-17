@@ -146,7 +146,7 @@ scrollMessagesView = ->
   # scrollMessagesView is called inside a reactive context.  See the
   # comment in showUnreadMessagesAlert.
   window.setTimeout ->
-    $("body").scrollTop 10000
+    $("body").scrollTo 'max'
   , 200
 
 # Event Handlers

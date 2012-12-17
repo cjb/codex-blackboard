@@ -38,11 +38,16 @@ Template.blackboard.rounds = ->
    } for id, index in this.rounds)
    r.reverse() if Session.get 'sortReverse'
    return r
+Template.blackboard.preserve ['#bb-sidebar']
+Template.blackboard.created = ->
+  this.afterFirstRender = ->
+    $("#bb-sidebar").localScroll({ duration: 400, lazy: true })
+    $("body").scrollspy(target: "#bb-sidebar", offset: (NAVBAR_HEIGHT + 10))
 Template.blackboard.rendered = ->
+  this.afterFirstRender?()
+  this.afterFirstRender = null
   #  page title
   $("title").text("Blackboard")
-  $("#bb-sidebar").localScroll({ duration: 400 })
-  $("body").scrollspy(target: "#bb-sidebar", offset: (NAVBAR_HEIGHT + 10))
   # update bootstrap "scroll spy" component when rounds list changes
   ss = $("body").data("scrollspy")
   ss.refresh()
