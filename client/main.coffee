@@ -28,11 +28,11 @@ BlackboardRouter = Backbone.Router.extend
   BlackboardPage: ->
     this.Page("blackboard", "general", "0")
 
-  RoundPage: (round) ->
+  RoundPage: (id) ->
     this.Page("round", "rounds", id)
 
-  PuzzlePage: (puzzle) ->
-    this.Page("puzzle", "puzzles", puzzle)
+  PuzzlePage: (id) ->
+    this.Page("puzzle", "puzzles", id)
 
   ChatPage: (type,id) ->
     id = "0" if type is "general"
