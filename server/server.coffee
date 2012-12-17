@@ -9,6 +9,11 @@ Meteor.publish 'all-presence', ->
     timestamp: 0
     foreground_uuid: 0
     present: 0
+Meteor.publish 'presence-for-room', (room_name) ->
+  Presence.find {present: true, room_name: room_name}, fields:
+    timestamp: 0
+    foreground_uuid: 0
+    present: 0
 
 # this is for the "that was easy" sound effect
 # everyone is subscribed to this all the time

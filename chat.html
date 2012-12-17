@@ -11,6 +11,23 @@
 
 </template>
 
+<template name="chat_header">
+  <form id="joinRoom" class="form-search pull-left">
+    <div class="input-prepend">
+      <span class='add-on'>Room name:</span>
+      <input id="roomName" type="text" class="search-query"
+             value="{{room_name}}" />
+    </div>
+  </form>
+  <div class="navbar-text bb-chat-presence">
+    <span class="label label-inverse">
+    Currently in room:
+    </span>
+    <span class="comma-list">
+      {{#each whos_here}}{{> nick_presence }}{{/each}}
+    </span>
+  </div>
+</template>
 
 <template name="messages-input">
       <form id="messageForm" class="navbar-form">

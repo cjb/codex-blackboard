@@ -67,7 +67,6 @@ Template.header_loginmute.events
 
 ############## breadcrumbs / navigation #############
 Template.header_breadcrumbs.currentPage = -> Session.get 'currentPage'
-Template.header_breadcrumbs.room_name = -> prettyRoomName()
 
 ############## nick selection ####################
 Template.header_nickmodal.nickModalVisible = -> Session.get 'nickModalVisible'

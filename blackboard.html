@@ -63,6 +63,10 @@
   </section>
 </template>
 
+<template name="nick_presence">
+<span class="nick {{#unless foreground}}background{{/unless}}">{{nick}}</span>
+</template>
+
 <template name="blackboard_puzzle">
   <tr><!-- {{id}} -->
     <td class="puzzle-name">
@@ -73,9 +77,7 @@
     <td class="puzzle-status">{{status}}</td>
     <td class="puzzle-working">
       <span class="comma-list">
-      {{#each whos_working}}
-        <span class="nick {{#unless foreground}}background{{/unless}}">{{nick}}</span>
-      {{/each}}
+      {{#each whos_working}}{{> nick_presence }}{{/each}}
       </span>
     </td>
     <td class="puzzle-update">

@@ -27,15 +27,9 @@
     {{/if}}
   </a></li>
 </ul>
-{{#if equal currentPage "chat"}}
-  <form id="joinRoom" class="form-search">
-    <div class="input-prepend">
-      <span class='add-on'>Room name:</span>
-      <input id="roomName" type="text" class="search-query"
-             value="{{room_name}}" />
-    </div>
-  </form>
-{{/if}}
+  {{#if equal currentPage "chat"}}
+    {{> chat_header }}
+  {{/if}}
 {{/unless}}
 </template>
 

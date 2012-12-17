@@ -18,6 +18,7 @@ Meteor.autosubscribe ->
   return unless Session.get("currentPage") is "chat"
   room_name = Session.get 'room_name'
   Meteor.subscribe 'recent-messages', room_name if room_name
+  Meteor.subscribe 'presence-for-room', room_name if room_name
 
 Meteor.autosubscribe ->
   return unless Session.get("currentPage") is "chat"
@@ -58,6 +59,10 @@ Template.messages.nick = ->
   else
     nick + ":"
 
+Template.chat_header.room_name = -> prettyRoomName()
+Template.chat_header.whos_here = ->
+  roomName = Session.get('type') + '/' + Session.get('id')
+  return Presence.find room_name: roomName
 
 # Utility functions
 
