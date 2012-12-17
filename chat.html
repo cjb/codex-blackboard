@@ -1,64 +1,35 @@
-
 <template name="chat">
-<div id="chat-background"></div>
 
-  <div id="chat-header">
-    <div class="container" id="headerInner">
-      <h2 id="logo" class="pull-left brand">
-        Insta<strong>Chat</strong>
-      </h2>
 
-      {{> nickAndRoom}}
+  {{> messages}}
+
+  <div class="navbar navbar-inverse navbar-fixed-bottom bb-chat-footer">
+    <div class="navbar-inner">
+      {{> messages-input}}
     </div>
   </div>
 
-  <div id="chat-content">
-    {{> messages}}
-  </div>
-
-  <div id="chat-footer">
-    {{> messages-input}}
-  </div>
-
-</template>
-
-
-<template name="nickAndRoom">
-  <div id="nickAndRoom" class="pull-right">
-    <a href="#" class="change-nick-link"><strong>{{nick}}</strong></a>
-    is in the room:
-    <form id="joinRoom" class="form-search">
-      <input id="roomName" type="text" class="search-query" value="{{room}}">
-    </form>
-    <button class="mute btn btn-small btn-inverse">
-	<span class="{{volumeIcon}} icon-white"></span>
-    </button>
-  </div>
 </template>
 
 
 <template name="messages-input">
-  <div id="chatInput">
-    <div class="container" id="messageInputInner">
-      <form id="messageForm">
-        <input id="messageInput" placeholder="Type your mesage and press enter..."  autocomplete="off" >
+      <form id="messageForm" class="navbar-form">
+        <input id="messageInput" class="input-block-level"
+               placeholder="Type your mesage and press enter..."
+               autocomplete="off" >
       </form>
-    </div>
-  </div>
 </template>
 
 
 <template name="messages">
-  <div id="messages">
-    <div class="container" id="messagesInner">
+  <div id="messages" class="row-fluid bb-chat-messages">
         {{#each messages}}
           {{#if system}}
-            <p class="systemRow">⊕ {{pretty_ts timestamp}} {{body}}</p>
+            <p class="systemRow">&raquo; {{pretty_ts timestamp}} {{body}}</p>
           {{else}}
             <p class="{{#if action}}actionRow{{else}}messageRow{{/if}}"><span class="timestamp">{{pretty_ts timestamp}}</span>
             <strong>{{nick}}</strong>{{body}}</p>
           {{/if}}
         {{/each}}
-    </div>
   </div>
 </template>

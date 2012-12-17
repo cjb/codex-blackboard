@@ -3,13 +3,21 @@
 </head>
 
 <body>
- {{> page }}
+  <div id="bb-body">
+    <div id="bb-content" class="container-fluid">
+      {{> page }}
+    </div>
+  </div>
+  {{> header_nickmodal}}
 </body>
 
 <template name="page">
 <!-- DEBUGGING: currentPage: "{{currentPage}}" -->
 
-<!-- add common header here -->
+<!-- common header -->
+  {{> header }}
+
+<!-- page contents -->
   {{#if equal currentPage "blackboard"}}
     {{> blackboard }}
   {{/if}}
@@ -22,8 +30,6 @@
   {{#if equal currentPage "chat"}}
     {{> chat }}
   {{/if}}
-
-  {{> header_nickmodal}}
 
 <!-- add footer here? -->
 </template>

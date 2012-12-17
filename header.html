@@ -5,9 +5,38 @@
     {{> header_loginmute}}
     {{> header_lastupdates}}
     {{> header_lastchats}}
+    {{> header_breadcrumbs}}
   </div>
 </div>
 
+</template>
+
+<template name="header_breadcrumbs">
+{{#unless equal currentPage "blackboard"}}
+<ul class="nav">
+  <li><a href="/" class="home-link"><i class="icon-chevron-left icon-white"></i><i class="icon-home icon-white"></i> Blackboard</a></li>
+  <li class="active"><a>
+    {{#if equal currentPage "chat"}}
+<i class="icon-comment icon-white"></i> Chat room
+    {{/if}}
+    {{#if equal currentPage "puzzle"}}
+<i class="icon-book icon-white"></i> Puzzle  page
+    {{/if}}
+    {{#if equal currentPage "round"}}
+<i class="icon-folder-open icon-white"></i> Round  page
+    {{/if}}
+  </a></li>
+</ul>
+{{#if equal currentPage "chat"}}
+  <form id="joinRoom" class="form-search">
+    <div class="input-prepend">
+      <span class='add-on'>Room name:</span>
+      <input id="roomName" type="text" class="search-query"
+             value="{{room_name}}" />
+    </div>
+  </form>
+{{/if}}
+{{/unless}}
 </template>
 
 <template name="header_loginmute">
@@ -38,6 +67,7 @@
     {{/if}}
    </div>
    <div class="btn-toolbar">
+{{#if equal currentPage "blackboard"}}
     <div class="btn-group">
      <button title="Protect page" data-canEdit="false"
              class="bb-protect btn btn-small btn-inverse {{#unless canEdit}}active{{/unless}}">
@@ -48,6 +78,7 @@
       <i class="icon-pencil icon-white"></i>
      </button>
     </div>
+{{/if}}
     <div class="btn-group">
      <button title="Mute" class="mute btn btn-small btn-inverse">
       <span class="{{volumeIcon}} icon-white"></span>

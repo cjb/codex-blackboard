@@ -13,7 +13,7 @@ Handlebars.registerHelper 'link', (args) ->
   link += '</a>'
   return new Handlebars.SafeString(link)
 
-$('a.puzzles-link, a.rounds-link, a.chat-link').live 'click', (event) ->
+$('a.puzzles-link, a.rounds-link, a.chat-link, a.home-link').live 'click', (event) ->
   return unless event.button is 0 # check right-click
   event.preventDefault()
   Router.navigate $(this).attr('href'), {trigger:true}
@@ -27,8 +27,12 @@ Handlebars.registerHelper 'gravatar', (args) ->
   return new Handlebars.SafeString(html)
 
 ############## log in/protect/mute panel ####################
+Template.header_loginmute.currentPage = -> Session.get 'currentPage'
 Template.header_loginmute.volumeIcon = ->
-  Template.nickAndRoom.volumeIcon()
+  if Session.get "mute"
+    "icon-volume-off"
+  else
+    "icon-volume-up"
 Template.header_loginmute.sessionNick = ->
   nick = Session.get 'nick'
   return nick unless nick
@@ -55,9 +59,15 @@ Template.header_loginmute.events
     event.preventDefault()
     Session.set 'nick', null
     $.removeCookie 'nick', {path:'/'}
+    if Session.get('currentPage') is 'chat'
+      ensureNick() # login again immediately
   "click .bb-protect, click .bb-unprotect": (event, template) ->
     canEdit = $(event.currentTarget).attr('data-canEdit') is 'true'
     Session.set 'canEdit', canEdit
+
+############## breadcrumbs / navigation #############
+Template.header_breadcrumbs.currentPage = -> Session.get 'currentPage'
+Template.header_breadcrumbs.room_name = -> prettyRoomName()
 
 ############## nick selection ####################
 Template.header_nickmodal.nickModalVisible = -> Session.get 'nickModalVisible'

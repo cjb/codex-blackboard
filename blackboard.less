@@ -10,8 +10,19 @@
 
 @navbar-height: 73px;
 
+body {
+  background: url('/img/grid_noise.png');
+  background-attachment: fixed;
+}
+.bb-puzzleround, .bb-chat-messages {
+  margin-top: 40px; /* allow space for breadcrumbs in navbar */
+}
+.bb-chat-messages {
+  margin-bottom: 26px; /* 41px navbar - 15px padding on #bb-body */
+}
 #bb-body {
   padding-top: @navbar-height;
+  padding-bottom: 15px;
 
   @left-size: 85px;
   @right-size: 45px;
@@ -80,6 +91,18 @@
   }
 }
 #bb-tables {
+  background: white;
+  margin-top: 10px;
+  padding-left: 15px;
+  padding-right: 15px;
+  -webkit-border-radius: 6px;
+     -moz-border-radius: 6px;
+          border-radius: 6px;
+  border: 1px solid #e5e5e5;
+  -webkit-box-shadow: 0 1px 4px rgba(0,0,0,0.065);
+     -moz-box-shadow: 0 1px 4px rgba(0,0,0,0.065);
+          box-shadow: 0 1px 4px rgba(0,0,0,0.065);
+
   section {
     /* Indent our sections to start underneath the chat/update log */
     padding-top: @navbar-height;
@@ -144,8 +167,11 @@
 ------------------------- */
 @media (max-width: 979px) {
   /* navbar becomes unfixed below 980px */
+  .navbar-fixed-top, .bb-chat-messages { margin-bottom: 0; }
+  .navbar-fixed-bottom, .bb-chat-messages, .bb-puzzleround { margin-top: 0; }
   #bb-body {
     padding-top: 0;
+    padding-bottom: 0;
   }
   #bb-tables {
     section {

@@ -58,20 +58,6 @@ Template.messages.nick = ->
   else
     nick + ":"
 
-Template.nickAndRoom.nick = -> Session.get "nick"
-
-Template.nickAndRoom.room = -> prettyRoomName()
-
-Template.nickAndRoom.volumeIcon = ->
-  if Session.get "mute"
-    "icon-volume-off"
-  else
-    "icon-volume-up"
-
-Template.nickAndRoom.events
-  "click .change-nick-link": (event, template) ->
-    event.preventDefault()
-    changeNick()
 
 # Utility functions
 
@@ -155,7 +141,7 @@ scrollMessagesView = ->
   # scrollMessagesView is called inside a reactive context.  See the
   # comment in showUnreadMessagesAlert.
   window.setTimeout ->
-    $("#messagesInner").scrollTop 10000
+    $("body").scrollTop 10000
   , 200
 
 # Event Handlers
@@ -166,12 +152,6 @@ $("button.mute").live "click", ->
     $.cookie "mute", true, {expires: 365, path: '/'}
 
   Session.set "mute", $.cookie "mute"
-
-$(window).resize ->
-  if Session.get("currentPage") is "chat"
-    $("#chat-content").height $(window).height() -
-      $("#chat-content").offset().top -
-      $("#chat-footer").height()
 
 # Form Interceptors
 $("#joinRoom").live "submit", ->
