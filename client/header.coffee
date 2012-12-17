@@ -57,10 +57,12 @@ Template.header_loginmute.events
     ensureNick()
   "click .bb-logout": (event, template) ->
     event.preventDefault()
+    cleanupChat() if Session.get('currentPage') is 'chat'
     Session.set 'nick', null
     $.removeCookie 'nick', {path:'/'}
     if Session.get('currentPage') is 'chat'
-      ensureNick() # login again immediately
+      ensureNick -> # login again immediately
+        joinRoom Session.get('type'), Session.get('id')
   "click .bb-protect, click .bb-unprotect": (event, template) ->
     canEdit = $(event.currentTarget).attr('data-canEdit') is 'true'
     Session.set 'canEdit', canEdit
