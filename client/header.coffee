@@ -41,7 +41,7 @@ Template.header_loginmute.sessionNick = ->
     name: n?.name or nick
     canon: n?.canon or canonical(nick)
     realname: getTag n, 'Real Name'
-    gravatar: getTag n, 'Gravatar'
+    gravatar: (getTag n, 'Gravatar') or "#{nick}@#{DEFAULT_HOST}"
   }
 Template.header_loginmute.canEdit = ->
   (Session.get 'nick') and (Session.get 'canEdit')
@@ -94,14 +94,15 @@ Template.header_nickmodal_contents.created = ->
   this.update = (query, options) =>
     # can we find an existing nick matching this?
     n = if query then Nicks.findOne canon: canonical(query) else null
-    return unless (n or options?.force)
-    realname = getTag n, 'Real Name'
-    gravatar = getTag n, 'Gravatar'
-    $('#nickRealname').val(realname or '')
-    $('#nickEmail').val(gravatar or '')
+    if (n or options?.force)
+      realname = getTag n, 'Real Name'
+      gravatar = getTag n, 'Gravatar'
+      $('#nickRealname').val(realname or '')
+      $('#nickEmail').val(gravatar or '')
     this.updateGravatar()
   this.updateGravatar = () =>
-    gravatar = $.gravatar $('#nickEmail').val(),
+    email = $('#nickEmail').val() or ($('#nickInput').val()+'@'+DEFAULT_HOST)
+    gravatar = $.gravatar email,
       image: 'wavatar' # 'monsterid'
       classes: 'img-polaroid'
     container = $(this.find('.gravatar'))

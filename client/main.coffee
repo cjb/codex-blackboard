@@ -9,6 +9,7 @@ Template.page.currentPage = -> (Session.get "currentPage") or "blackboard"
 Handlebars.registerHelper "equal", (a, b) -> a is b
 
 CLIENT_UUID = Meteor.uuid() # this identifies this particular client instance
+DEFAULT_HOST = 'ihtfp.us' # this is used to create gravatars from nicks
 
 # subscribe to the all-names feed all the time
 Meteor.subscribe 'all-names'
