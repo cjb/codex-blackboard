@@ -128,20 +128,26 @@ if Meteor.isServer
   Presence.find(present: true).observe
     added: (presence, beforeIndex) ->
       return if initiallySuppressPresence
-      #console.log "#{presence.nick} entered #{presence.room_name}"
+      # look up a real name, if there is one
+      n = Nicks.findOne canon: canonical(presence.nick)
+      name = getTag(n, 'Real Name') or presence.nick
+      #console.log "#{name} entered #{presence.room_name}"
       Messages.insert
         system: true
         nick: ''
-        body: presence.nick + " joined the room."
+        body: "#{name} joined the room."
         room_name: presence.room_name
         timestamp: UTCNow()
     removed: (presence, atIndex) ->
       return if initiallySuppressPresence
-      #console.log "#{presence.nick} left #{presence.room_name}"
+      # look up a real name, if there is one
+      n = Nicks.findOne canon: canonical(presence.nick)
+      name = getTag(n, 'Real Name') or presence.nick
+      #console.log "#{name} left #{presence.room_name}"
       Messages.insert
         system: true
         nick: ''
-        body: presence.nick + " left the room."
+        body: "#{name} left the room."
         room_name: presence.room_name
         timestamp: UTCNow()
   # turn on presence notifications once initial observation set has been

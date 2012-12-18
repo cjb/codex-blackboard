@@ -10,12 +10,63 @@
   .bb-content-area;
 }
 .bb-chat-messages {
-  .bb-content-area;
-  & > p {
-    padding: 4px; border-radius:5px;
-    &.messageRow:nth-child(even) {
-      background-color: #eee;
+  @chat-arrow-size: 6px;
+  @chat-arrow-height: 15px;
+  .media {
+    position: relative; /* establish context for arrow placement */
+    margin-bottom: 10px;
+    &, &:first-child { margin-top: 10px; }
+    &:before, &:after {
+      content:"";
+      position: absolute;
+      top: @chat-arrow-height; left: 75px - @chat-arrow-size;
+      width: 0; height: 0;
+      border-color: transparent;
+      border-style: solid;
+      border-width: @chat-arrow-size @chat-arrow-size @chat-arrow-size 0;
+      border-right-color: white;
     }
+    &:before {
+      border-width: (@chat-arrow-size + 2px) (@chat-arrow-size + 1px) (@chat-arrow-size + 2px) 0;
+      border-right-color: #ccc;
+      left: 74px - @chat-arrow-size; top: @chat-arrow-height - 2px;
+    }
+  }
+  .bb-message-body {
+    min-height: 64px; /* match avatar height */
+    background-color: white;
+    box-sizing: border-box;
+    padding: 2px 5px;
+    border: 1px solid #ccc;
+    -webkit-border-radius: 6px;
+       -moz-border-radius: 6px;
+            border-radius: 6px;
+  }
+  .bb-message-system {
+    color: #888;
+    font-size: 12px;
+    line-height: 16px;
+  }
+  .bb-message-action {
+    font-weight: bold; background: #eee; color: #444;
+    padding: 2px 0;
+  }
+  .bb-message-action, .bb-message-system {
+    padding-left: 80px;
+    padding-right: 5px;
+  }
+  .bb-message-body, .bb-message-action, .bb-message-system {
+    .timestamp {
+      color: #ccc;
+      padding-right: 5px;
+    }
+  }
+}
+@media (max-width: 480px) {
+  .bb-chat-messages .media {
+    /* hide chat bubble arrows when display gets too narrow */
+    &:before, &:after { display: none; }
+    .timestamp { float: right; /* still */ }
   }
 }
 .messageRow, .actionRow {
@@ -28,9 +79,6 @@
   font-style: italic;
   background-color: rgb(244,255,253);
   color: rgb(4,121,170);
-}
-.timestamp {
-  font-size: .65em; color: #049cdb;
 }
 .systemRow {
   margin: 0; font-size: .8em; color: #aaa; padding: 1px 4px!important;

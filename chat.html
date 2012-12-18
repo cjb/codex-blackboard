@@ -42,11 +42,28 @@
   <div id="messages" class="row-fluid bb-chat-messages">
         {{#each messages}}
           {{#if system}}
-            <p class="systemRow">&raquo; {{pretty_ts timestamp}} {{body}}</p>
+<div class="bb-message-system">
+   <div class="pull-right timestamp">{{pretty_ts timestamp}}</div>
+     {{body}}
+   </div>
+</div>
+          {{else}}{{#if action}}
+<div class="bb-message-action">
+   <div class="pull-right timestamp">{{pretty_ts timestamp}}</div>
+     <i class="icon-hand-right"></i>
+     {{nickOrName}} {{body}}
+   </div>
+</div>
           {{else}}
-            <p class="{{#if action}}actionRow{{else}}messageRow{{/if}}"><span class="timestamp">{{pretty_ts timestamp}}</span>
-            <strong>{{nick}}</strong>{{body}}</p>
-          {{/if}}
+<div class="media">
+  {{gravatar id=email image="wavatar" size=64 classes="media-object pull-left img-rounded" }}
+  <div class="media-body bb-message-body">
+    <div class="pull-right timestamp">{{pretty_ts timestamp}}</div>
+    <h4 class="media-heading">{{nickOrName}}</h4>
+    {{body}}
+  </div>
+</div>
+          {{/if}}{{/if}}
         {{/each}}
   </div>
 </template>

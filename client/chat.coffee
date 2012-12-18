@@ -19,6 +19,7 @@ Meteor.autosubscribe ->
   room_name = Session.get 'room_name'
   Meteor.subscribe 'recent-messages', room_name if room_name
   Meteor.subscribe 'presence-for-room', room_name if room_name
+  Meteor.subscribe 'all-nicks' # for gravatars, etc. could be nick-for-room...
 
 Meteor.autosubscribe ->
   return unless Session.get("currentPage") is "chat"
@@ -35,12 +36,26 @@ Meteor.autosubscribe ->
 Template.messages.messages  = ->
   Messages.find {room_name: Session.get("room_name")}, {sort:['timestamp']}
 
+Template.messages.email = ->
+  cn = canonical(this.nick)
+  n = Nicks.findOne canon: cn
+  return getTag(n, 'Gravatar') or "#{cn}@#{DEFAULT_HOST}"
+
 Template.messages.pretty_ts = (timestamp) ->
   return unless timestamp
   d = new Date(timestamp)
+  hrs = d.getHours()
+  ampm = if hrs < 12 then 'AM' else 'PM'
+  hrs = 12 if hrs is 0
+  hrs = (hrs-12) if hrs > 12
   min = d.getMinutes()
   min = if min < 10 then "0" + min else min
-  d.getHours() + ":" + min
+  hrs + ":" + min + ' ' + ampm
+
+Template.messages.nickOrName = ->
+  nick = this.nick
+  n = Nicks.findOne canon: canonical(nick)
+  return getTag(n, 'Real Name') or nick
 
 Template.messages.body = ->
   body = this.body
@@ -51,13 +66,6 @@ Template.messages.body = ->
     new Handlebars.SafeString(body.slice(4))
   else
     new Handlebars.SafeString(body)
-
-Template.messages.nick = ->
-  nick = this.nick
-  if this.action
-    "* " + nick
-  else
-    nick + ":"
 
 Template.chat_header.room_name = -> prettyRoomName()
 Template.chat_header.whos_here = ->
