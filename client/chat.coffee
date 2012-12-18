@@ -60,6 +60,7 @@ Template.messages.nickOrName = ->
 Template.messages.body = ->
   body = this.body
   body = Handlebars._escape(body)
+  body = body.replace(/\n|\r\n?/g, '<br/>')
   body = convertURLsToLinksAndImages(body)
   body = highlightNick(body) unless this.system
   if (body.slice(0,4) == "/me ")
