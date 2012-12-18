@@ -84,7 +84,8 @@ x appropriately link puzzle/round names appearing in the update log.
     (use all-names to get link text and type from id?)
 x add 'all-names' subscription which merges names from puzzles/rounds/groups
   x fix chat room title breakage introduced w/ recent pub/sub refactor.
-- always subscribe to all-rounds, all-groups, and all-names
+- always subscribe to all-rounds, all-groups?
+  (pro: slightly faster blackboard loading, con: greater bw, harder debugging)
 x add 'foreground uuid' field to presence, and only set foreground=false
   if current app's uuid matched foreground uuid.  this prevents bouncing
   if user has one tab in foreground and one in background
@@ -92,15 +93,17 @@ x add 'foreground uuid' field to presence, and only set foreground=false
 x strip unnecessary fields from presence publication to limit updates
   (ie, timestamp, foreground uuid, etc)
 x make nick modal universal
-- make navbar universal.  suppress group chat iff we're on group chat page
-- switch to button bar for edit/protect.  clicking on username (always a
+x make navbar universal.
+  - suppress group chat iff we're on group chat page
+x switch to button bar for edit/protect.  clicking on username (always a
   button) brings up nick modal and allows editing full name, etc.
 x refactor some subscriptions to being done in template create/destroy
   ie, nick modal should subscribe to Nicks for completion, etc;
   oplog header should subscribe to recent oplogs,
   chat header should take care of its own subscription to recent-messages, etc.
 x fix chat presence breakage on main page (maybe related to pub/sub refactor)
-
+- combine multiple consecutive chat bubbles from same sender
+- combine multiple consecutive system messages
 - newline support in chat
   - shift-return or paste in the new message box should turn it into a
     text box
