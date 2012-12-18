@@ -124,9 +124,10 @@ if Meteor.isServer
   , 60*1000
   # generate automatic "<nick> entered <room>" and <nick> left room" messages
   # as the presence set changes
-  Presence.remove {} # on server restart, begin with no presence
+  initiallySuppressPresence = true
   Presence.find(present: true).observe
     added: (presence, beforeIndex) ->
+      return if initiallySuppressPresence
       #console.log "#{presence.nick} entered #{presence.room_name}"
       Messages.insert
         system: true
@@ -135,6 +136,7 @@ if Meteor.isServer
         room_name: presence.room_name
         timestamp: UTCNow()
     removed: (presence, atIndex) ->
+      return if initiallySuppressPresence
       #console.log "#{presence.nick} left #{presence.room_name}"
       Messages.insert
         system: true
@@ -142,6 +144,10 @@ if Meteor.isServer
         body: presence.nick + " left the room."
         room_name: presence.room_name
         timestamp: UTCNow()
+  # turn on presence notifications once initial observation set has been
+  # processed. (observe doesn't return on server until initial observation
+  # is complete.)
+  initiallySuppressPresence = false
 
 # this reverses the name given to Meteor.Collection; that is the
 # 'type' argument is the name of a server-side Mongo collection.
