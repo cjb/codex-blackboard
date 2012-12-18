@@ -27,7 +27,6 @@ Handlebars.registerHelper 'gravatar', (args) ->
   return new Handlebars.SafeString(html)
 
 ############## log in/protect/mute panel ####################
-Template.header_loginmute.currentPage = -> Session.get 'currentPage'
 Template.header_loginmute.volumeIcon = ->
   if Session.get "mute"
     "icon-volume-off"
@@ -43,8 +42,6 @@ Template.header_loginmute.sessionNick = ->
     realname: getTag n, 'Real Name'
     gravatar: (getTag n, 'Gravatar') or "#{nick}@#{DEFAULT_HOST}"
   }
-Template.header_loginmute.canEdit = ->
-  (Session.get 'nick') and (Session.get 'canEdit')
 Template.header_loginmute.rendered = ->
   # tool tips
   $(this.findAll('.bb-buttonbar *[title]')).tooltip placement: 'bottom'
@@ -67,13 +64,9 @@ Template.header_loginmute.events
     canEdit = $(event.currentTarget).attr('data-canEdit') is 'true'
     Session.set 'canEdit', canEdit
 
-############## breadcrumbs / navigation #############
-Template.header_breadcrumbs.currentPage = -> Session.get 'currentPage'
-
 ############## nick selection ####################
 Template.header_nickmodal.nickModalVisible = -> Session.get 'nickModalVisible'
 Template.header_nickmodal.preserve ['#nickPickModal']
-Template.header_nickmodal_contents.currentPage = -> Session.get "currentPage"
 Template.header_nickmodal_contents.nick = -> Session.get "nick" or ''
 Template.header_nickmodal_contents.created = ->
   this.sub = Meteor.subscribe 'all-nicks'

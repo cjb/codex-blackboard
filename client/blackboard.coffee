@@ -22,7 +22,6 @@ Meteor.startup ->
           unless Session.get 'mute'
             blackboard.newAnswerSound.play()
 
-Template.blackboard.canEdit = -> Session.get 'canEdit'
 Template.blackboard.sortReverse = -> Session.get 'sortReverse'
 
 ############## groups, rounds, and puzzles ####################

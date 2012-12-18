@@ -4,9 +4,13 @@
 #   "round"      -- round information (much like the puzzle page)
 #   "chat"       -- chat room
 
-Template.page.currentPage = -> (Session.get "currentPage") or "blackboard"
-
 Handlebars.registerHelper "equal", (a, b) -> a is b
+
+# session variables we want to make available from all templates
+do -> for v in ['currentPage']
+  Handlebars.registerHelper v, () -> Session.get(v)
+Handlebars.registerHelper 'canEdit', () ->
+  (Session.get 'nick') and (Session.get 'canEdit')
 
 CLIENT_UUID = Meteor.uuid() # this identifies this particular client instance
 DEFAULT_HOST = 'ihtfp.us' # this is used to create gravatars from nicks
