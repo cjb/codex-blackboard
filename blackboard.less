@@ -64,7 +64,13 @@ body {
   .bb-lastupdate {
     .comma-list { text-transform: uppercase; }
   }
-  .bb-chat-presence { .ellipsis; }
+  .bb-chat-presence {
+    .ellipsis;
+    /* tweak the height by 1px to get text baselines to line up. */
+    /* yes, this is incredibly anal. */
+    padding-top: 1px;
+    margin-bottom: -1px;
+  }
 }
 #bb-sidebar {
   .bb-sidenav {
