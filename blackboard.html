@@ -15,18 +15,25 @@
     </ul>
   </div>
   {{/isolate}}
-  <div id="bb-tables" class="span10">
+  <div id="bb-tables" class="span10 {{#if canEdit}}bb-canEdit{{/if}}">
     <!-- content div -->
-    <h1>Codex Puzzle Blackboard</h1>
 <div class="btn-group pull-right bb-sort-order">
   <button class="btn btn-small {{#if sortReverse}}active{{/if}}"
           data-sortReverse="true">Newest rounds first</button>
   <button class="btn btn-small {{#unless sortReverse}}active{{/unless}}"
           data-sortReverse="false">Oldest rounds first</button>
 </div>
+    <h1>Codex Puzzle Blackboard</h1>
     {{#each roundgroups}}
     <section id="group{{_id}}">
-    <h2>{{name}}</h2>
+    {{#if editing "roundgroups" _id "title"}}
+      <h2><input type="text" value="{{name}}" /></h2>
+    {{else}}
+      <h2 class="bb-editable">
+      {{#if canEdit}}<i class="bb-edit-icon icon-pencil pull-right"></i>{{/if}}
+      {{name}}
+      </h2>
+    {{/if}}
     {{#each rounds}}
       {{> blackboard_round }}
     {{/each}}
@@ -39,9 +46,15 @@
 
 <template name="blackboard_round">
   <section id="r{{round._id}}">
-  <h3>{{link id=round._id title=rX}}
-      <small>({{rX}})</small>
+  {{#if editing "rounds" round._id "title"}}
+    <h3><input type="text" value="{{round.name}}" /></h3>
+  {{else}}
+  <h3 class="bb-editable">
+    {{#if canEdit}}<i class="bb-edit-icon icon-pencil pull-right"></i>{{/if}}
+    {{link id=round._id title=rX editing=canEdit}}
+    <small>({{rX}})</small>
   </h3>
+  {{/if}}
 
   {{#if hasPuzzles}}
   <table class="table table-bordered table-condensed bb-puzzle">
@@ -69,12 +82,33 @@
 
 <template name="blackboard_puzzle">
   <tr><!-- {{id}} -->
-    <td class="puzzle-name">
-      {{link id=puzzle._id title=rXpY}}
+    <td class="puzzle-name bb-editable">
+      {{#if editing "puzzles" puzzle._id "title"}}
+        <input type="text" value="{{puzzle.name}}" />
+      {{else}}
+        {{#if canEdit}}<i class="bb-edit-icon icon-pencil pull-right"></i>{{/if}}
+        {{link id=puzzle._id title=rXpY editing=canEdit}}
+      {{/if}}
       {{#with puzzle}}{{>blackboard_puzzle_tags}}{{/with}}
     </td>
-    <td class="puzzle-answer">{{#if puzzle.answer}}<span class="answer">{{puzzle.answer}}</span>{{/if}}</td>
-    <td class="puzzle-status">{{status}}</td>
+    <td class="puzzle-answer bb-editable">
+      {{#if editing "puzzles" puzzle._id "answer"}}
+        <input type="text" value="{{puzzle.answer}}" />
+      {{else}}
+        {{#if canEdit}}<i class="bb-edit-icon icon-pencil pull-right"></i>{{/if}}
+        {{#if puzzle.answer}}
+          <span class="answer">{{puzzle.answer}}</span>
+        {{/if}}
+      {{/if}}
+    </td>
+    <td class="puzzle-status bb-editable">
+      {{#if editing "puzzles" puzzle._id "status"}}
+        <input type="text" value="{{status}}" />
+      {{else}}
+        {{#if canEdit}}<i class="bb-edit-icon icon-pencil pull-right"></i>{{/if}}
+        {{status}}
+      {{/if}}
+    </td>
     <td class="puzzle-working">
       <span class="comma-list">
       {{#each whos_working}}{{> nick_presence }}{{/each}}

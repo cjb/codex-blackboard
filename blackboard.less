@@ -97,6 +97,10 @@ body {
     }
   }
 }
+.bb-canEdit .bb-editable:hover {
+  background: #fcffc0;
+  cursor: pointer;
+}
 #bb-tables {
   background: white;
   margin-top: 10px;
@@ -109,6 +113,7 @@ body {
   -webkit-box-shadow: 0 1px 4px rgba(0,0,0,0.065);
      -moz-box-shadow: 0 1px 4px rgba(0,0,0,0.065);
           box-shadow: 0 1px 4px rgba(0,0,0,0.065);
+  font-size: 93%; /* 13px for body text */
 
   section {
     /* Indent our sections to start underneath the chat/update log */
@@ -117,12 +122,21 @@ body {
   }
   h2 {
     border-bottom: 1px solid #e5e5e5;
+    font-size: 200%;
+    .bb-edit-icon { margin-top: 13px; }
+    position: relative; /* fixes z-order issues, makes whole width clickable */
   }
-  font-size: 93%; /* 13px for body text */
+  h3 {
+    font-size: 130%;
+    line-height: 28px;
+    .bb-edit-icon { margin-top: 7px; }
+  }
   h2,h3 {
-   font-size: 130%;
-   margin-top: 0;
-   margin-bottom: 0;
+    margin-bottom: 0;
+    .bb-edit-icon { margin-right: 5px; }
+  }
+  .bb-sort-order {
+    margin-top: 23px;
   }
   dl {
     margin: 0;
@@ -135,6 +149,9 @@ body {
   .bb-puzzle {
     margin-bottom: 0;
     th { background: #f8f8f8; }
+    .bb-edit-icon {
+      margin-top: 3px;
+    }
     .answer {
       font-family: 'Andale Mono', Courier, monospace;
       text-transform: uppercase;

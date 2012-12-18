@@ -5,7 +5,8 @@
 Handlebars.registerHelper 'link', (args) ->
   args = if typeof(args) is 'string' then {id:args} else args.hash
   n = Names.findOne(args.id)
-  return args.id unless n
+  return args.id.slice(0,8) unless n
+  return n.name if args.editing
   extraclasses = if args.class then (' '+args.class) else ''
   title = if args.title then " title='#{args.title}'" else ''
   link = "<a href='/#{n.type}/#{n._id}' class='#{n.type}-link#{extraclasses}' #{title}>"
@@ -63,6 +64,7 @@ Template.header_loginmute.events
   "click .bb-protect, click .bb-unprotect": (event, template) ->
     canEdit = $(event.currentTarget).attr('data-canEdit') is 'true'
     Session.set 'canEdit', canEdit
+    Session.set 'editing', null # abort current edit, whatever it is
 
 ############## nick selection ####################
 Template.header_nickmodal.nickModalVisible = -> Session.get 'nickModalVisible'
