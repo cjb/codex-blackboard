@@ -63,6 +63,9 @@ Template.blackboard.events
   "click .bb-sort-order button": (event, template) ->
      reverse = $(event.currentTarget).attr('data-sortReverse') is 'true'
      Session.set 'sortReverse', reverse
+  "click .bb-canEdit .bb-editable": (event, template) ->
+     edit = $(event.currentTarget).attr('data-bbedit')
+     Session.set 'editing', edit
 
 Template.blackboard_round.hasPuzzles = -> (this.round?.puzzles?.length > 0)
 # the following is a map() instead of a direct find() to preserve order

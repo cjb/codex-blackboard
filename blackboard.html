@@ -27,9 +27,10 @@
     {{#each roundgroups}}
     <section id="group{{_id}}">
     {{#if editing "roundgroups" _id "title"}}
-      <h2><input type="text" value="{{name}}" /></h2>
+      <h2><input type="text" value="{{name}}"
+                 class="input-block-level" autofocus /></h2>
     {{else}}
-      <h2 class="bb-editable">
+      <h2 class="bb-editable" data-bbedit="roundgroups/{{_id}}/title">
       {{#if canEdit}}<i class="bb-edit-icon icon-pencil pull-right"></i>{{/if}}
       {{name}}
       </h2>
@@ -47,9 +48,12 @@
 <template name="blackboard_round">
   <section id="r{{round._id}}">
   {{#if editing "rounds" round._id "title"}}
-    <h3><input type="text" value="{{round.name}}" /></h3>
+    <h3>
+      <input type="text" value="{{round.name}}"
+             class="input-block-level" autofocus />
+    </h3>
   {{else}}
-  <h3 class="bb-editable">
+  <h3 class="bb-editable" data-bbedit="rounds/{{round._id}}/title">
     {{#if canEdit}}<i class="bb-edit-icon icon-pencil pull-right"></i>{{/if}}
     {{link id=round._id title=rX editing=canEdit}}
     <small>({{rX}})</small>
@@ -62,8 +66,10 @@
       <th class="puzzle-name">Name</th>
       <th class="puzzle-answer">Solution</th>
       <th class="puzzle-status">Status</th>
+      {{#unless canEdit}}
       <th class="puzzle-working">Working on this</th>
       <th class="puzzle-update">Last update</th>
+      {{/unless}}
     </tr>
     {{#each puzzles}}
       {{> blackboard_puzzle}}
@@ -82,18 +88,23 @@
 
 <template name="blackboard_puzzle">
   <tr><!-- {{id}} -->
-    <td class="puzzle-name bb-editable">
+    <td class="puzzle-name">
+      <div class="bb-editable" data-bbedit="puzzles/{{puzzle._id}}/title">
       {{#if editing "puzzles" puzzle._id "title"}}
-        <input type="text" value="{{puzzle.name}}" />
+        <input type="text" value="{{puzzle.name}}"
+               class="input-block-level" autofocus />
       {{else}}
         {{#if canEdit}}<i class="bb-edit-icon icon-pencil pull-right"></i>{{/if}}
         {{link id=puzzle._id title=rXpY editing=canEdit}}
       {{/if}}
+      </div>
       {{#with puzzle}}{{>blackboard_puzzle_tags}}{{/with}}
     </td>
-    <td class="puzzle-answer bb-editable">
+    <td class="puzzle-answer bb-editable"
+        data-bbedit="puzzles/{{puzzle._id}}/answer">
       {{#if editing "puzzles" puzzle._id "answer"}}
-        <input type="text" value="{{puzzle.answer}}" />
+        <input type="text" value="{{puzzle.answer}}"
+               class="input-block-level" autofocus />
       {{else}}
         {{#if canEdit}}<i class="bb-edit-icon icon-pencil pull-right"></i>{{/if}}
         {{#if puzzle.answer}}
@@ -101,14 +112,17 @@
         {{/if}}
       {{/if}}
     </td>
-    <td class="puzzle-status bb-editable">
-      {{#if editing "puzzles" puzzle._id "status"}}
-        <input type="text" value="{{status}}" />
+    <td class="puzzle-status bb-editable"
+        data-bbedit="tags/{{puzzle._id}}/status/value">
+      {{#if editing "tags" puzzle._id "status" "value"}}
+        <input type="text" value="{{status}}"
+               class="input-block-level" autofocus />
       {{else}}
         {{#if canEdit}}<i class="bb-edit-icon icon-pencil pull-right"></i>{{/if}}
         {{status}}
       {{/if}}
     </td>
+    {{#unless canEdit}}
     <td class="puzzle-working">
       <span class="comma-list">
       {{#each whos_working}}{{> nick_presence }}{{/each}}
@@ -121,12 +135,32 @@
       {{/if}}
       {{/isolate}}
     </td>
+    {{/unless}}
   </tr>
 </template>
 
 <template name="blackboard_tags">
   <dl class="dl-horizontal">{{#each tags}}
-    <dt>{{name}}:</dt><dd>{{value}}</dd>
+    <dt class="bb-editable"
+        data-bbedit="tags/{{../_id}}/{{canon}}/name">
+      {{#if editing "tags" ../_id canon "name"}}
+        <input type="text" value="{{name}}"
+               class="input-block-level" autofocus />
+      {{else}}
+        {{#if canEdit}}<i class="bb-edit-icon icon-pencil pull-left"></i>{{/if}}
+        {{name}}:
+      {{/if}}
+     </dt>
+    <dd class="bb-editable"
+        data-bbedit="tags/{{../_id}}/{{canon}}/value">
+      {{#if editing "tags" ../_id canon "value"}}
+        <input type="text" value="{{value}}"
+               class="input-block-level" autofocus />
+      {{else}}
+        {{#if canEdit}}<i class="bb-edit-icon icon-pencil pull-right"></i>{{/if}}
+        {{value}}
+      {{/if}}
+    </dd>
   {{/each}}</dl>
 </template>
 
@@ -134,7 +168,28 @@
   <table class="bb-tag-table"><tbody>{{!
     }}{{#each tags}}{{!
       }}{{#unless equal canon "status"}}
-        <tr><td>{{name}}:</td><td>{{value}}</td></tr>
+        <tr>
+          <td class="bb-editable"
+              data-bbedit="tags/{{../../_id}}/{{canon}}/name">
+            {{#if editing "tags" ../../_id canon "name"}}
+              <input type="text" value="{{name}}"
+                     class="input-block-level" autofocus />
+            {{else}}
+              {{#if canEdit}}<i class="bb-edit-icon icon-pencil pull-left"></i>{{/if}}
+              {{name}}:
+            {{/if}}
+          </td>
+          <td class="bb-editable"
+              data-bbedit="tags/{{../../_id}}/{{canon}}/value">
+            {{#if editing "tags" ../../_id canon "value"}}
+              <input type="text" value="{{value}}"
+                     class="input-block-level" autofocus />
+            {{else}}
+              {{#if canEdit}}<i class="bb-edit-icon icon-pencil pull-right"></i>{{/if}}
+              {{value}}
+            {{/if}}
+          </td>
+        </tr>
       {{/unless}}{{!
     }}{{/each}}{{!
   }}</tbody></table>

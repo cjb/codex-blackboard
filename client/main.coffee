@@ -13,7 +13,7 @@ Handlebars.registerHelper 'canEdit', () ->
   (Session.get 'nick') and (Session.get 'canEdit')
 Handlebars.registerHelper 'editing', (args..., options) ->
   return false unless (Session.get 'nick') and (Session.get 'canEdit')
-  return args.join('/') is Session.get('editing')
+  return Session.equals 'editing', args.join('/')
 
 CLIENT_UUID = Meteor.uuid() # this identifies this particular client instance
 DEFAULT_HOST = 'ihtfp.us' # this is used to create gravatars from nicks
