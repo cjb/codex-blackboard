@@ -15,14 +15,14 @@ instachat["unreadMessages"]          = 0
 
 # Collection Subscriptions
 Meteor.autosubscribe ->
-  return unless Session.get("currentPage") is "chat"
+  return unless Session.equals("currentPage", "chat")
   room_name = Session.get 'room_name'
   Meteor.subscribe 'recent-messages', room_name if room_name
   Meteor.subscribe 'presence-for-room', room_name if room_name
   Meteor.subscribe 'all-nicks' # for gravatars, etc. could be nick-for-room...
 
 Meteor.autosubscribe ->
-  return unless Session.get("currentPage") is "chat"
+  return unless Session.equals("currentPage", "chat")
   # the autosubscribe magic will tear down 'observe's
   # live query handle when room_name or currentPage changes
   Messages.find
@@ -233,7 +233,7 @@ hideMessageAlert = ->
   $("title").text("Chat: "+prettyRoomName())
 
 unreadMessage = (doc)->
-  unless doc["nick"] == Session.get("nick") || doc.system || Session.get "mute"
+  unless Session.equals('nick', doc["nick"]) || doc.system || Session.get "mute"
     instachat.unreadMessageSound.play()
 
   if instachat.alertWhenUnreadMessages

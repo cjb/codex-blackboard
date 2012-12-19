@@ -12,22 +12,22 @@
 </template>
 
 <template name="header_breadcrumbs">
-{{#unless equal currentPage "blackboard"}}
+{{#unless currentPageEquals "blackboard"}}
 <ul class="nav">
   <li><a href="/" class="home-link"><i class="icon-chevron-left icon-white"></i><i class="icon-home icon-white"></i> Blackboard</a></li>
   <li class="active"><a>
-    {{#if equal currentPage "chat"}}
+    {{#if currentPageEquals "chat"}}
 <i class="icon-comment icon-white"></i> Chat room
     {{/if}}
-    {{#if equal currentPage "puzzle"}}
+    {{#if currentPageEquals "puzzle"}}
 <i class="icon-book icon-white"></i> Puzzle  page
     {{/if}}
-    {{#if equal currentPage "round"}}
+    {{#if currentPageEquals "round"}}
 <i class="icon-folder-open icon-white"></i> Round  page
     {{/if}}
   </a></li>
 </ul>
-  {{#if equal currentPage "chat"}}
+  {{#if currentPageEquals "chat"}}
     {{> chat_header }}
   {{/if}}
 {{/unless}}
@@ -61,7 +61,7 @@
     {{/if}}
    </div>
    <div class="btn-toolbar">
-{{#if equal currentPage "blackboard"}}
+{{#if currentPageEquals "blackboard"}}
     <div class="btn-group">
      <button title="Protect page" data-canEdit="false"
              class="bb-protect btn btn-small btn-inverse {{#unless canEdit}}active{{/unless}}">
@@ -133,7 +133,7 @@
 
 <template name="header_nickmodal_contents">
     <div class="modal-header">
-      {{#unless equal currentPage "chat"}}
+      {{#unless currentPageEquals "chat"}}
       <button type="button" class="close" data-dismiss="modal">&times;</button>
       {{/unless}}
       <h3>Pick a Nick Name</h3>
@@ -176,7 +176,7 @@
     </div>
     <div class="modal-footer">
       <button type="button" class="btn btn-primary bb-submit">
-      {{#if equal currentPage "chat"}}
+      {{#if currentPageEquals "chat"}}
       Start Chatting
       {{else}}
       Log in

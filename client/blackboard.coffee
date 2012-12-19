@@ -109,7 +109,7 @@ Template.blackboard_puzzle.pretty_ts = (timestamp, brief) ->
 
 # Subscribe to all group, round, and puzzle information
 Meteor.autosubscribe ->
-  return unless Session.get("currentPage") is "blackboard"
+  return unless Session.equals("currentPage", "blackboard")
   Meteor.subscribe 'all-roundgroups'
   Meteor.subscribe 'all-rounds'
   Meteor.subscribe 'all-puzzles'

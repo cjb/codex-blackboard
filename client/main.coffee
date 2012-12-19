@@ -9,6 +9,9 @@ Handlebars.registerHelper "equal", (a, b) -> a is b
 # session variables we want to make available from all templates
 do -> for v in ['currentPage']
   Handlebars.registerHelper v, () -> Session.get(v)
+Handlebars.registerHelper 'currentPageEquals', (arg) ->
+  # register a more precise dependency on the value of currentPage
+  Session.equals 'currentPage', arg
 Handlebars.registerHelper 'canEdit', () ->
   (Session.get 'nick') and (Session.get 'canEdit')
 Handlebars.registerHelper 'editing', (args..., options) ->

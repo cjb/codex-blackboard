@@ -14,7 +14,7 @@ Template.round.rendered = ->
 # presumably we also want to subscribe to the round's chat room
 # and presence information at some point.
 Meteor.autosubscribe ->
-  return unless Session.get("currentPage") is "round"
+  return unless Session.equals("currentPage", "round")
   round_id = Session.get('id')
   return unless round_id
   Meteor.subscribe 'round-by-id', round_id

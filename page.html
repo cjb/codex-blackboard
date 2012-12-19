@@ -18,16 +18,16 @@
   {{> header }}
 
 <!-- page contents -->
-  {{#if equal currentPage "blackboard"}}
+  {{#if currentPageEquals "blackboard"}}
     {{> blackboard }}
   {{/if}}
-  {{#if equal currentPage "round"}}
+  {{#if currentPageEquals "round"}}
     {{> round }}
   {{/if}}
-  {{#if equal currentPage "puzzle"}}
+  {{#if currentPageEquals "puzzle"}}
     {{> puzzle }}
   {{/if}}
-  {{#if equal currentPage "chat"}}
+  {{#if currentPageEquals "chat"}}
     {{> chat }}
   {{/if}}
 
