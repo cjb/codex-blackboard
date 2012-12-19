@@ -62,7 +62,7 @@ Template.blackboard.rendered = ->
 Template.blackboard.events
   "click .bb-sort-order button": (event, template) ->
      reverse = $(event.currentTarget).attr('data-sortReverse') is 'true'
-     Session.set 'sortReverse', reverse
+     Session.set 'sortReverse', reverse or undefined
   "click .bb-canEdit .bb-editable": (event, template) ->
      edit = $(event.currentTarget).attr('data-bbedit')
      Session.set 'editing', edit
@@ -84,7 +84,7 @@ Template.blackboard_puzzle.whos_working = ->
     room_name: ("puzzles/"+this.puzzle?._id)
 
 Template.blackboard_puzzle.pretty_ts = (timestamp, brief) ->
-  duration = (Session.get('currentTime')||UTCNow()) - timestamp
+  duration = (Session.get('currentTime') or UTCNow()) - timestamp
   seconds = Math.floor(duration/1000)
   return "in the future" if seconds < -60
   return "just now" if seconds < 60

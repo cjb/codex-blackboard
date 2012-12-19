@@ -56,15 +56,15 @@ Template.header_loginmute.events
   "click .bb-logout": (event, template) ->
     event.preventDefault()
     cleanupChat() if Session.equals('currentPage', 'chat')
-    Session.set 'nick', null
+    Session.set 'nick', undefined
     $.removeCookie 'nick', {path:'/'}
     if Session.equals('currentPage', 'chat')
       ensureNick -> # login again immediately
         joinRoom Session.get('type'), Session.get('id')
   "click .bb-protect, click .bb-unprotect": (event, template) ->
     canEdit = $(event.currentTarget).attr('data-canEdit') is 'true'
-    Session.set 'canEdit', canEdit
-    Session.set 'editing', null # abort current edit, whatever it is
+    Session.set 'canEdit', canEdit or undefined
+    Session.set 'editing', undefined # abort current edit, whatever it is
 
 ############## nick selection ####################
 Template.header_nickmodal.nickModalVisible = -> Session.get 'nickModalVisible'
@@ -74,7 +74,7 @@ Template.header_nickmodal_contents.created = ->
   this.sub = Meteor.subscribe 'all-nicks'
   this.afterFirstRender = =>
     $('#nickPickModal').one 'hide', ->
-      Session.set 'nickModalVisible', false
+      Session.set 'nickModalVisible', undefined
     $('#nickPickModal').modal keyboard: false, backdrop:"static"
     $('#nickInput').select()
     firstNick = Session.get 'nick' or ''
@@ -90,7 +90,7 @@ Template.header_nickmodal_contents.created = ->
     (n.name for n in Nicks.find({}).fetch())
   this.update = (query, options) =>
     # can we find an existing nick matching this?
-    n = if query then Nicks.findOne canon: canonical(query) else null
+    n = if query then Nicks.findOne canon: canonical(query) else undefined
     if (n or options?.force)
       realname = getTag n, 'Real Name'
       gravatar = getTag n, 'Gravatar'
@@ -109,7 +109,7 @@ Template.header_nickmodal_contents.created = ->
         container.append(gravatar)
 Template.header_nickmodal_contents.rendered = ->
   this.afterFirstRender?()
-  this.afterFirstRender = null
+  this.afterFirstRender = undefined
 Template.header_nickmodal_contents.destroyed = ->
   this.sub.stop()
 Template.header_nickmodal_contents.events
@@ -157,7 +157,7 @@ $("#nickPick").live "submit", ->
 
 changeNick = (cb=(->)) ->
   $('#nickPickModal').one 'hide', -> cb()
-  Session.set 'nickModalVisible',true
+  Session.set 'nickModalVisible', true
 
 ensureNick = (cb=(->)) ->
   if Session.get 'nick'

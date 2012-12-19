@@ -10,7 +10,7 @@ Session.set 'id'       , '0'
 instachat = {}
 instachat["UTCOffset"] = new Date().getTimezoneOffset() * 60000
 instachat["alertWhenUnreadMessages"] = false
-instachat["messageAlertInterval"]    = null
+instachat["messageAlertInterval"]    = undefined
 instachat["unreadMessages"]          = 0
 
 # Collection Subscriptions
@@ -229,7 +229,7 @@ showUnreadMessagesAlert = ->
 hideMessageAlert = ->
   return unless instachat.messageAlertInterval
   window.clearInterval instachat.messageAlertInterval
-  instachat.messageAlertInterval = null
+  instachat.messageAlertInterval = undefined
   $("title").text("Chat: "+prettyRoomName())
 
 unreadMessage = (doc)->
@@ -254,12 +254,12 @@ Template.chat.rendered = ->
   $("title").text("Chat: "+prettyRoomName())
   $(window).resize()
   this.afterFirstRender?()
-  this.afterFirstRender = null
+  this.afterFirstRender = undefined
 
 cleanupChat = ->
   if instachat.keepaliveInterval
     Meteor.clearInterval instachat.keepaliveInterval
-    instachat.keepalive = instachat.keepaliveInterval = null
+    instachat.keepalive = instachat.keepaliveInterval = undefined
   Meteor.call "setPresence"
     nick: Session.get('nick')
     room_name: Session.get "room_name"
