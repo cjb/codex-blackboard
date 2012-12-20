@@ -31,7 +31,10 @@
       <input type="text" value="{{name}}"
              class="input-block-level" autofocus />
     {{else}}
-      {{#if canEdit}}<i class="bb-edit-icon icon-pencil pull-right"></i>{{/if}}
+      {{#if canEdit}}
+        <i class="bb-delete-icon icon-remove pull-left"></i>
+        <i class="bb-edit-icon icon-pencil pull-right"></i>
+      {{/if}}
       {{name}}
     {{/if}}
       </h2>
@@ -52,7 +55,10 @@
       <input type="text" value="{{round.name}}"
              class="input-block-level" autofocus />
   {{else}}
-    {{#if canEdit}}<i class="bb-edit-icon icon-pencil pull-right"></i>{{/if}}
+    {{#if canEdit}}
+      <i class="bb-delete-icon icon-remove pull-left"></i>
+      <i class="bb-edit-icon icon-pencil pull-right"></i>
+    {{/if}}
     {{link id=round._id title=rX editing=canEdit}}
     <small>({{rX}})</small>
   {{/if}}
@@ -92,7 +98,10 @@
         <input type="text" value="{{puzzle.name}}"
                class="input-block-level" autofocus />
       {{else}}
-        {{#if canEdit}}<i class="bb-edit-icon icon-pencil pull-right"></i>{{/if}}
+        {{#if canEdit}}
+          <i class="bb-delete-icon icon-remove pull-left"></i>
+          <i class="bb-edit-icon icon-pencil pull-right"></i>
+        {{/if}}
         {{link id=puzzle._id title=rXpY editing=canEdit}}
       {{/if}}
       </div>
@@ -101,11 +110,16 @@
     <td class="puzzle-answer bb-editable"
         data-bbedit="puzzles/{{puzzle._id}}/answer">
       {{#if editing "puzzles" puzzle._id "answer"}}
-        <input type="text" value="{{puzzle.answer}}"
+        <input type="text" value="{{#if puzzle.answer}}{{puzzle.answer}}{{/if}}"
                class="input-block-level" autofocus />
       {{else}}
-        {{#if canEdit}}<i class="bb-edit-icon icon-pencil pull-right"></i>{{/if}}
+        {{#if canEdit}}
+          <i class="bb-edit-icon icon-pencil pull-right"></i>
+        {{/if}}
         {{#if puzzle.answer}}
+          {{#if canEdit}}
+            <i class="bb-delete-icon icon-remove pull-left"></i>
+          {{/if}}
           <span class="answer">{{puzzle.answer}}</span>
         {{/if}}
       {{/if}}
@@ -116,7 +130,12 @@
         <input type="text" value="{{status}}"
                class="input-block-level" autofocus />
       {{else}}
-        {{#if canEdit}}<i class="bb-edit-icon icon-pencil pull-right"></i>{{/if}}
+        {{#if canEdit}}
+          <i class="bb-edit-icon icon-pencil pull-right"></i>
+          {{#if status}}
+            <i class="bb-delete-icon icon-remove pull-left"></i>
+          {{/if}}
+        {{/if}}
         {{status}}
       {{/if}}
     </td>
@@ -155,7 +174,10 @@
         <input type="text" value="{{value}}"
                class="input-block-level" autofocus />
       {{else}}
-        {{#if canEdit}}<i class="bb-edit-icon icon-pencil pull-right"></i>{{/if}}
+        {{#if canEdit}}
+          <i class="bb-delete-icon icon-remove pull-left"></i>
+          <i class="bb-edit-icon icon-pencil pull-right"></i>
+        {{/if}}
         {{value}}
       {{/if}}
     </dd>
@@ -183,7 +205,10 @@
               <input type="text" value="{{value}}"
                      class="input-block-level" autofocus />
             {{else}}
-              {{#if canEdit}}<i class="bb-edit-icon icon-pencil pull-right"></i>{{/if}}
+              {{#if canEdit}}
+                <i class="bb-delete-icon icon-remove pull-left"></i>
+                <i class="bb-edit-icon icon-pencil pull-right"></i>
+              {{/if}}
               {{value}}
             {{/if}}
           </td>

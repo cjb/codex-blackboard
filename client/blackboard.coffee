@@ -86,6 +86,12 @@ Template.blackboard.events
   "click .bb-sort-order button": (event, template) ->
      reverse = $(event.currentTarget).attr('data-sortReverse') is 'true'
      Session.set 'sortReverse', reverse or undefined
+  "click .bb-canEdit .bb-delete-icon": (event, template) ->
+     event.stopPropagation() # keep .bb-editable from being processed!
+     edit = $(event.currentTarget).closest('*[data-bbedit]').attr('data-bbedit')
+     [type, id, rest...] = edit.split('/')
+     # XXX confirm delete?
+     processBlackboardEdit[type]?(null, id, rest...) # process delete
   "click .bb-canEdit .bb-editable": (event, template) ->
      edit = $(event.currentTarget).attr('data-bbedit')
      # note that we rely on 'blur' on old field (which triggers ok or cancel)
@@ -105,6 +111,7 @@ Template.blackboard.events okCancelEvents('.bb-editable input',
 )
 processBlackboardEdit =
   tags: (text, id, canon, field) ->
+    field = 'name' if text is null # special case for delete of status tag
     processBlackboardEdit["tags_#{field}"]?(text, id, canon)
   puzzles: (text, id, field) ->
     processBlackboardEdit["puzzles_#{field}"]?(text, id)
@@ -113,17 +120,31 @@ processBlackboardEdit =
   roundgroups: (text, id, field) ->
     processBlackboardEdit["roundgroups_#{field}"]?(text, id)
   puzzles_title: (text, id) ->
-    Meteor.call 'renamePuzzle', {id:id, name:text, who:Session.get('nick')}
+    if text is null # delete puzzle
+      Meteor.call 'deletePuzzle', {id:id, who:Session.get('nick')}
+    else
+      Meteor.call 'renamePuzzle', {id:id, name:text, who:Session.get('nick')}
   rounds_title: (text, id) ->
-    Meteor.call 'renameRound', {id:id, name:text, who:Session.get('nick')}
+    if text is null # delete round
+      Meteor.call 'deleteRound', {id:id, who:Session.get('nick')}
+    else
+      Meteor.call 'renameRound', {id:id, name:text, who:Session.get('nick')}
   roundgroups_title: (text, id) ->
-    Meteor.call 'renameRoundGroup', {id:id, name:text, who:Session.get('nick')}
+    if text is null # delete roundgroup
+      Meteor.call 'deleteRoundGroup', {id:id, who:Session.get('nick')}
+    else
+      Meteor.call 'renameRoundGroup', {id:id,name:text,who:Session.get('nick')}
   puzzles_answer: (text, id) ->
-    # how to delete answer?
-    Meteor.call 'setAnswer', id, text, Session.get('nick')
+    who = Session.get 'nick'
+    if text is null
+      Meteor.call 'deleteAnswer', id, who
+    else
+      Meteor.call 'setAnswer', id, text, who
   tags_name: (text, id, canon) ->
     who = Session.get('nick')
     n = Names.findOne(id)
+    if text is null # delete tag
+      return Meteor.call 'deleteTag', n.type, id, canon, who
     tags = collection(n.type).findOne(id).tags
     t = (tag for tag in tags when tag.canon is canon)[0]
     Meteor.call 'setTag', n.type, id, text, t.value, who, (error,result) ->

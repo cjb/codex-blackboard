@@ -138,17 +138,20 @@ body {
   h2 {
     border-bottom: 1px solid #e5e5e5;
     font-size: 200%;
-    .bb-edit-icon { margin-top: 13px; }
+    .bb-edit-icon, .bb-delete-icon { margin-top: 13px; }
   }
   h3 {
     font-size: 130%;
     line-height: 28px;
-    .bb-edit-icon { margin-top: 7px; }
+    .bb-edit-icon, .bb-delete-icon { margin-top: 7px; }
   }
   h2,h3 {
     margin-bottom: 0;
     position: relative; /* fixes z-order issues, makes whole width clickable */
-    .bb-edit-icon { margin-right: 5px; }
+    .bb-edit-icon, .bb-delete-icon {
+      &.pull-right { margin-right: 5px; }
+      &.pull-left  { margin-left: 4px; margin-right: 3px; }
+    }
   }
   .bb-sort-order {
     margin-top: 23px;
@@ -166,13 +169,21 @@ body {
       margin-left: (@tag-width + 10px);
       position: relative; /* fixes z-order, makes whole width clickable */
       .bb-edit-icon { margin-right: 5px; }
+      .bb-delete-icon { margin-right: 3px; }
+    }
+    dt,dd {
+      .bb-edit-icon, .bb-delete-icon { margin-top: 3px; }
     }
   }
   .bb-puzzle {
     margin-bottom: 0;
     th { background: #f8f8f8; }
-    .bb-edit-icon {
+    .bb-edit-icon, .bb-delete-icon {
       margin-top: 3px;
+    }
+    td .bb-delete-icon.pull-left {
+      margin-left: -2px;
+      margin-right: 3px;
     }
     .answer {
       font-family: 'Andale Mono', Courier, monospace;

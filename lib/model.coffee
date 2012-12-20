@@ -264,7 +264,11 @@ canonical = (s) ->
     renameRound: (args) ->
       renameObject "rounds", args
     deleteRound: (args) ->
+      rid = args.id
+      # remove round itself
       r = deleteObject "rounds", args
+      # remove from all roundgroups
+      RoundGroups.update { rounds: rid },{ $pull: rounds: rid },{ multi: true }
       # XXX: delete google drive folder
       # XXX: delete chat room logs?
       return r
@@ -282,7 +286,11 @@ canonical = (s) ->
       # XXX: rename google drive folder
       return r
     deletePuzzle: (args) ->
+      pid = args.id
+      # remove puzzle itself
       r = deleteObject "puzzles", args
+      # remove from all rounds
+      Rounds.update { puzzles: pid },{ $pull: puzzles: pid },{ multi: true }
       # XXX: delete google drive folder
       # XXX: delete chat room logs?
       return r
