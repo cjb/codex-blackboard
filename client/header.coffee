@@ -190,11 +190,14 @@ Template.header_lastupdates.lastupdates = ->
   if message[0].id
     type = ' ' + pretty_collection(message[0].type) + \
       (if message.length > 1 then 's ' else ' ')
+  uniq = (array) ->
+    seen = Object.create(null)
+    ((seen[o.id]=o) for o in array when not (o.id of seen))
   return {
     timestamp: message[0].timestamp
     message: message[0].message + type
     nick: message[0].nick
-    objects: ({type:m.type,id:m.id} for m in message)
+    objects: uniq({type:m.type,id:m.id} for m in message)
   }
 
 # subscribe when this template is in use/unsubscribe when it is destroyed
