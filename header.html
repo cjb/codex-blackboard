@@ -184,3 +184,26 @@
       </button>
     </div>
 </template>
+
+<template name="header_confirmmodal">
+  <div class="modal hide" id="confirmModal">
+    {{! only insert contents if visible; this lets us manage
+        dependencies so we're not updating invisible content }}
+    {{#if confirmModalVisible}}{{> header_confirmmodal_contents }}{{/if}}
+  </div>
+</template>
+
+<template name="header_confirmmodal_contents">
+  <div class="modal-header">
+    <button type="button" class="close" data-dismiss="modal"
+            aria-hidden="true">&times;</button>
+    <h3>Are you sure?</h3>
+  </div>
+  <div class="modal-body">
+    <p>{{options.message}}</p>
+  </div>
+  <div class="modal-footer">
+    <button class="btn bb-confirm-ok">{{options.ok_button}}</button>
+    <button class="btn btn-primary" data-dismiss="modal" aria-hidden="true">{{options.no_button}}</button>
+  </div>
+</template>

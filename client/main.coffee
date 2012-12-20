@@ -54,8 +54,9 @@ BlackboardRouter = Backbone.Router.extend
     Session.set "currentPage", page
     Session.set "type", type
     Session.set "id", id
-    # cancel modal if it was active
+    # cancel modals if they were active
     $('#nickPickModal').modal 'hide'
+    $('#confirmModal').modal 'hide'
 
   urlFor: (type,id) ->
     "/#{type}/#{id}"

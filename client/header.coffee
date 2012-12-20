@@ -168,6 +168,29 @@ ensureNick = (cb=(->)) ->
   else
     changeNick cb
 
+############## confirmation dialog ########################
+Template.header_confirmmodal.confirmModalVisible = ->
+  !!(Session.get 'confirmModalVisible')
+Template.header_confirmmodal.preserve ['#confirmModal']
+Template.header_confirmmodal_contents.created = ->
+  this.afterFirstRender = =>
+    $('#confirmModal').modal show: true
+Template.header_confirmmodal_contents.rendered = ->
+  this.afterFirstRender?()
+  this.afterFirstRender = undefined
+Template.header_confirmmodal_contents.events
+  "click .bb-confirm-ok": (event, template) ->
+     Template.header_confirmmodal_contents.cancel = false # do the thing!
+     $('#confirmModal').modal 'hide'
+
+confirmationDialog = (options) ->
+  $('#confirmModal').one 'hide', ->
+    Session.set 'confirmModalVisible', undefined
+    options.ok?() unless Template.header_confirmmodal_contents.cancel
+  # store away options before making dialog visible
+  Template.header_confirmmodal_contents.options = -> options
+  Template.header_confirmmodal_contents.cancel = true
+  Session.set 'confirmModalVisible', (options or Object.create(null))
 
 ############## operation log in header ####################
 Template.header_lastupdates.lastupdates = ->

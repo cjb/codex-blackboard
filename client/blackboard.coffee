@@ -90,8 +90,17 @@ Template.blackboard.events
      event.stopPropagation() # keep .bb-editable from being processed!
      edit = $(event.currentTarget).closest('*[data-bbedit]').attr('data-bbedit')
      [type, id, rest...] = edit.split('/')
-     # XXX confirm delete?
-     processBlackboardEdit[type]?(null, id, rest...) # process delete
+     message = "Are you sure you want to delete "
+     if (type is'tags') or (rest[0] is 'title')
+       message += "this #{pretty_collection(type)}?"
+     else
+       message += "the #{rest[0]} of this #{pretty_collection(type)}?"
+     confirmationDialog
+       ok_button: 'Yes, delete it'
+       no_button: 'No, cancel'
+       message: message
+       ok: ->
+         processBlackboardEdit[type]?(null, id, rest...) # process delete
   "click .bb-canEdit .bb-editable": (event, template) ->
      edit = $(event.currentTarget).attr('data-bbedit')
      # note that we rely on 'blur' on old field (which triggers ok or cancel)
