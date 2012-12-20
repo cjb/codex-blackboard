@@ -367,7 +367,8 @@ canonical = (s) ->
       throw new Meteor.Error(400, "bad fields") unless typeof(fields)=='object'
       now = UTCNow()
       # disallow modifications to the following fields; use other APIs for these
-      for f in ['name','canon','created','created_by','tags','rounds','puzzles']
+      for f in ['name','canon','created','created_by','solved','solved_by',
+               'tags','rounds','round_start','puzzles']
         delete fields[f]
       fields.touched = now
       fields.touched_by = canonical(who)
