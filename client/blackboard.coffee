@@ -22,6 +22,29 @@ Meteor.startup ->
           unless Session.get 'mute'
             blackboard.newAnswerSound.play()
 
+# Returns an event map that handles the "escape" and "return" keys and
+# "blur" events on a text input (given by selector) and interprets them
+# as "ok" or "cancel".
+# (Borrowed from Meteor 'todos' example.)
+okCancelEvents = (selector, callbacks) ->
+  ok = callbacks.ok or (->)
+  cancel = callbacks.cancel or (->)
+  evspec = ("#{ev} #{selector}" for ev in ['keyup','keydown','focusout'])
+  events = {}
+  events[evspec.join(', ')] = (evt) ->
+    if evt.type is "keydown" and evt.which is 27
+      # escape = cancel
+      cancel.call this, evt
+    else if evt.type is "keyup" and evt.which is 13 or evt.type is "focusout"
+      # blur/return/enter = ok/submit if non-empty
+      value = String(evt.target.value or "")
+      if value
+        ok.call this, value, evt
+      else
+        cancel.call this, evt
+  events
+
+######### general properties of the blackboard page ###########
 Template.blackboard.sortReverse = -> Session.get 'sortReverse'
 
 ############## groups, rounds, and puzzles ####################
@@ -65,7 +88,55 @@ Template.blackboard.events
      Session.set 'sortReverse', reverse or undefined
   "click .bb-canEdit .bb-editable": (event, template) ->
      edit = $(event.currentTarget).attr('data-bbedit')
+     # note that we rely on 'blur' on old field (which triggers ok or cancel)
+     # happening before 'click' on new field
      Session.set 'editing', edit
+Template.blackboard.events okCancelEvents('.bb-editable input',
+  ok: (text, evt) ->
+     # find the data-bbedit specification for this field
+     edit = $(evt.currentTarget).closest('*[data-bbedit]').attr('data-bbedit')
+     [type, id, rest...] = edit.split('/')
+     # strip leading/trailing whitespace from text (cancel if text is empty)
+     text = text.replace /^\s+|\s+$/, ''
+     processBlackboardEdit[type]?(text, id, rest...) if text
+     Session.set 'editing', undefined # done editing this
+  cancel: (evt) ->
+     Session.set 'editing', undefined # not editing anything anymore
+)
+processBlackboardEdit =
+  tags: (text, id, canon, field) ->
+    processBlackboardEdit["tags_#{field}"]?(text, id, canon)
+  puzzles: (text, id, field) ->
+    processBlackboardEdit["puzzles_#{field}"]?(text, id)
+  rounds: (text, id, field) ->
+    processBlackboardEdit["rounds_#{field}"]?(text, id)
+  roundgroups: (text, id, field) ->
+    processBlackboardEdit["roundgroups_#{field}"]?(text, id)
+  puzzles_title: (text, id) ->
+    Meteor.call 'renamePuzzle', {id:id, name:text, who:Session.get('nick')}
+  rounds_title: (text, id) ->
+    Meteor.call 'renameRound', {id:id, name:text, who:Session.get('nick')}
+  roundgroups_title: (text, id) ->
+    Meteor.call 'renameRoundGroup', {id:id, name:text, who:Session.get('nick')}
+  puzzles_answer: (text, id) ->
+    # how to delete answer?
+    Meteor.call 'setAnswer', id, text, Session.get('nick')
+  tags_name: (text, id, canon) ->
+    who = Session.get('nick')
+    n = Names.findOne(id)
+    tags = collection(n.type).findOne(id).tags
+    t = (tag for tag in tags when tag.canon is canon)[0]
+    Meteor.call 'setTag', n.type, id, text, t.value, who, (error,result) ->
+      if (t.canon isnt canonical(text)) and (not error)
+        Meteor.call 'deleteTag', n.type, id, t.name, who
+  tags_value: (text, id, canon) ->
+    n = Names.findOne(id)
+    tags = collection(n.type).findOne(id).tags
+    t = (tag for tag in tags when tag.canon is canon)[0]
+    # special case for 'status' tag, which might not previously exist
+    t = {name:'Status',canon:'status',value:''} if (canon is 'status') and not t
+    # set tag (overwriting previous value)
+    Meteor.call 'setTag', n.type, id, t.name, text, Session.get('nick')
 
 Template.blackboard_round.hasPuzzles = -> (this.round?.puzzles?.length > 0)
 # the following is a map() instead of a direct find() to preserve order

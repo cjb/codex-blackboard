@@ -26,15 +26,15 @@
     <h1>Codex Puzzle Blackboard</h1>
     {{#each roundgroups}}
     <section id="group{{_id}}">
-    {{#if editing "roundgroups" _id "title"}}
-      <h2><input type="text" value="{{name}}"
-                 class="input-block-level" autofocus /></h2>
-    {{else}}
       <h2 class="bb-editable" data-bbedit="roundgroups/{{_id}}/title">
+    {{#if editing "roundgroups" _id "title"}}
+      <input type="text" value="{{name}}"
+             class="input-block-level" autofocus />
+    {{else}}
       {{#if canEdit}}<i class="bb-edit-icon icon-pencil pull-right"></i>{{/if}}
       {{name}}
-      </h2>
     {{/if}}
+      </h2>
     {{#each rounds}}
       {{> blackboard_round }}
     {{/each}}
@@ -47,18 +47,16 @@
 
 <template name="blackboard_round">
   <section id="r{{round._id}}">
+  <h3 class="bb-editable" data-bbedit="rounds/{{round._id}}/title">
   {{#if editing "rounds" round._id "title"}}
-    <h3>
       <input type="text" value="{{round.name}}"
              class="input-block-level" autofocus />
-    </h3>
   {{else}}
-  <h3 class="bb-editable" data-bbedit="rounds/{{round._id}}/title">
     {{#if canEdit}}<i class="bb-edit-icon icon-pencil pull-right"></i>{{/if}}
     {{link id=round._id title=rX editing=canEdit}}
     <small>({{rX}})</small>
-  </h3>
   {{/if}}
+  </h3>
 
   {{#if hasPuzzles}}
   <table class="table table-bordered table-condensed bb-puzzle">
