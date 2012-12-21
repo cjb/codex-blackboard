@@ -229,6 +229,7 @@ canonical = (s) ->
     now = UTCNow()
 
     # Only perform the rename and oplog if the name is changing
+    # XXX: This is racy with updates to findOne().name.
     if collection(type).findOne(args.id).name is args.name
       return false
 
@@ -480,6 +481,7 @@ canonical = (s) ->
       now = UTCNow()
 
       # Only perform the update and oplog if the answer is changing
+      # XXX: This is racy with updates to findOne().answer.
       if Puzzles.findOne(id).answer is answer
         return false
 
