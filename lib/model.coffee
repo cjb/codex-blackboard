@@ -227,6 +227,11 @@ canonical = (s) ->
     throw new Meteor.Error(400, "missing name") unless args.name
     throw new Meteor.Error(400, "missing who") unless args.who
     now = UTCNow()
+
+    # Only perform the rename and oplog if the name is changing
+    if collection(type).findOne(args.id).name is args.name
+      return false
+
     collection(type).update args.id, $set:
       name: args.name
       canon: canonical(args.name)
@@ -473,6 +478,11 @@ canonical = (s) ->
       throw new Meteor.Error(400, "missing answer") unless answer
       throw new Meteor.Error(400, "missing who") unless who
       now = UTCNow()
+
+      # Only perform the update and oplog if the answer is changing
+      if Puzzles.findOne(id).answer is answer
+        return false
+
       Puzzles.update id, $set:
         answer: answer
         solved: now
