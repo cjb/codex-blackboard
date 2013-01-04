@@ -431,9 +431,9 @@ canonical = (s) ->
       # XXX (on server) loop if this update failed?
       return true
 
-    addRoundToGroup: (round, group, who) ->
-      rid = round._id or round
-      gid = group._id or group
+    addRoundToGroup: (args) ->
+      rid = args.round._id or args.round
+      gid = args.group._id or args.group
       # remove round from all other groups
       RoundGroups.update { rounds: rid },{ $pull: rounds: rid },{ multi: true }
       # add round to the given group

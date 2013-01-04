@@ -411,7 +411,7 @@ Meteor.startup ->
         for round in roundgroup.rounds
           Meteor.call "newRound", extend(round,{who:WHO,puzzles:null}), (error, r) ->
             throw error if error
-            Meteor.call "addRoundToGroup", r, rg, WHO
+            Meteor.call "addRoundToGroup", {round:r, group:rg, who:WHO}
             for chat in (round.chats or [])
               chat.room_name = "round/" + r._id
               Meteor.call "newMessage", chat
