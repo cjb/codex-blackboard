@@ -420,7 +420,7 @@ Meteor.startup ->
                 throw error if error
                 Meteor.call "addPuzzleToRound", p, r, WHO
                 if puzzle.answer
-                  Meteor.call "setAnswer", p._id, puzzle.answer, WHO
+                  Meteor.call "setAnswer", {puzzle:p._id, answer:puzzle.answer, who:WHO}
                 for chat in (puzzle.chats or [])
                   chat.room_name = "puzzle/" + p._id
                   Meteor.call "newMessage", chat

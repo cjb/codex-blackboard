@@ -473,25 +473,25 @@ canonical = (s) ->
                                                              args.after
       unimplemented()
 
-    setAnswer: (puzzle, answer, who) ->
-      id = puzzle._id or puzzle
+    setAnswer: (args) ->
+      id = args.puzzle._id or args.puzzle
       throw new Meteor.Error(400, "missing puzzle") unless id
-      throw new Meteor.Error(400, "missing answer") unless answer
-      throw new Meteor.Error(400, "missing who") unless who
+      throw new Meteor.Error(400, "missing answer") unless args.answer
+      throw new Meteor.Error(400, "missing who") unless args.who
       now = UTCNow()
 
       # Only perform the update and oplog if the answer is changing
       # XXX: This is racy with updates to findOne().answer.
-      if Puzzles.findOne(id).answer is answer
+      if Puzzles.findOne(id).answer is args.answer
         return false
 
       Puzzles.update id, $set:
-        answer: answer
+        answer: args.answer
         solved: now
-        solved_by: canonical(who)
+        solved_by: canonical(args.who)
         touched: now
-        touched_by: canonical(who)
-      oplog "Found an answer to", "puzzles", id, who
+        touched_by: canonical(args.who)
+      oplog "Found an answer to", "puzzles", id, args.who
       return true
 
     deleteAnswer: (puzzle, who) ->
