@@ -367,10 +367,10 @@ canonical = (s) ->
       throw new Meteor.Error(400, "missing id") unless args.id
       return collection(type).findOne(id)
 
-    getByName: (name, optional_type=null) ->
+    getByName: (args) ->
       for type in ['roundgroups','rounds','puzzles','nicks']
-        continue if optional_type and optional_type isnt type
-        o = collection(type).findOne canon: canonical(name)
+        continue if args.optional_type and args.optional_type isnt type
+        o = collection(type).findOne canon: canonical(args.name)
         return {type:type,object:o} if o
       return null # no match found
 
