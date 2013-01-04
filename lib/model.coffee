@@ -505,7 +505,7 @@ canonical = (s) ->
         solved_by: null
         touched: now
         touched_by: canonical(who)
-      oplog "Deleted answer", "puzzles", id, who
+      oplog "Deleted answer for", "puzzles", id, who
       return true
 
     getChatLog: (type, id, from=0) ->
