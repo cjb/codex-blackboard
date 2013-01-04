@@ -146,7 +146,7 @@ processBlackboardEdit =
   puzzles_answer: (text, id) ->
     who = Session.get 'nick'
     if text is null
-      Meteor.call 'deleteAnswer', id, who
+      Meteor.call 'deleteAnswer', {puzzle:id, who:who}
     else
       Meteor.call 'setAnswer', {puzzle:id, answer:text, who:who}
   tags_name: (text, id, canon) ->

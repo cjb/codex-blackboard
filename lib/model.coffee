@@ -494,18 +494,18 @@ canonical = (s) ->
       oplog "Found an answer to", "puzzles", id, args.who
       return true
 
-    deleteAnswer: (puzzle, who) ->
-      id = puzzle._id or puzzle
+    deleteAnswer: (args) ->
+      id = args.puzzle._id or args.puzzle
       throw new Meteor.Error(400, "missing puzzle") unless id
-      throw new Meteor.Error(400, "missing who") unless who
+      throw new Meteor.Error(400, "missing who") unless args.who
       now = UTCNow()
       Puzzles.update id, $set:
         answer: null
         solved: null
         solved_by: null
         touched: now
-        touched_by: canonical(who)
-      oplog "Deleted answer for", "puzzles", id, who
+        touched_by: canonical(args.who)
+      oplog "Deleted answer for", "puzzles", id, args.who
       return true
 
     getChatLog: (type, id, from=0) ->
