@@ -440,9 +440,9 @@ canonical = (s) ->
       RoundGroups.update gid, $addToSet: rounds: rid
       return true
 
-    addPuzzleToRound: (puzzle, round, who) ->
-      pid = puzzle._id or puzzle
-      rid = round._id or round
+    addPuzzleToRound: (args) ->
+      pid = args.puzzle._id or args.puzzle
+      rid = args.round._id or args.round
       # remove puzzle from all other rounds
       Rounds.update { puzzles: pid },{ $pull: puzzles: pid },{ multi: true }
       # add puzzle to the given round

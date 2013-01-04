@@ -418,7 +418,7 @@ Meteor.startup ->
             for puzzle in round.puzzles
               Meteor.call "newPuzzle", extend(puzzle,{who:WHO}), (error, p) ->
                 throw error if error
-                Meteor.call "addPuzzleToRound", p, r, WHO
+                Meteor.call "addPuzzleToRound", {puzzle:p, round:r, who:WHO}
                 if puzzle.answer
                   Meteor.call "setAnswer", {puzzle:p._id, answer:puzzle.answer, who:WHO}
                 for chat in (puzzle.chats or [])
