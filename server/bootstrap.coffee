@@ -411,16 +411,16 @@ Meteor.startup ->
         for round in roundgroup.rounds
           Meteor.call "newRound", extend(round,{who:WHO,puzzles:null}), (error, r) ->
             throw error if error
-            Meteor.call "addRoundToGroup", r, rg, WHO
+            Meteor.call "addRoundToGroup", {round:r, group:rg, who:WHO}
             for chat in (round.chats or [])
               chat.room_name = "round/" + r._id
               Meteor.call "newMessage", chat
             for puzzle in round.puzzles
               Meteor.call "newPuzzle", extend(puzzle,{who:WHO}), (error, p) ->
                 throw error if error
-                Meteor.call "addPuzzleToRound", p, r, WHO
+                Meteor.call "addPuzzleToRound", {puzzle:p, round:r, who:WHO}
                 if puzzle.answer
-                  Meteor.call "setAnswer", p._id, puzzle.answer, WHO
+                  Meteor.call "setAnswer", {puzzle:p._id, answer:puzzle.answer, who:WHO}
                 for chat in (puzzle.chats or [])
                   chat.room_name = "puzzle/" + p._id
                   Meteor.call "newMessage", chat
