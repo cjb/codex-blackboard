@@ -17,11 +17,21 @@
   {{/isolate}}
   <div id="bb-tables" class="span10 {{#if canEdit}}bb-canEdit{{/if}}">
     <!-- content div -->
-<div class="btn-group pull-right bb-sort-order">
+<div class="btn-toolbar pull-right bb-top-buttons">
+    {{#if canEdit}}
+     <div class="btn-group">
+     <button class="btn btn-mini btn-inverse">
+       <i class="bb-add-icon icon-plus icon-white"></i>
+       Add new round group
+     </button>
+     </div>
+    {{/if}}
+<div class="btn-group bb-sort-order">
   <button class="btn btn-small {{#if sortReverse}}active{{/if}}"
           data-sortReverse="true">Newest rounds first</button>
   <button class="btn btn-small {{#unless sortReverse}}active{{/unless}}"
           data-sortReverse="false">Oldest rounds first</button>
+</div>
 </div>
     <h1>Codex Puzzle Blackboard</h1>
     {{#each roundgroups}}
@@ -38,10 +48,28 @@
       {{name}}
     {{/if}}
       </h2>
+    {{>blackboard_tags}}
+  {{#if canEdit}}
+     <button class="btn btn-mini btn-inverse">
+       <i class="bb-add-icon icon-plus icon-white"></i>
+       Add new round to this group
+     </button>
+     <button class="btn btn-mini btn-inverse">
+       <i class="bb-add-tag icon-tag icon-white"></i>
+       Add new tag to this group
+     </button>
+     <button class="btn btn-mini btn-inverse">
+       <i class="bb-move-down icon-arrow-down icon-white"></i>
+       Move group down
+     </button>
+     <button class="btn btn-mini btn-inverse">
+       <i class="bb-move-up icon-arrow-up icon-white"></i>
+       Move group up
+     </button>
+  {{/if}}
     {{#each rounds}}
       {{> blackboard_round }}
     {{/each}}
-    {{>blackboard_tags}}
     </section>
     {{/each}}
   </div><!-- bb-tables -->
@@ -80,9 +108,27 @@
     {{/each}}
   </table>
   {{else}}
-  <i>No puzzles in this round yet.</i>
+  <p><i>No puzzles in this round yet.</i></p>
   {{/if}}
   {{#with round}}{{>blackboard_tags}}{{/with}}
+  {{#if canEdit}}
+     <button class="btn btn-mini btn-inverse">
+       <i class="bb-add-icon icon-plus icon-white"></i>
+       Add new puzzle to this round
+     </button>
+     <button class="btn btn-mini btn-inverse">
+       <i class="bb-add-tag icon-tag icon-white"></i>
+       Add new tag to this round
+     </button>
+     <button class="btn btn-mini btn-inverse">
+       <i class="bb-move-down icon-arrow-down icon-white"></i>
+       Move round down
+     </button>
+     <button class="btn btn-mini btn-inverse">
+       <i class="bb-move-up icon-arrow-up icon-white"></i>
+       Move round up
+     </button>
+  {{/if}}
   </section>
 </template>
 
