@@ -267,6 +267,8 @@ drive_id_to_link = (id) ->
     renameRoundGroup: (args) ->
       renameObject "roundgroups", args
     deleteRoundGroup: (args) ->
+      # XXX disallow deletion unless roundgroup.rounds is empty?
+      # XXX or else move rounds to some other group(s)
       deleteObject "roundgroups", args
 
     newRound: (args) ->
@@ -277,6 +279,8 @@ drive_id_to_link = (id) ->
       renameObject "rounds", args
     deleteRound: (args) ->
       rid = args.id
+      # XXX disallow deletion unless round.puzzles is empty?
+      # XXX or else move puzzles to some other round(s)
       # remove round itself
       r = deleteObject "rounds", args
       # remove from all roundgroups
