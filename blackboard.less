@@ -156,6 +156,9 @@ body {
   .bb-top-buttons {
     margin-top: 23px;
   }
+  .bb-roundgroup-buttons, .bb-round-buttons {
+    margin-top: 5px;
+  }
   dl {
     margin: 0;
     &:empty { display: none; }
@@ -203,6 +206,7 @@ body {
     td,th { padding-top: 0; padding-bottom: 0; }
     /* try to make table spacing more-or-less consistent */
     td,th {
+      position: relative; /* fix z-order issues, make whole width clickable */
       width: 10%;
       &.puzzle-name, &.puzzle-answer { width: 35%; }
       &.puzzle-update { width: 100px; min-width: 100px; }

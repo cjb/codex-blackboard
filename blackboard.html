@@ -20,7 +20,7 @@
 <div class="btn-toolbar pull-right bb-top-buttons">
     {{#if canEdit}}
      <div class="btn-group">
-     <button class="btn btn-mini btn-inverse">
+     <button class="btn btn-mini btn-inverse bb-add-round-group">
        <i class="bb-add-icon icon-plus icon-white"></i>
        Add new round group
      </button>
@@ -50,22 +50,24 @@
       </h2>
     {{>blackboard_tags}}
   {{#if canEdit}}
-     <button class="btn btn-mini btn-inverse">
-       <i class="bb-add-icon icon-plus icon-white"></i>
+  <div class="bb-roundgroup-buttons" data-bbedit="roundgroups/{{_id}}">
+     <button class="btn btn-mini btn-inverse bb-add-round">
+       <i class="icon-plus icon-white"></i>
        Add new round to this group
      </button>
-     <button class="btn btn-mini btn-inverse">
-       <i class="bb-add-tag icon-tag icon-white"></i>
+     <button class="btn btn-mini btn-inverse bb-add-tag">
+       <i class="icon-tag icon-white"></i>
        Add new tag to this group
      </button>
-     <button class="btn btn-mini btn-inverse">
-       <i class="bb-move-down icon-arrow-down icon-white"></i>
+     <button class="btn btn-mini btn-inverse bb-move-group-down">
+       <i class="icon-arrow-down icon-white"></i>
        Move group down
      </button>
-     <button class="btn btn-mini btn-inverse">
-       <i class="bb-move-up icon-arrow-up icon-white"></i>
+     <button class="btn btn-mini btn-inverse bb-move-group-up">
+       <i class="icon-arrow-up icon-white"></i>
        Move group up
      </button>
+   </div>
   {{/if}}
     {{#each rounds}}
       {{> blackboard_round }}
@@ -112,22 +114,24 @@
   {{/if}}
   {{#with round}}{{>blackboard_tags}}{{/with}}
   {{#if canEdit}}
-     <button class="btn btn-mini btn-inverse">
-       <i class="bb-add-icon icon-plus icon-white"></i>
+  <div class="bb-round-buttons" data-bbedit="rounds/{{round._id}}">
+     <button class="btn btn-mini btn-inverse bb-add-puzzle">
+       <i class="icon-plus icon-white"></i>
        Add new puzzle to this round
      </button>
-     <button class="btn btn-mini btn-inverse">
-       <i class="bb-add-tag icon-tag icon-white"></i>
+     <button class="btn btn-mini btn-inverse bb-add-tag">
+       <i class="icon-tag icon-white"></i>
        Add new tag to this round
      </button>
-     <button class="btn btn-mini btn-inverse">
-       <i class="bb-move-down icon-arrow-down icon-white"></i>
+     <button class="btn btn-mini btn-inverse bb-move-round-down">
+       <i class="icon-arrow-down icon-white"></i>
        Move round down
      </button>
-     <button class="btn btn-mini btn-inverse">
-       <i class="bb-move-up icon-arrow-up icon-white"></i>
+     <button class="btn btn-mini btn-inverse bb-move-round-up">
+       <i class="icon-arrow-up icon-white"></i>
        Move round up
      </button>
+  </div>
   {{/if}}
   </section>
 </template>
