@@ -5,6 +5,9 @@
 # client/server load.
 PRESENCE_KEEPALIVE_MINUTES = 2
 
+# URL for google-drive python server
+GDRIVE_HOST = 'http://hydro.laptop.org:5000'
+
 BBCollection = Object.create(null) # create new object w/o any inherited cruft
 
 # OpLogs are:
@@ -182,6 +185,9 @@ canonical = (s) ->
   s = s.replace(/[^a-z0-9]+/, '_').replace(/^_/,'').replace(/_$/,'')
   return s
 
+drive_id_to_link = (id) ->
+  return "https://docs.google.com/folder/d/#{id}/edit"
+
 (->
   # private helpers, not exported
   unimplemented = -> throw new Meteor.Error(500, "Unimplemented")
@@ -285,19 +291,42 @@ canonical = (s) ->
         solved: null
         solved_by: null
         drive: args.drive or null
-      # XXX: create google drive folder (server only)
+      # create google drive folder (server only)
+      return p unless Meteor.isServer
+      Meteor.http.post("#{GDRIVE_HOST}/puzzle/Codex: #{p.name}", (err, res) ->
+        if err
+          console.log "Error creating puzzle on Google Drive: ", err
+        if res.data
+          Puzzles.update p._id, { $set: drive: res.data.id }
+      )
       return p
+
     renamePuzzle: (args) ->
+      # get drive ID (racy)
+      drive = Puzzles.findOne(args.id)?.drive
       r = renameObject "puzzles", args
-      # XXX: rename google drive folder
+      # rename google drive folder
+      return r unless Meteor.isServer
+      Meteor.http.call("MOVE", "#{GDRIVE_HOST}/puzzle/#{drive}/Codex: #{args.name}", (err, res) ->
+        if err
+          console.log "Error renaming puzzle on Google Drive: ", err
+      )
       return r
+
     deletePuzzle: (args) ->
       pid = args.id
+      # get drive ID (racy)
+      drive = Puzzles.findOne(args.id)?.drive
       # remove puzzle itself
       r = deleteObject "puzzles", args
       # remove from all rounds
       Rounds.update { puzzles: pid },{ $pull: puzzles: pid },{ multi: true }
-      # XXX: delete google drive folder
+      # delete google drive folder
+      return r unless Meteor.isServer
+      Meteor.http.del("#{GDRIVE_HOST}/puzzle/#{drive}", (err, res) ->
+        if err
+          console.log "Error deleting puzzle on Google Drive: ", err
+      )
       # XXX: delete chat room logs?
       return r
 
