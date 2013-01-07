@@ -42,8 +42,10 @@
              class="input-block-level" autofocus />
     {{else}}
       {{#if canEdit}}
-        <i class="bb-delete-icon icon-remove pull-left"></i>
-        <i class="bb-edit-icon icon-pencil pull-right"></i>
+        <i class="bb-delete-icon icon-remove pull-left"
+           title="Delete this round group"></i>
+        <i class="bb-edit-icon icon-pencil pull-right"
+           title="Edit the name of this round group"></i>
       {{/if}}
       {{name}}
     {{/if}}
@@ -86,8 +88,10 @@
              class="input-block-level" autofocus />
   {{else}}
     {{#if canEdit}}
-      <i class="bb-delete-icon icon-remove pull-left"></i>
-      <i class="bb-edit-icon icon-pencil pull-right"></i>
+      <i class="bb-delete-icon icon-remove pull-left"
+         title="Delete this round"></i>
+      <i class="bb-edit-icon icon-pencil pull-right"
+         title="Edit the name of this round"></i>
     {{/if}}
     {{link id=round._id title=rX editing=canEdit}}
     <small>({{rX}})</small>
@@ -149,8 +153,10 @@
                class="input-block-level" autofocus />
       {{else}}
         {{#if canEdit}}
-          <i class="bb-delete-icon icon-remove pull-left"></i>
-          <i class="bb-edit-icon icon-pencil pull-right"></i>
+          <i class="bb-delete-icon icon-remove pull-left"
+             title="Delete this puzzle"></i>
+          <i class="bb-edit-icon icon-pencil pull-right"
+             title="Edit the name of this puzzle"></i>
         {{/if}}
         {{link id=puzzle._id title=rXpY editing=canEdit}}
       {{/if}}
@@ -171,11 +177,13 @@
                class="input-block-level" autofocus />
       {{else}}
         {{#if canEdit}}
-          <i class="bb-edit-icon icon-pencil pull-right"></i>
+          <i class="bb-edit-icon icon-pencil pull-right"
+             title="Change the answer of this puzzle"></i>
         {{/if}}
         {{#if puzzle.answer}}
           {{#if canEdit}}
-            <i class="bb-delete-icon icon-remove pull-left"></i>
+            <i class="bb-delete-icon icon-remove pull-left"
+               title="Delete the answer to this puzzle"></i>
           {{/if}}
           <span class="answer">{{puzzle.answer}}</span>
         {{/if}}
@@ -188,9 +196,11 @@
                class="input-block-level" autofocus />
       {{else}}
         {{#if canEdit}}
-          <i class="bb-edit-icon icon-pencil pull-right"></i>
+          <i class="bb-edit-icon icon-pencil pull-right"
+             title="Change the status of this puzzle"></i>
           {{#if status}}
-            <i class="bb-delete-icon icon-remove pull-left"></i>
+            <i class="bb-delete-icon icon-remove pull-left"
+               title="Delete the status message for this puzzle"></i>
           {{/if}}
         {{/if}}
         {{status}}
@@ -221,7 +231,10 @@
         <input type="text" value="{{name}}"
                class="input-block-level" autofocus />
       {{else}}
-        {{#if canEdit}}<i class="bb-edit-icon icon-pencil pull-left"></i>{{/if}}
+        {{#if canEdit}}
+          <i class="bb-edit-icon icon-pencil pull-left"
+             title="Edit the name of this tag"></i>
+        {{/if}}
         {{name}}:
       {{/if}}
      </dt>
@@ -232,8 +245,10 @@
                class="input-block-level" autofocus />
       {{else}}
         {{#if canEdit}}
-          <i class="bb-delete-icon icon-remove pull-left"></i>
-          <i class="bb-edit-icon icon-pencil pull-right"></i>
+          <i class="bb-delete-icon icon-remove pull-left"
+             title="Delete this tag and value"></i>
+          <i class="bb-edit-icon icon-pencil pull-right"
+             title="Edit the value of this tag"></i>
         {{/if}}
         {{value}}
       {{/if}}
@@ -252,7 +267,10 @@
               <input type="text" value="{{name}}"
                      class="input-block-level" autofocus />
             {{else}}
-              {{#if canEdit}}<i class="bb-edit-icon icon-pencil pull-left"></i>{{/if}}
+              {{#if canEdit}}
+                <i class="bb-edit-icon icon-pencil pull-left"
+                   title="Edit the name of this tag"></i>
+              {{/if}}
               {{name}}:
             {{/if}}
           </td>
@@ -263,8 +281,10 @@
                      class="input-block-level" autofocus />
             {{else}}
               {{#if canEdit}}
-                <i class="bb-delete-icon icon-remove pull-left"></i>
-                <i class="bb-edit-icon icon-pencil pull-right"></i>
+                <i class="bb-delete-icon icon-remove pull-left"
+                   title="Delete this tag and value"></i>
+                <i class="bb-edit-icon icon-pencil pull-right"
+                   title="Change the value of this tag"></i>
               {{/if}}
               {{value}}
             {{/if}}
