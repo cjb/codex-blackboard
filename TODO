@@ -116,3 +116,6 @@ x fix chat presence breakage on main page (maybe related to pub/sub refactor)
 - completion of nicks in the message compose box
 - mouseover images should also scroll up if necessary
 - DDP unset support (if unset leaves an empty object, remove the object)
+- when deleting round/round groups, add the contained rounds/puzzles to a new
+  'unnamed' group/round?
+- move puzzles up/down
