@@ -155,6 +155,10 @@
         {{link id=puzzle._id title=rXpY editing=canEdit}}
       {{/if}}
       </div>
+      <div class="bb-add-tag" data-bbedit="puzzles/{{puzzle._id}}">
+        <i class="icon-tags"></i>
+        <i class="icon-plus"></i>
+      </div>
       {{#with puzzle}}{{>blackboard_puzzle_tags}}{{/with}}
     </td>
     <td class="puzzle-answer bb-editable"

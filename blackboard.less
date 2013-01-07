@@ -115,6 +115,8 @@ body {
     &.bb-editable { min-height: 24px; }
   }
   .bb-tag-table td.bb-editable { min-height: 24px; }
+  /* tweak table column to make room for add tag icon */
+  td.puzzle-name { padding-right: 20px; }
 }
 #bb-tables {
   background: white;
@@ -191,6 +193,21 @@ body {
     .answer {
       font-family: 'Andale Mono', Courier, monospace;
       text-transform: uppercase;
+    }
+    .puzzle-name .bb-add-tag {
+      display: inline-block; width: 14px; height: 14px;
+      position: absolute; right: 0; top: 0;
+      cursor: pointer;
+      i { position: absolute; top: 0; left: 0; }
+      i + i {
+       top: 3px;
+       -webkit-transform-origin: bottom left;
+          -moz-transform-origin: bottom left;
+               transform-origin: bottom left;
+       -webkit-transform: scale(0.5);
+          -moz-transform: scale(0.5);
+               transform: scale(0.5);
+      }
     }
     .bb-tag-table {
       font-size: 90%;
