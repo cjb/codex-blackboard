@@ -64,10 +64,7 @@ Template.messages.body = ->
   body = body.replace(/\n|\r\n?/g, '<br/>')
   body = convertURLsToLinksAndImages(body)
   body = highlightNick(body) unless this.system
-  if (body.slice(0,4) == "/me ")
-    new Handlebars.SafeString(body.slice(4))
-  else
-    new Handlebars.SafeString(body)
+  new Handlebars.SafeString(body)
 
 Template.chat_header.room_name = -> prettyRoomName()
 Template.chat_header.whos_here = ->
@@ -188,17 +185,39 @@ $("#joinRoom").live "submit", ->
   return false
 
 $("#messageForm").live "submit", (e) ->
+  e.preventDefault() # don't actually submit the form!
   $message = $ "#messageInput"
   message  = $message.val()
   $message.val ""
-  if message
-    Meteor.call 'newMessage', {
-      nick: Session.get "nick"
-      body: message
-      action: (message.slice(0,4) is "/me ")
-      room_name: Session.get "room_name"}
-
-  return false
+  return unless message
+  args =
+    nick: Session.get 'nick'
+    room_name: Session.get 'room_name'
+    body: message
+  [word1, rest] = message.split(/\s+([^]*)/, 2)
+  switch word1
+    when "/me"
+      args.body = rest
+      args.action = true
+    when "/msg"
+      # find who it's to
+      [to, rest] = rest.split(/\s+([^]*)/, 2)
+      while rest
+        n = Nicks.findOne canon: canonical(to)
+        break if n
+        [extra, rest] = rest.split(/\s+([^]*)/, 2)
+        to += ' ' + extra
+      if n
+        args.body = rest
+        args.to = to
+      else
+        # error: unknown user
+        # record this attempt as a PM to yourself
+        args.to = args.nick
+        args.body = "tried to /msg an UNKNOWN USER: " + message
+        args.action = true
+  Meteor.call 'newMessage', args
+  return
 
 
 # alert for unread messages
