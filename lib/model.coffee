@@ -283,9 +283,9 @@ drive_id_to_link = (id) ->
         if 0 <= newPos < sibs.length
           return [parentType, parent?._id, newPos, sibs[newPos], sameLevel]
         # otherwise, need to go up a level.
-        upSibId = parent._id
+        upSibId = parent?._id
         sameLevel = false
-        return [parentType, null, 0, null, sameLevel] unless parent
+        return [parentType, null, 0, null, sameLevel] unless upSibId
         loop
           [upType, upId, upPos, upSibId, _] = adjSib(parentType, upSibId, dir, true)
           return [parentType, null, 0, null, sameLevel] unless upSibId # no more sibs
@@ -301,14 +301,25 @@ drive_id_to_link = (id) ->
     dir = if direction is 'up' then 'prev' else 'next'
     [parentType,newParent,newPos,adjId,sameLevel] = adjSib(type,id,dir,false)
     args = if (direction is 'up') is sameLevel then {before:adjId} else {after:adjId}
-    return false unless newParent # can't go further in this direction
     switch type
       when 'puzzles'
+        return false unless newParent # can't go further in this direction
         [args.puzzle, args.round] = [id, newParent]
         Meteor.call 'addPuzzleToRound', args
       when 'rounds'
+        return false unless newParent # can't go further in this direction
         [args.round, args.group] = [id, newParent]
         Meteor.call 'addRoundToGroup', args
+      when 'roundgroups'
+        return false unless adjId # can't go further in this direction
+        # this is a bit of a hack!
+        thisGroup = RoundGroups.findOne(id)
+        thatGroup = RoundGroups.findOne(adjId)
+        # swap creation times! (i told you this was a hack)
+        [thisCreated,thatCreated] = [thisGroup.created, thatGroup.created]
+        RoundGroups.update thisGroup._id, $set: created: thatCreated
+        RoundGroups.update thatGroup._id, $set: created: thisCreated
+        return true # it's a hack and we know it, clap your hands
       else
         throw new Meteor.Error(400, "bad type: #{type}")
 
