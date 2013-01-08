@@ -61,14 +61,16 @@
        <i class="icon-tag icon-white"></i>
        Add new tag to this group
      </button>
-     <button class="btn btn-mini btn-inverse bb-move-group-down">
+    <!--
+     <button class="btn btn-mini btn-inverse bb-move-down">
        <i class="icon-arrow-down icon-white"></i>
        Move group down
      </button>
-     <button class="btn btn-mini btn-inverse bb-move-group-up">
+     <button class="btn btn-mini btn-inverse bb-move-up">
        <i class="icon-arrow-up icon-white"></i>
        Move group up
      </button>
+    -->
    </div>
   {{/if}}
     {{#each rounds}}
@@ -127,11 +129,11 @@
        <i class="icon-tag icon-white"></i>
        Add new tag to this round
      </button>
-     <button class="btn btn-mini btn-inverse bb-move-round-down">
+     <button class="btn btn-mini btn-inverse bb-move-down">
        <i class="icon-arrow-down icon-white"></i>
        Move round down
      </button>
-     <button class="btn btn-mini btn-inverse bb-move-round-up">
+     <button class="btn btn-mini btn-inverse bb-move-up">
        <i class="icon-arrow-up icon-white"></i>
        Move round up
      </button>
@@ -162,10 +164,14 @@
       {{/if}}
       </div>
       {{#if canEdit}}
-        <div class="bb-add-tag" data-bbedit="puzzles/{{puzzle._id}}"
+        <div class="bb-puzzle-add-move" data-bbedit="puzzles/{{puzzle._id}}">
+        <button class="btn btn-link bb-add-tag"
              title="Add tag to puzzle">
           <i class="icon-tags"></i>
           <i class="icon-plus"></i>
+        </button>
+        <button class="btn btn-link bb-move-down"><i class="icon-arrow-down"></i></a>
+        <button class="btn btn-link bb-move-up"><i class="icon-arrow-up"></i></button>
         </div>
       {{/if}}
       {{#with puzzle}}{{>blackboard_puzzle_tags}}{{/with}}

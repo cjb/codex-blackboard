@@ -14,7 +14,7 @@
   x add 'mute' and 'admin' buttons to top header.  (admin should enable
     editing functionality, as well as the ensureNick template)
   x also display current nick (if any) in top header, allow logout/switching
-  - add 'edit' links or buttons or somesuch to add new round/puzzle/tag
+  x add 'edit' links or buttons or somesuch to add new round/puzzle/tag
     (only visible when in 'admin mode')
   - separate "zoomed out" view where puzzles are a big color-coded grid,
     and you can easily see which puzzles are not solved?
@@ -36,7 +36,7 @@ x Improve the 'ensureNick' modal, do nick completion and allow display
   and (optional) setting full name associated with nick; this will help
   disambiguate if you accidentally choose the same nick as someone else.
 . Finish implementing functionality of spec.txt in lib/model.coffee
-  - carefully implement puzzle/round reordering functions, use
+  x carefully implement puzzle/round reordering functions, use
     MongoDB findAndModify() operation to avoid race conditions when
     rewriting reordered array
      (http://docs.mongodb.org/manual/tutorial/isolate-sequence-of-operations/)
@@ -118,4 +118,4 @@ x fix chat presence breakage on main page (maybe related to pub/sub refactor)
 - DDP unset support (if unset leaves an empty object, remove the object)
 - when deleting round/round groups, add the contained rounds/puzzles to a new
   'unnamed' group/round?
-- move puzzles up/down
+x move puzzles up/down

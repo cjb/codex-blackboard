@@ -115,6 +115,13 @@ Template.blackboard.events
      alertify.prompt "Name of new tag:", (e,str) ->
         return unless e # bail if cancelled
         Meteor.call 'setTag', type, id, str, '', who
+  "click .bb-move-up, click .bb-move-down": (event, template) ->
+     [type, id, rest...] = template.find_bbedit(event)
+     up = event.currentTarget.classList.contains('bb-move-up')
+     # flip direction if sort order is inverted
+     up = (!up) if (Session.get 'sortReverse') and type isnt 'puzzles'
+     method = if up then 'moveUp' else 'moveDown'
+     Meteor.call method, {type:type, id:id, who:Session.get('nick')}
   "click .bb-canEdit .bb-delete-icon": (event, template) ->
      event.stopPropagation() # keep .bb-editable from being processed!
      [type, id, rest...] = template.find_bbedit(event)

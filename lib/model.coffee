@@ -259,6 +259,59 @@ drive_id_to_link = (id) ->
     collection(type).remove(args.id)
     return true
 
+  parentObject = do ->
+    lookup =
+      puzzles: (id) -> ['rounds', Rounds.findOne(puzzles: id)]
+      rounds: (id) -> ['roundgroups', RoundGroups.findOne(rounds: id)]
+      roundgroups: (id) -> [null, null]
+    (type, id) -> lookup[type]?(id)
+
+  moveObject = (type, id, direction) ->
+    throw new Meteor.Error(400, "missing type") unless type
+    throw new Meteor.Error(400, "missing id") unless id
+
+    adjSib = (type, id, dir, nonempty=true) ->
+        sameLevel = true
+        if type is 'roundgroups'
+          parentType = parent = null
+          sibs = RoundGroups.find({}, sort: ['created']).map (rg)->rg._id
+        else
+          [parentType, parent] = parentObject(type, id)
+          sibs = parent[type]
+        pos = sibs.indexOf(id)
+        newPos = if dir is 'prev' then (pos-1) else (pos+1)
+        if 0 <= newPos < sibs.length
+          return [parentType, parent?._id, newPos, sibs[newPos], sameLevel]
+        # otherwise, need to go up a level.
+        upSibId = parent._id
+        sameLevel = false
+        return [parentType, null, 0, null, sameLevel] unless parent
+        loop
+          [upType, upId, upPos, upSibId, _] = adjSib(parentType, upSibId, dir, true)
+          return [parentType, null, 0, null, sameLevel] unless upSibId # no more sibs
+          # check that this sibling has children (if nonempty is true)
+          prevSibs = collection(parentType).findOne(upSibId)[type]
+          newPos = if dir is 'prev' then (prevSibs.length - 1) else 0
+          if 0 <= newPos < prevSibs.length
+            return [parentType, upSibId, newPos, prevSibs[newPos], sameLevel]
+          if prevSibs.length==0 and not nonempty
+             return [parentType, upSibId, 0, null, sameLevel]
+          # crap, adjacent parent has no children, need *next* parent (loop)
+
+    dir = if direction is 'up' then 'prev' else 'next'
+    [parentType,newParent,newPos,adjId,sameLevel] = adjSib(type,id,dir,false)
+    args = if (direction is 'up') is sameLevel then {before:adjId} else {after:adjId}
+    return false unless newParent # can't go further in this direction
+    switch type
+      when 'puzzles'
+        [args.puzzle, args.round] = [id, newParent]
+        Meteor.call 'addPuzzleToRound', args
+      when 'rounds'
+        [args.round, args.group] = [id, newParent]
+        Meteor.call 'addRoundToGroup', args
+      else
+        throw new Meteor.Error(400, "bad type: #{type}")
+
   Meteor.methods
     newRoundGroup: (args) ->
       newObject "roundgroups", args,
@@ -467,18 +520,48 @@ drive_id_to_link = (id) ->
     addRoundToGroup: (args) ->
       rid = args.round._id or args.round
       gid = args.group._id or args.group
+      rg = RoundGroups.findOne(gid)
+      throw new Meteor.Error(400, "bad group") unless rg
       # remove round from all other groups
       RoundGroups.update { rounds: rid },{ $pull: rounds: rid },{ multi: true }
       # add round to the given group
+      if args.before or args.after
+        # add to a specific location
+        rounds = (r for r in rg.rounds when r != rid)
+        nrounds = rounds[..]
+        if args.before
+           npos = rounds.indexOf(args.before)
+        else
+           npos = rounds.indexOf(args.after) + 1
+        nrounds.splice(npos, 0, rid)
+        # update the collection only if there wasn't a race
+        RoundGroups.update {_id: gid, rounds: rounds}, $set: rounds: nrounds
+      # add to the end (no-op if the 'at' clause succeeded)
       RoundGroups.update gid, $addToSet: rounds: rid
       return true
 
     addPuzzleToRound: (args) ->
       pid = args.puzzle._id or args.puzzle
       rid = args.round._id or args.round
+      r = Rounds.findOne(rid)
+      throw new Meteor.Error(400, "bad round") unless r
       # remove puzzle from all other rounds
       Rounds.update { puzzles: pid },{ $pull: puzzles: pid },{ multi: true }
       # add puzzle to the given round
+      if args.before or args.after
+        # add to a specific location
+        puzzles = (p for p in r.puzzles when p != pid)
+        npuzzles = puzzles[..]
+        if puzzles.length == 0
+           npos = 0
+        else if args.before
+           npos = puzzles.indexOf(args.before)
+        else
+           npos = puzzles.indexOf(args.after) + 1
+        npuzzles.splice(npos, 0, pid)
+        # update the collection only if there wasn't a race
+        Rounds.update {_id: rid, puzzles: puzzles}, $set: puzzles: npuzzles
+      # add to the end (no-op if the 'at' clause succeeded)
       Rounds.update rid, $addToSet: puzzles: pid
       return true
 
@@ -492,19 +575,9 @@ drive_id_to_link = (id) ->
       throw new Meteor.Error(400, "missing round") unless id
       return RoundGroups.findOne(rounds: id)
 
-    reorderPuzzle: (puzzle, args) ->
-      id = puzzle._id or puzzle
-      throw new Meteor.Error(400, "missing puzzle") unless id
-      throw new Meteor.Error(400, "missing position") unless args.before or
-                                                             args.after
-      unimplemented()
+    moveUp: (args) -> moveObject(args.type, args.id, "up")
 
-    reorderRound: (round, args) ->
-      id = round._id or round
-      throw new Meteor.Error(400, "missing round") unless id
-      throw new Meteor.Error(400, "missing position") unless args.before or
-                                                             args.after
-      unimplemented()
+    moveDown: (args) -> moveObject(args.type, args.id, "down")
 
     setAnswer: (args) ->
       id = args.puzzle._id or args.puzzle

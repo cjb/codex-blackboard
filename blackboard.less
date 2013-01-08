@@ -115,8 +115,8 @@ body {
     &.bb-editable { min-height: 24px; }
   }
   .bb-tag-table td.bb-editable { min-height: 24px; }
-  /* tweak table column to make room for add tag icon */
-  td.puzzle-name { padding-right: 20px; }
+  /* tweak table column to make room for add tag/up/down icons */
+  td.puzzle-name { padding-right: (14px)*3 + 4px; }
 }
 #bb-tables {
   background: white;
@@ -194,19 +194,30 @@ body {
       font-family: 'Andale Mono', Courier, monospace;
       text-transform: uppercase;
     }
-    .puzzle-name .bb-add-tag {
-      display: inline-block; width: 14px; height: 14px;
-      position: absolute; right: 2px; top: 1px;
-      cursor: pointer;
-      i { position: absolute; top: 0; left: 0; }
-      i + i {
-       top: 3px;
-       -webkit-transform-origin: bottom left;
-          -moz-transform-origin: bottom left;
-               transform-origin: bottom left;
-       -webkit-transform: scale(0.5);
-          -moz-transform: scale(0.5);
-               transform: scale(0.5);
+    .puzzle-name .bb-puzzle-add-move {
+      display: block; width: 14px*3; height: 14px;
+      position: absolute; right: 2px; top: 3px;
+      .bb-add-tag, .bb-move-up, .bb-move-down {
+        float: left;
+        i { margin-top: 0px; }
+      }
+      button {
+        padding: 0; margin: 0; border: none; text-shadow: none;
+        line-height: 14px; height: 14px;
+      }
+      .bb-add-tag {
+        display: inline-block; width: 14px; height: 14px;
+        position: relative;
+        i { position: absolute; top: 0; left: 0; }
+        i + i {
+         top: 3px;
+         -webkit-transform-origin: bottom left;
+            -moz-transform-origin: bottom left;
+                 transform-origin: bottom left;
+         -webkit-transform: scale(0.5);
+            -moz-transform: scale(0.5);
+                 transform: scale(0.5);
+        }
       }
     }
     .bb-tag-table {
