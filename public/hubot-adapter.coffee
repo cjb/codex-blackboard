@@ -4,18 +4,23 @@ Adapter                                 = require '../adapter'
 
 DDPClient = require("/home/cjb/meteor/node-ddp-client/lib/ddp-client")
 
+BOT_NAME = "codexbot"
+
 class Blackboardbot extends Adapter
   run: ->
     self = @
-    @robot.name = "codexbot"
+    @robot.name = BOT_NAME
     @ready = false
 
     initial_cb = ->
       @ready = true
-      self.ddpclient.call "deleteNick", ["name": "codexbot", "tags": {}]
-      self.ddpclient.call "newNick", ["name": "codexbot", "tags": {}]
+      # XXX 'deleteNick' needs a Nicks id, not a name.  Could use
+      # call "getByName", [optional_type: "nicks", name: BOT_NAME]
+      # to fetch id, then delete it if exists.  Is that worth it?
+      self.ddpclient.call "deleteNick", ["name": BOT_NAME]
+      self.ddpclient.call "newNick", ["name": BOT_NAME, "tags": {}]
       self.ddpclient.call "setPresence", [
-        nick: "codexbot"
+        nick: BOT_NAME
         room_name: "general/0"
         present: true
         foreground: true
@@ -24,7 +29,7 @@ class Blackboardbot extends Adapter
 
     update_cb = (data) ->
       if @ready
-        if data.set.nick isnt "codexbot" and data.set.system is false and data.set.nick isnt ""
+        if data.set.nick isnt BOT_NAME and data.set.system is false and data.set.nick isnt ""
           self.receive new TextMessage data.set.nick, data.set.body
 
     # Connect to Meteor
@@ -37,7 +42,7 @@ class Blackboardbot extends Adapter
   send: (user, strings...) ->
     self = @
     self.ddpclient.call "newMessage", [
-      nick: "codexbot"
+      nick: BOT_NAME
       body: "#{user}: #{strings}"
     ]
 
