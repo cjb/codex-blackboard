@@ -37,7 +37,7 @@ class Blackboardbot extends Adapter
     @robot.ddpclient = self.ddpclient
     self.ddpclient.connect ->
       console.log "connected!"
-      self.ddpclient.subscribe "recent-messages", ["general/0"], initial_cb, update_cb, "messages"
+      self.ddpclient.subscribe "recent-messages", [BOT_NAME, "general/0"], initial_cb, update_cb, "messages"
 
   send: (user, strings...) ->
     self = @

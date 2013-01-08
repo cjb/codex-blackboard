@@ -101,6 +101,7 @@ if Meteor.isServer
 #   nick: canonicalized string (may match some Nicks.canon ... or not)
 #   system: boolean (true for system messages, false for user messages)
 #   action: boolean (true for /me commands)
+#   to:   destination of pm (optional)
 #   room_name: "<type>/<id>", ie "puzzle/1", "round/1". "general/0" for main chat.
 #   timestamp: timestamp
 Messages = BBCollection.messages = new Meteor.Collection "messages"
@@ -421,6 +422,7 @@ drive_id_to_link = (id) ->
         nick: canonical(args.nick or "")
         system: args.system or false
         action: args.action or false
+        to: canonical(args.to or "") or null
         room_name: args.room_name or "general/0"
         timestamp: UTCNow()
       newMsg._id = Messages.insert newMsg

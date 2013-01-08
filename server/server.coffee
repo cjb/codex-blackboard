@@ -33,16 +33,25 @@ Meteor.publish 'my-nick', (nick) -> Nicks.find canon: canonical(nick)
 
 MESSAGE_PAGE = 150 # a page is 150 messages
 # only publish last page of messages
-Meteor.publish 'recent-messages', (room_name) ->
-  Messages.find {room_name: room_name},
+Meteor.publish 'recent-messages', (nick, room_name) ->
+  nick = nick or null
+  Messages.find {
+    room_name: room_name
+    $or: [ { nick: nick }, { to: $in: [null, nick] } ]
+  },
     sort:[["timestamp","desc"]]
     limit: MESSAGE_PAGE
 
 # paged version: specify page boundary by timestamp, so we can display
 # 'more' messages by passing in the timestamp of the first message
 # on the current page we're looking at
-Meteor.publish 'paged-messages', (room_name, timestamp) ->
-   Messages.find {room_name: room_name, timestamp: $lte: timestamp},
+Meteor.publish 'paged-messages', (nick, room_name, timestamp) ->
+  nick = nick or null
+  Messages.find {
+    room_name: room_name
+    timestamp: $lte: timestamp
+    $or: [ { nick: nick }, { to: $in: [null, nick] } ]
+  },
      sort: [['timestamp','desc']]
      limit: MESSAGE_PAGE
 

@@ -17,7 +17,8 @@ instachat["unreadMessages"]          = 0
 Meteor.autosubscribe ->
   return unless Session.equals("currentPage", "chat")
   room_name = Session.get 'room_name'
-  Meteor.subscribe 'recent-messages', room_name if room_name
+  nick = Session.get 'nick' or null
+  Meteor.subscribe 'recent-messages', nick, room_name if room_name
   Meteor.subscribe 'presence-for-room', room_name if room_name
   Meteor.subscribe 'all-nicks' # for gravatars, etc. could be nick-for-room...
 

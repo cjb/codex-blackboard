@@ -248,6 +248,11 @@ Template.header_lastchats.pretty_ts = (ts) -> Template.messages.pretty_ts ts
 
 # subscribe when this template is in use/unsubscribe when it is destroyed
 Template.header_lastchats.created = ->
-  this.sub = Meteor.subscribe 'recent-messages', 'general/0'
+  this.run = Meteor.autorun =>
+    # use autorun to ensure subscription changes if/when nick does
+    nick = Session.get('nick')
+    this.sub?.stop?()
+    this.sub = Meteor.subscribe 'recent-messages', nick, 'general/0'
 Template.header_lastchats.destroyed = ->
   this.sub.stop()
+  this.run.stop()
