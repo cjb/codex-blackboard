@@ -301,6 +301,11 @@ drive_id_to_link = (id) ->
     dir = if direction is 'up' then 'prev' else 'next'
     [parentType,newParent,newPos,adjId,sameLevel] = adjSib(type,id,dir,false)
     args = if (direction is 'up') is sameLevel then {before:adjId} else {after:adjId}
+    # now do the move.  note that there are races, in that we're not guaranteed
+    # some other concurrent re-ordering/insertions haven't made this the
+    # 'wrong' place to insert --- but we *are* going to insert it *somewhere*
+    # regardless.  Hopefully the user will notice and forgive us if the
+    # object ends up slightly out of place.
     switch type
       when 'puzzles'
         return false unless newParent # can't go further in this direction
