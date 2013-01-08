@@ -70,10 +70,10 @@ x add mute button to front page (use instachat's button/cookie?)
     (i think hubot-scripts uses some functionality like this)
   - file upload via the google drive folder attached to the puzzle/round
   - nick completion (@foo?)
-  - show who's in the room
-  - add "last updates" notification bar?
+  x show who's in the room
+  x add "last updates" notification bar?
   - link nicks in log to popover of nick info, including picture?
-- chatbot (based on hubot?) [talk to cjb]
+x chatbot (based on hubot?) [talk to cjb]
 - IRC or Jabber gateway
 x fix round/puzzle ordering bug in blackboard
 - fix smooth scrolling leak
@@ -119,3 +119,5 @@ x fix chat presence breakage on main page (maybe related to pub/sub refactor)
 - when deleting round/round groups, add the contained rounds/puzzles to a new
   'unnamed' group/round?
 x move puzzles up/down
+- chat archive page
+- oplog archive page
