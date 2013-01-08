@@ -3,7 +3,7 @@
 
 # link various types of objects
 Handlebars.registerHelper 'link', (args) ->
-  args = if typeof(args) is 'string' then {id:args} else args.hash
+  args = if (not args?) or (typeof(args) is 'string') then {id:args} else args.hash
   n = Names.findOne(args.id)
   return args.id.slice(0,8) unless n
   return n.name if args.editing
@@ -18,6 +18,11 @@ $('a.puzzles-link, a.rounds-link, a.chat-link, a.home-link').live 'click', (even
   return unless event.button is 0 # check right-click
   event.preventDefault()
   Router.navigate $(this).attr('href'), {trigger:true}
+
+Handlebars.registerHelper 'drive_link', (args) ->
+  console.log args, typeof(args)
+  args = if (not args?) or (typeof(args) is 'string') then {id:args} else args.hash
+  return drive_id_to_link(args.id)
 
 # gravatars
 Handlebars.registerHelper 'gravatar', (args) ->
