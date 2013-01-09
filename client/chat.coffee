@@ -17,14 +17,17 @@ instachat["unreadMessages"]          = 0
 Meteor.autosubscribe ->
   return unless Session.equals("currentPage", "chat")
   room_name = Session.get 'room_name'
+  return unless room_name
   nick = Session.get 'nick' or null
-  Meteor.subscribe 'recent-messages', nick, room_name if room_name
-  Meteor.subscribe 'presence-for-room', room_name if room_name
+  timestamp = (+Session.get('timestamp')) or Number.MAX_VALUE
+  Meteor.subscribe 'presence-for-room', room_name
+  Meteor.subscribe 'paged-messages', nick, room_name, timestamp
   # we always subscribe to all-nicks... but otherwise we could subscribe to
   # nick-for-room or some such
 
 Meteor.autosubscribe ->
   return unless Session.equals("currentPage", "chat")
+  return unless (+Session.get('timestamp')) is 0
   # the autosubscribe magic will tear down 'observe's
   # live query handle when room_name or currentPage changes
   Messages.find
@@ -35,20 +38,40 @@ Meteor.autosubscribe ->
       unreadMessage(item) unless item.system
 
 # Template Binding
+Template.messages.room_name = -> Session.get('room_name')
+Template.messages.timestamp = -> +Session.get('timestamp')
 Template.messages.messages  = ->
-  Messages.find {room_name: Session.get("room_name")}, {sort:['timestamp']}
+  timestamp = (+Session.get('timestamp')) or Number.MAX_VALUE
+  messages = Messages.find
+    room_name: Session.get("room_name")
+    timestamp: $lt: timestamp
+  ,
+    sort: [['timestamp',"desc"]]
+    limit: MESSAGE_PAGE
+  sameNick = do ->
+    prevContext = null
+    (m) ->
+      thisContext = m.nick + (if m.to then "/#{m.to}" else "")
+      thisContext = null if m.system or m.action
+      result = thisContext? and (thisContext == prevContext)
+      prevContext = thisContext
+      return result
+  for m, i in messages.fetch().reverse()
+    first: ("/chat/#{Session.get 'room_name'}/#{m.timestamp}" if i is 0)
+    followup: sameNick(m)
+    message: m
 
 Template.messages.email = ->
-  cn = canonical(this.nick)
+  cn = canonical(this.message.nick)
   n = Nicks.findOne canon: cn
   return getTag(n, 'Gravatar') or "#{cn}@#{DEFAULT_HOST}"
 
 Template.messages.body = ->
-  body = this.body
+  body = this.message.body
   body = Handlebars._escape(body)
   body = body.replace(/\n|\r\n?/g, '<br/>')
   body = convertURLsToLinksAndImages(body)
-  body = highlightNick(body) unless this.system
+  body = highlightNick(body) unless this.message.system
   new Handlebars.SafeString(body)
 
 Template.chat_header.room_name = -> prettyRoomName()
@@ -202,6 +225,9 @@ $("#messageForm").live "submit", (e) ->
         args.body = "tried to /msg an UNKNOWN USER: " + message
         args.action = true
   Meteor.call 'newMessage', args
+  # make sure we're looking at the most recent messages
+  if (+Session.get('timestamp'))
+    Router.navigate "/chat/#{Session.get 'room_name'}", {trigger:true}
   return
 
 

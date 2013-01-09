@@ -36,6 +36,7 @@ BlackboardRouter = Backbone.Router.extend
     "rounds/:round": "RoundPage"
     "puzzles/:puzzle": "PuzzlePage"
     "chat/:type/:id": "ChatPage"
+    "chat/:type/:id/:timestamp": "ChatPage"
     "oplogs/:timestamp": "OpLogPage"
 
   BlackboardPage: ->
@@ -47,10 +48,11 @@ BlackboardRouter = Backbone.Router.extend
   PuzzlePage: (id) ->
     this.Page("puzzle", "puzzles", id)
 
-  ChatPage: (type,id) ->
+  ChatPage: (type,id,timestamp=0) ->
     id = "0" if type is "general"
     this.Page("chat", type, id)
     Session.set "room_name", (type+'/'+id)
+    Session.set "timestamp", +timestamp
 
   OpLogPage: (timestamp) ->
     this.Page("oplog", "general", "0")

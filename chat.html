@@ -42,34 +42,49 @@
 
 <template name="messages">
   <div id="messages" class="row-fluid bb-chat-messages">
-        {{#each messages}}
-          {{#if system}}
+    {{#each messages}}
+      {{#if first}}
+        <p align="center">
+          <a href="{{first}}" class="chat-link">See earlier messages</a>
+        </p>
+      {{/if}}
+      {{#if message.system}}
 <div class="bb-message-system">
-   <div class="pull-right timestamp">{{pretty_ts timestamp}}</div>
+   <div class="pull-right timestamp">{{pretty_ts message.timestamp}}</div>
      {{body}}
    </div>
 </div>
-          {{else}}{{#if action}}
+      {{else}}{{#if message.action}}
 <div class="bb-message-action">
-   <div class="pull-right timestamp">{{pretty_ts timestamp}}</div>
+   <div class="pull-right timestamp">{{pretty_ts message.timestamp}}</div>
      <i class="icon-hand-right"></i>
-     {{nickOrName nick}} {{body}}
+     {{nickOrName message.nick}} {{body}}
    </div>
 </div>
-          {{else}}
-<div class="media {{#if to}}bb-message-pm{{/if}}">
+      {{else}}
+<div class="media {{#if message.to}}bb-message-pm{{/if}}">
   {{gravatar id=email image="wavatar" size=64 classes="media-object pull-left img-rounded" }}
   <div class="media-body bb-message-body">
-    <div class="pull-right timestamp">{{pretty_ts timestamp}}</div>
-    <h5 class="media-heading"><span title="{{nick}}">{{nickOrName nick}}</span>
-    {{#if to}}
-    <small>(Private message to {{nickOrName to}})</small>
+    <div class="pull-right timestamp">{{pretty_ts message.timestamp}}</div>
+    <h5 class="media-heading"><span title="{{message.nick}}">{{nickOrName message.nick}}</span>
+    {{#if message.to}}
+    <small>(Private message to {{nickOrName message.to}})</small>
     {{/if}}
     </h5>
     {{body}}
   </div>
 </div>
-          {{/if}}{{/if}}
-        {{/each}}
+      {{/if}}{{/if}}
+    {{else}}
+      <p align="center">
+No chat messages{{#if timestamp}} before {{pretty_ts timestamp}}{{/if}}.
+      </p>
+    {{/each}}
+
+    {{#if timestamp}}
+      <p align="center">
+      <a href="/chat/{{room_name}}" class="chat-link">See more recent logs</a>
+      </p>
+    {{/if}}
   </div>
 </template>
