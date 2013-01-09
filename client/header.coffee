@@ -1,9 +1,16 @@
 # templates, event handlers, and subscriptions for the site-wide
 # header bar, including the login modals and general Handlebars helpers
 
+keyword_or_positional = (name, args) ->
+  return args.hash unless (not args?) or \
+    (typeof(args) is 'string') or (typeof(args) is 'number')
+  a = {}
+  a[name] = args
+  return a
+
 # link various types of objects
 Handlebars.registerHelper 'link', (args) ->
-  args = if (not args?) or (typeof(args) is 'string') then {id:args} else args.hash
+  args = keyword_or_positional 'id', args
   n = Names.findOne(args.id)
   return args.id.slice(0,8) unless n
   return n.name if args.editing
@@ -14,29 +21,41 @@ Handlebars.registerHelper 'link', (args) ->
   link += '</a>'
   return new Handlebars.SafeString(link)
 
-$('a.puzzles-link, a.rounds-link, a.chat-link, a.home-link').live 'click', (event) ->
+$('a.puzzles-link, a.rounds-link, a.chat-link, a.home-link, a.oplogs-link').live 'click', (event) ->
   return unless event.button is 0 # check right-click
   event.preventDefault()
   Router.navigate $(this).attr('href'), {trigger:true}
 
 Handlebars.registerHelper 'drive_link', (args) ->
-  args = if (not args?) or (typeof(args) is 'string') then {id:args} else args.hash
+  args = keyword_or_positional 'id', args
   return drive_id_to_link(args.id)
 
 # nicks
 Handlebars.registerHelper 'nickOrName', (args) ->
-  args = if (not args?) or (typeof(args) is 'string') then {nick:args} else args.hash
-  nick = args.nick
+  nick = (keyword_or_positional 'nick', args).nick
   n = Nicks.findOne canon: canonical(nick)
   return getTag(n, 'Real Name') or nick
 
 # gravatars
 Handlebars.registerHelper 'gravatar', (args) ->
-  args = if (not args?) or (typeof(args) is 'string') then {id:args} else args.hash
+  args = keyword_or_positional 'id', args
   g = $.gravatar(args.id, args)
   # hacky cross-platform version of 'outerHTML'
   html = $('<div>').append( g.eq(0).clone() ).html();
   return new Handlebars.SafeString(html)
+
+# timestamps
+Handlebars.registerHelper 'pretty_ts', (args) ->
+  timestamp = (keyword_or_positional 'timestamp', args).timestamp
+  return unless timestamp
+  d = new Date(timestamp)
+  hrs = d.getHours()
+  ampm = if hrs < 12 then 'AM' else 'PM'
+  hrs = 12 if hrs is 0
+  hrs = (hrs-12) if hrs > 12
+  min = d.getMinutes()
+  min = if min < 10 then "0" + min else min
+  hrs + ":" + min + ' ' + ampm
 
 ############## log in/protect/mute panel ####################
 Template.header_loginmute.volumeIcon = ->
@@ -258,7 +277,6 @@ Template.header_lastchats.lastchats = ->
         {sort: [["timestamp","desc"]], limit: LIMIT}
   m = m.fetch().reverse()
   return m
-Template.header_lastchats.pretty_ts = (ts) -> Template.messages.pretty_ts ts
 
 # subscribe when this template is in use/unsubscribe when it is destroyed
 Template.header_lastchats.created = ->

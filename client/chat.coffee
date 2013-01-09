@@ -43,17 +43,6 @@ Template.messages.email = ->
   n = Nicks.findOne canon: cn
   return getTag(n, 'Gravatar') or "#{cn}@#{DEFAULT_HOST}"
 
-Template.messages.pretty_ts = (timestamp) ->
-  return unless timestamp
-  d = new Date(timestamp)
-  hrs = d.getHours()
-  ampm = if hrs < 12 then 'AM' else 'PM'
-  hrs = 12 if hrs is 0
-  hrs = (hrs-12) if hrs > 12
-  min = d.getMinutes()
-  min = if min < 10 then "0" + min else min
-  hrs + ":" + min + ' ' + ampm
-
 Template.messages.body = ->
   body = this.body
   body = Handlebars._escape(body)
