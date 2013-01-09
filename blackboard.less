@@ -1,3 +1,20 @@
+@font-face
+{
+  font-family: "Inconsolata";
+  src: url("../fonts/Inconsolata.otf");
+}
+
+@font-face
+{
+  font-family: "Droid Sans";
+  src: url("../fonts/DroidSans.ttf");
+}
+@font-face
+{
+  font-family: "Droid Sans Bold";
+  src: url("../fonts/DroidSans-Bold.ttf");
+}
+
 .ellipsis {
   overflow: hidden;
   text-overflow: ellipsis;
@@ -21,6 +38,7 @@
 body {
   background: url('/img/grid_noise.png');
   background-attachment: fixed;
+  font-family: 'Droid Sans', sans-serif;
 }
 .bb-puzzleround, .bb-chat-messages {
   margin-top: 40px; /* allow space for breadcrumbs in navbar */
@@ -200,7 +218,7 @@ body {
       margin-right: 3px;
     }
     .answer {
-      font-family: 'Andale Mono', Courier, monospace;
+      font-family: 'Inconsolata', 'Andale Mono', Courier, monospace;
       text-transform: uppercase;
     }
     .puzzle-name .bb-puzzle-add-move {
