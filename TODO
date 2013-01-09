@@ -28,9 +28,9 @@
   - like puzzle info page?
   x display rXmeta info (subtly) just in case things go pear-shaped
 x Implement full-window chat screen (port InstaChat), link from blackboard
-. Implement paginated chat log archive page
-  - and truncate full-window log at the same time
-. Implement paginated database operation log page, link from blackboard
+x Implement paginated chat log archive page
+  x and truncate full-window log at the same time
+x Implement paginated database operation log page, link from blackboard
 - Implement 'nick' page, edit real name, set tags, set picture?
 x Improve the 'ensureNick' modal, do nick completion and allow display
   and (optional) setting full name associated with nick; this will help
@@ -76,7 +76,7 @@ x add mute button to front page (use instachat's button/cookie?)
 x chatbot (based on hubot?) [talk to cjb]
 - IRC or Jabber gateway
 x fix round/puzzle ordering bug in blackboard
-- fix smooth scrolling leak
+x fix smooth scrolling leak
 x add rXpY numbering
 x appropriately link puzzle/round names appearing in the update log.
   x add general 'link' helper which takes a type/id and generates the
@@ -102,22 +102,22 @@ x refactor some subscriptions to being done in template create/destroy
   oplog header should subscribe to recent oplogs,
   chat header should take care of its own subscription to recent-messages, etc.
 x fix chat presence breakage on main page (maybe related to pub/sub refactor)
-- combine multiple consecutive chat bubbles from same sender
+x combine multiple consecutive chat bubbles from same sender
 - combine multiple consecutive system messages
 - newline support in chat
   - shift-return or paste in the new message box should turn it into a
     text box
-  - when displaying messages, replace \n with <br>
-- private messages?
-  - 'pm' field in messages collection; only people whose nicks match
+  x when displaying messages, replace \n with <br>
+x private messages?
+  x 'pm' field in messages collection; only people whose nicks match
     the pm field get those messages
+  x /msg support?
   - codexbot's help should be a pm
-  - /msg support?
 - completion of nicks in the message compose box
 - mouseover images should also scroll up if necessary
 - DDP unset support (if unset leaves an empty object, remove the object)
 - when deleting round/round groups, add the contained rounds/puzzles to a new
   'unnamed' group/round?
 x move puzzles up/down
-- chat archive page
-- oplog archive page
+x chat archive page
+x oplog archive page
