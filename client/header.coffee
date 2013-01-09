@@ -23,6 +23,13 @@ Handlebars.registerHelper 'drive_link', (args) ->
   args = if (not args?) or (typeof(args) is 'string') then {id:args} else args.hash
   return drive_id_to_link(args.id)
 
+# nicks
+Handlebars.registerHelper 'nickOrName', (args) ->
+  args = if (not args?) or (typeof(args) is 'string') then {nick:args} else args.hash
+  nick = args.nick
+  n = Nicks.findOne canon: canonical(nick)
+  return getTag(n, 'Real Name') or nick
+
 # gravatars
 Handlebars.registerHelper 'gravatar', (args) ->
   args = if (not args?) or (typeof(args) is 'string') then {id:args} else args.hash
@@ -75,7 +82,8 @@ Template.header_nickmodal.nickModalVisible = -> Session.get 'nickModalVisible'
 Template.header_nickmodal.preserve ['#nickPickModal']
 Template.header_nickmodal_contents.nick = -> Session.get "nick" or ''
 Template.header_nickmodal_contents.created = ->
-  this.sub = Meteor.subscribe 'all-nicks'
+  # we'd need to subscribe to 'all-nicks' here if we didn't have a permanent
+  # subscription to it (in main.coffee)
   this.afterFirstRender = =>
     $('#nickPickModal').one 'hide', ->
       Session.set 'nickModalVisible', undefined
@@ -114,8 +122,6 @@ Template.header_nickmodal_contents.created = ->
 Template.header_nickmodal_contents.rendered = ->
   this.afterFirstRender?()
   this.afterFirstRender = undefined
-Template.header_nickmodal_contents.destroyed = ->
-  this.sub.stop()
 Template.header_nickmodal_contents.events
   "click .bb-submit": (event, template) ->
     $('#nickPick').submit()

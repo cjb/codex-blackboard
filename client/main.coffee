@@ -23,10 +23,8 @@ DEFAULT_HOST = 'ihtfp.us' # this is used to create gravatars from nicks
 
 # subscribe to the all-names feed all the time
 Meteor.subscribe 'all-names'
-# always subscribe to your own nick
-Meteor.autosubscribe ->
-  return unless Session.get('nick')
-  Meteor.subscribe 'my-nick', Session.get('nick')
+# subscribe to all nicks all the time
+Meteor.subscribe 'all-nicks'
 
 # Router
 BlackboardRouter = Backbone.Router.extend

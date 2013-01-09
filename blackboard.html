@@ -141,7 +141,8 @@
 </template>
 
 <template name="nick_presence">
-<span class="nick {{#unless foreground}}background{{/unless}}">{{nick}}</span>
+<span class="nick {{#unless foreground}}background{{/unless}}"
+      title="{{nickOrName nick}}">{{nick}}</span>
 </template>
 
 <template name="blackboard_puzzle">

@@ -20,7 +20,8 @@ Meteor.autosubscribe ->
   nick = Session.get 'nick' or null
   Meteor.subscribe 'recent-messages', nick, room_name if room_name
   Meteor.subscribe 'presence-for-room', room_name if room_name
-  Meteor.subscribe 'all-nicks' # for gravatars, etc. could be nick-for-room...
+  # we always subscribe to all-nicks... but otherwise we could subscribe to
+  # nick-for-room or some such
 
 Meteor.autosubscribe ->
   return unless Session.equals("currentPage", "chat")
@@ -52,10 +53,6 @@ Template.messages.pretty_ts = (timestamp) ->
   min = d.getMinutes()
   min = if min < 10 then "0" + min else min
   hrs + ":" + min + ' ' + ampm
-
-Template.messages.nickOrName = (nick) ->
-  n = Nicks.findOne canon: canonical(nick)
-  return getTag(n, 'Real Name') or nick
 
 Template.messages.body = ->
   body = this.body

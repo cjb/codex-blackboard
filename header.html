@@ -100,7 +100,7 @@
     <span class="timestamp">{{pretty_ts timestamp}}</span>
     {{message}}
     <span class="comma-list">{{#each objects}}{{link id}}{{/each}}</span>
-    {{#if nick}} (<strong>{{nick}}</strong>){{/if}}
+    {{#if nick}} (<strong title="{{nickOrName nick}}">{{nick}}</strong>){{/if}}
     {{/with}}
     </span>
   </div>
@@ -120,10 +120,10 @@
     <p class="messageRow">
     <span class="timestamp">{{pretty_ts timestamp}}</span>
     {{#if action}}
-      <strong>{{nick}}</strong> {{body}}
+      <strong title="{{nickOrName nick}}">{{nick}}</strong> {{body}}
     {{else}}
-      <strong>{{nick}}:</strong>
-      {{#if to}}/msg {{to}}{{/if}}
+      <strong title="{{nickOrName nick}}">{{nick}}:</strong>
+      {{#if to}}/msg <span title="{{nickOrName to}}">{{to}}</span>{{/if}}
       {{body}}
     {{/if}}
     </p>
