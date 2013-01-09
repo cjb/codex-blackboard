@@ -43,6 +43,13 @@
             border-radius: 6px;
     .media-heading { margin-bottom: 0; color: #666; }
   }
+  .bb-message-pm {
+    @bb-message-pm-color: rgb(232,237,255);
+    .bb-message-body {
+      background-color: @bb-message-pm-color;
+    }
+    &.media:after { border-right-color: @bb-message-pm-color; }
+  }
   .bb-message-system {
     color: #888;
     font-size: 12px;

@@ -53,8 +53,7 @@ Template.messages.pretty_ts = (timestamp) ->
   min = if min < 10 then "0" + min else min
   hrs + ":" + min + ' ' + ampm
 
-Template.messages.nickOrName = ->
-  nick = this.nick
+Template.messages.nickOrName = (nick) ->
   n = Nicks.findOne canon: canonical(nick)
   return getTag(n, 'Real Name') or nick
 
