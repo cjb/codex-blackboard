@@ -16,7 +16,7 @@ Template.puzzle.rendered = ->
 # presumably we also want to subscribe to the puzzle's chat room
 # and presence information at some point.
 Meteor.autosubscribe ->
-  return unless Session.equals("currentPage", "puzzle")
+  return unless Session.equals("type", "puzzles")
   puzzle_id = Session.get('id')
   return unless puzzle_id
   Meteor.subscribe 'puzzle-by-id', puzzle_id

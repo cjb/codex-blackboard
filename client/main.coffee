@@ -12,6 +12,9 @@ do -> for v in ['currentPage']
 Handlebars.registerHelper 'currentPageEquals', (arg) ->
   # register a more precise dependency on the value of currentPage
   Session.equals 'currentPage', arg
+Handlebars.registerHelper 'typeEquals', (arg) ->
+  # register a more precise dependency on the value of type
+  Session.equals 'type', arg
 Handlebars.registerHelper 'canEdit', () ->
   (Session.get 'nick') and (Session.get 'canEdit')
 Handlebars.registerHelper 'editing', (args..., options) ->

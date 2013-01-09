@@ -12,6 +12,7 @@
 </template>
 
 <template name="chat_header">
+  {{#unless "true"}}
   <form id="joinRoom" class="form-search pull-left">
     <div class="input-prepend">
       <span class='add-on'>Room name:</span>
@@ -19,6 +20,7 @@
              value="{{room_name}}" />
     </div>
   </form>
+  {{/unless}}
   <div class="navbar-text bb-chat-presence">
     <span class="label label-inverse">
     Hunters present:

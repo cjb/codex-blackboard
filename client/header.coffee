@@ -77,6 +77,20 @@ Template.header_loginmute.events
     Session.set 'canEdit', canEdit or undefined
     Session.set 'editing', undefined # abort current edit, whatever it is
 
+############## breadcrumbs #######################
+Template.header_breadcrumbs.round = ->
+  if Session.equals('type', 'puzzles')
+    Rounds.findOne puzzles: Session.get("id")
+  else if Session.equals('type', 'rounds')
+    Rounds.findOne Session.get('id')
+  else null
+Template.header_breadcrumbs.puzzle = ->
+  if Session.equals('type', 'puzzles')
+    Puzzles.findOne Session.get('id')
+  else null
+Template.header_breadcrumbs.type = -> Session.get('type')
+Template.header_breadcrumbs.id = -> Session.get('id')
+
 ############## nick selection ####################
 Template.header_nickmodal.nickModalVisible = -> Session.get 'nickModalVisible'
 Template.header_nickmodal.preserve ['#nickPickModal']

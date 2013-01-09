@@ -15,17 +15,22 @@
 {{#unless currentPageEquals "blackboard"}}
 <ul class="nav">
   <li><a href="/" class="home-link"><i class="icon-chevron-left icon-white"></i><i class="icon-home icon-white"></i> Blackboard</a></li>
-  <li class="active"><a>
-    {{#if currentPageEquals "chat"}}
-<i class="icon-comment icon-white"></i> Chat room
-    {{/if}}
-    {{#if currentPageEquals "puzzle"}}
-<i class="icon-book icon-white"></i> Puzzle  page
-    {{/if}}
-    {{#if currentPageEquals "round"}}
-<i class="icon-folder-open icon-white"></i> Round  page
-    {{/if}}
-  </a></li>
+  {{#if round}}
+  <li class="{{#if currentPageEquals "round"}}active{{else}}bb-omit-when-narrow{{/if}}">
+    <a href="/rounds/{{round._id}}" class="rounds-link"><i class="icon-folder-open icon-white"></i> Round: {{round.name}}</a>
+  </li>
+  {{/if}}
+  {{#if puzzle}}
+  <li class="{{#if currentPageEquals "puzzle"}}active{{else}}bb-omit-when-narrow{{/if}}">
+    <a href="/puzzles/{{puzzle._id}}" class="puzzles-link"><i class="icon-book icon-white"></i> Puzzle: {{puzzle.name}}</a>
+  </li>
+  {{/if}}
+  <li class="{{#if currentPageEquals "chat"}}active{{else}}bb-omit-when-narrow{{/if}}">
+  <a href="/chat/{{type}}/{{id}}" class="chat-link"><i class="icon-comment icon-white"></i>
+    {{#if typeEquals "rounds"}}Round{{/if}}
+    {{#if typeEquals "puzzles"}}Puzzle{{/if}}
+    {{#if typeEquals "general"}}General{{/if}}
+    chat</a></li>
 </ul>
   {{#if currentPageEquals "chat"}}
     {{> chat_header }}
