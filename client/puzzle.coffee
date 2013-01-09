@@ -13,6 +13,32 @@ Template.puzzle.rendered = ->
   name = collection(type)?.findOne(id)?.name
   $("title").text("Puzzle: "+name)
 
+Template.puzzle.events
+  "click .bb-drive-select": (event, template) ->
+    event.preventDefault()
+    drive = this.puzzle.drive
+    return unless drive
+    docsView = new google.picker.DocsView()\
+      .setIncludeFolders(true).setParent(drive)
+    new google.picker.PickerBuilder()\
+      .addView(docsView)\
+      .enableFeature(google.picker.Feature.NAV_HIDDEN)\
+      .setCallback(pickerCallback)\
+      .build().setVisible true
+  "click .bb-drive-upload": (event, template) ->
+    event.preventDefault()
+    drive = this.puzzle.drive
+    return unless drive
+    uploadView = new google.picker.DocsUploadView()\
+      .setParent(drive)
+    new google.picker.PickerBuilder()\
+      .setTitle('Upload Item')\
+      .setAppId('365816747654.apps.googleusercontent.com')
+      .addView(uploadView)\
+      .enableFeature(google.picker.Feature.NAV_HIDDEN)\
+      .setCallback(pickerCallback)\
+      .build().setVisible true
+
 # presumably we also want to subscribe to the puzzle's chat room
 # and presence information at some point.
 Meteor.autosubscribe ->
@@ -24,3 +50,12 @@ Meteor.autosubscribe ->
   round = Rounds.findOne puzzles: puzzle_id
   return unless round
   Meteor.subscribe 'roundgroup-for-round', round._id
+
+# A simple callback implementation.
+pickerCallback = (data) ->
+  url = "nothing"
+  if data[google.picker.Response.ACTION] is google.picker.Action.PICKED
+    doc = data[google.picker.Response.DOCUMENTS][0]
+    url = doc[google.picker.Document.URL]
+  message = "You picked: " + url
+  console.log message, data
