@@ -22,7 +22,7 @@ Handlebars.registerHelper 'editing', (args..., options) ->
   return Session.equals 'editing', args.join('/')
 
 CLIENT_UUID = Meteor.uuid() # this identifies this particular client instance
-DEFAULT_HOST = 'ihtfp.us' # this is used to create gravatars from nicks
+DEFAULT_HOST = 'codexian.org' # this is used to create gravatars from nicks
 
 # subscribe to the all-names feed all the time
 Meteor.subscribe 'all-names'
