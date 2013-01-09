@@ -20,13 +20,12 @@ $('a.puzzles-link, a.rounds-link, a.chat-link, a.home-link').live 'click', (even
   Router.navigate $(this).attr('href'), {trigger:true}
 
 Handlebars.registerHelper 'drive_link', (args) ->
-  console.log args, typeof(args)
   args = if (not args?) or (typeof(args) is 'string') then {id:args} else args.hash
   return drive_id_to_link(args.id)
 
 # gravatars
 Handlebars.registerHelper 'gravatar', (args) ->
-  args = if typeof(args) is 'string' then {id:args} else args.hash
+  args = if (not args?) or (typeof(args) is 'string') then {id:args} else args.hash
   g = $.gravatar(args.id, args)
   # hacky cross-platform version of 'outerHTML'
   html = $('<div>').append( g.eq(0).clone() ).html();
