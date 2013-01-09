@@ -25,7 +25,9 @@
             // secure
             secure: false,
             // support css on img element
-            classes: ''
+            classes: '',
+            // support title/tooltip on img element
+            title: ''
         }, overrides);
 
         var baseUrl = options.secure ? 'https://secure.gravatar.com/avatar/' : 'http://www.gravatar.com/avatar/';
@@ -38,6 +40,8 @@
             (options.image ? 'd=' + encodeURIComponent(options.image) : '') +
             '"' +
             (options.classes ? ' class="' + options.classes + '"' : '') +
+            (options.size ? ' width=' + options.size + ' height=' + options.size : '') +
+            (options.title ? ' title="' + options.title + '"' : '') +
             ' />').bind('error', function()
             {
                 $(this).remove();
