@@ -46,7 +46,11 @@
        {{else}}
        <i class="icon-user icon-white"></i>
        {{/if}}
-       {{sessionNick.realname}}
+       {{#if sessionNick.realname}}
+         {{sessionNick.realname}}
+       {{else}}
+         {{sessionNick.name}}
+       {{/if}}
        <span class="caret"></span>
       </a>
       <ul class="dropdown-menu pull-right">
