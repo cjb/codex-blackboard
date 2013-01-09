@@ -119,8 +119,13 @@
     {{#each lastchats}}
     <p class="messageRow">
     <span class="timestamp">{{pretty_ts timestamp}}</span>
-    <strong>{{nick}}:</strong>
-    {{body}}
+    {{#if action}}
+      <strong>{{nick}}</strong> {{body}}
+    {{else}}
+      <strong>{{nick}}:</strong>
+      {{#if to}}/msg {{to}}{{/if}}
+      {{body}}
+    {{/if}}
     </p>
     {{/each}}
     </span>
