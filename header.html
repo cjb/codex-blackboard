@@ -25,12 +25,16 @@
     <a href="/puzzles/{{puzzle._id}}" class="puzzles-link"><i class="icon-book icon-white"></i> Puzzle: {{puzzle.name}}</a>
   </li>
   {{/if}}
+  {{#if currentPageEquals "oplog"}}
+  <li class="active"><a><i class="icon-time icon-white"></i> Operation Logs</a></li>
+  {{else}}
   <li class="{{#if currentPageEquals "chat"}}active{{else}}bb-omit-when-narrow{{/if}}">
   <a href="/chat/{{type}}/{{id}}" class="chat-link"><i class="icon-comment icon-white"></i>
     {{#if typeEquals "rounds"}}Round{{/if}}
     {{#if typeEquals "puzzles"}}Puzzle{{/if}}
     {{#if typeEquals "general"}}General{{/if}}
     chat</a></li>
+  {{/if}}
 </ul>
   {{#if currentPageEquals "chat"}}
     {{> chat_header }}
@@ -95,7 +99,7 @@
 <!-- Last update bar -->
   <div class="bb-lastupdate">
     <span class="right pull-right">
-    <a href="#" id="bb-more-updates">more...</a>
+    <a href="/oplogs/0" class="oplogs-link">more...</a>
     </span>
     <span class="left pull-left label label-inverse">
     Last update:

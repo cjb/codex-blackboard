@@ -8,6 +8,11 @@ PRESENCE_KEEPALIVE_MINUTES = 2
 # URL for google-drive python server
 GDRIVE_HOST = 'http://hydro.laptop.org:5000'
 
+# how many chats in a page?
+MESSAGE_PAGE = 150
+# how many oplogs in a page?
+OPLOG_PAGE = 150
+
 BBCollection = Object.create(null) # create new object w/o any inherited cruft
 
 # OpLogs are:

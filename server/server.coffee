@@ -31,7 +31,6 @@ Meteor.publish 'roundgroup-for-round', (id) -> RoundGroups.find rounds: id
 
 Meteor.publish 'my-nick', (nick) -> Nicks.find canon: canonical(nick)
 
-MESSAGE_PAGE = 150 # a page is 150 messages
 # only publish last page of messages
 Meteor.publish 'recent-messages', (nick, room_name) ->
   nick = nick or null
@@ -49,19 +48,18 @@ Meteor.publish 'paged-messages', (nick, room_name, timestamp) ->
   nick = nick or null
   Messages.find {
     room_name: room_name
-    timestamp: $lte: timestamp
+    timestamp: $lt: +timestamp
     $or: [ { nick: nick }, { to: $in: [null, nick] } ]
   },
      sort: [['timestamp','desc']]
      limit: MESSAGE_PAGE
 
 # same thing for operation log
-OPLOG_PAGE = 150
 Meteor.publish 'recent-oplogs', ->
   OpLogs.find {}, {sort: [["timestamp","desc"]], limit: 20}
 
 Meteor.publish 'paged-oplogs', (timestamp) ->
-  OpLogs.find {timestamp: $lte: timestamp},
+  OpLogs.find {timestamp: $lt: +timestamp},
      sort: [['timestamp','desc']]
      limit: OPLOG_PAGE
 

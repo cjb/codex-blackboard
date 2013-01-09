@@ -1,0 +1,29 @@
+<template name="oplog">
+<div class="row-fluid bb-puzzleround">
+{{#each oplogs}}
+  {{#if first}}
+  <p align="center">
+  <a href="/oplogs/{{oplog.timestamp}}">See earlier logs</a>
+  </p>
+  {{/if}}
+  <div class="bb-oplog">
+    <span class="timestamp">{{pretty_ts oplog.timestamp}}</span>
+    {{oplog.message}}
+    {{link oplog.id}}
+    {{#if oplog.nick}} (<strong title="{{nickOrName oplog.nick}}">{{oplog.nick}}</strong>){{/if}}
+  </div>
+{{else}}
+  <p align="center">
+  No operation logs{{#if timestamp}} before {{pretty_ts timestamp}}{{/if}}.
+  </p>
+{{/each}}
+
+  <p align="center">
+  {{#if timestamp}}
+  <a href="/oplogs/0">See most recent logs</a>
+  {{else}}
+  End of log.
+  {{/if}}
+  </p>
+</div>
+</template>
