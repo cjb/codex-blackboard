@@ -200,10 +200,8 @@ confirmationDialog = (options) ->
 Template.header_lastupdates.lastupdates = ->
   LIMIT = 10
   ologs = OpLogs.find {}, \
-        {sort: [["timestamp","desc"]], limit_BUG: LIMIT}
-  # Meteor doesn't support the limit option yet.  So in a hacky workaround,
-  # limit the collection client-side
-  ologs = ologs.fetch().slice(0, LIMIT)
+        {sort: [["timestamp","desc"]], limit: LIMIT}
+  ologs = ologs.fetch()
   # now look through the entries and collect similar logs
   # this way we can say "New puzzles: X, Y, and Z" instead of just "New Puzzle: Z"
   return '' unless ologs && ologs.length
@@ -237,11 +235,8 @@ Template.header_lastupdates.destroyed = ->
 Template.header_lastchats.lastchats = ->
   LIMIT = 2
   m = Messages.find {room_name: "general/0", system: false}, \
-        {sort: [["timestamp","desc"]], limit_BUG: LIMIT}
-  # Meteor doesn't support the limit option yet.  So in a hacky workaround,
-  # limit the collection client-side
-  m = m.fetch().slice(0, LIMIT)
-  m.reverse()
+        {sort: [["timestamp","desc"]], limit: LIMIT}
+  m = m.fetch().reverse()
   return m
 Template.header_lastchats.pretty_ts = (ts) -> Template.messages.pretty_ts ts
 
