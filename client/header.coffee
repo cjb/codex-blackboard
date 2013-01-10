@@ -79,6 +79,8 @@ Template.header_loginmute.rendered = ->
 # preserve buttons with tooltips, so they don't leak
 Template.header_loginmute.preserve
   '.bb-buttonbar *[title]': (node) -> node.title
+  '.bb-buttonbar *[data-original-title]': (node) ->
+     $(node).attr('data-original-title')
 Template.header_loginmute.events
   "click .bb-login": (event, template) ->
     event.preventDefault()
@@ -269,6 +271,15 @@ Template.header_lastupdates.created = ->
   this.sub = Meteor.subscribe 'recent-oplogs'
 Template.header_lastupdates.destroyed = ->
   this.sub.stop()
+# add tooltip to 'more' links, and preserve then so they doesn't leak
+do ->
+  for t in ['header_lastupdates', 'header_lastchats']
+    Template[t].rendered = ->
+      $(this.findAll('.right a[title]')).tooltip placement: 'left'
+    Template[t].preserve
+      '.right a[title]': (node) -> node.title
+      '.right a[data-original-title]': (node) ->
+        $(node).attr('data-original-title')
 
 ############## chat log in header ####################
 Template.header_lastchats.lastchats = ->
