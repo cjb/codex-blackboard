@@ -8,6 +8,14 @@
   .messageRow, .actionRow, .bb-lastupdate {
     &, & .timestamp { color: #c4c4c4; }
   }
+  .bb-lastupdate, .bb-lastchat {
+    /* add some subtle highlighting to tie the 'more' links to the
+     * left-hand content */
+    &:hover {
+      background: rgba(0,0,0,0.1);
+      border-radius: 5px;
+    }
+  }
 }
 #bb-body {
   .timestamp { font-size: .65em; }
