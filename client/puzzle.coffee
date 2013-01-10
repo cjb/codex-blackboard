@@ -21,6 +21,7 @@ Template.puzzle.events
     docsView = new google.picker.DocsView()\
       .setIncludeFolders(true).setParent(drive)
     new google.picker.PickerBuilder()\
+      .setAppId('365816747654.apps.googleusercontent.com')\
       .addView(docsView)\
       .enableFeature(google.picker.Feature.NAV_HIDDEN)\
       .setCallback(pickerCallback)\
@@ -32,10 +33,11 @@ Template.puzzle.events
     uploadView = new google.picker.DocsUploadView()\
       .setParent(drive)
     new google.picker.PickerBuilder()\
+      .setAppId('365816747654.apps.googleusercontent.com')\
       .setTitle('Upload Item')\
-      .setAppId('365816747654.apps.googleusercontent.com')
       .addView(uploadView)\
       .enableFeature(google.picker.Feature.NAV_HIDDEN)\
+      .enableFeature(google.picker.Feature.MULTISELECT_ENABLED)\
       .setCallback(pickerCallback)\
       .build().setVisible true
 
