@@ -268,6 +268,29 @@ drive_id_to_link = (id) ->
     collection(type).remove(args.id)
     return true
 
+  newDriveFolder = (type, id, name) ->
+    return unless Meteor.isServer
+    Meteor.http.post "#{GDRIVE_HOST}/puzzle/Codex: #{name}", (err, res) ->
+      if err
+        console.log "Error creating folder on Google Drive: ", err
+      else if res?.data
+        collection(type).update id, { $set:
+          drive: res.data.id
+          spreadsheet: res.data.spread_id
+        }
+      else
+        console.log "Some other error creating folder: ", data
+  renameDriveFolder = (drive, new_name) ->
+    return unless Meteor.isServer
+    Meteor.http.call "MOVE", "#{GDRIVE_HOST}/puzzle/#{drive}/Codex: #{new_name}", (err, res) ->
+      if err
+        console.log "Error renaming folder on Google Drive: ", err
+  deleteDriveFolder = (drive) ->
+    return unless Meteor.isServer
+    Meteor.http.del "#{GDRIVE_HOST}/puzzle/#{drive}", (err, res) ->
+      if err
+        console.log "Error deleting folder on Google Drive: ", err
+
   parentObject = do ->
     lookup =
       puzzles: (id) -> ['rounds', Rounds.findOne(puzzles: id)]
@@ -350,20 +373,30 @@ drive_id_to_link = (id) ->
       deleteObject "roundgroups", args
 
     newRound: (args) ->
-      newObject "rounds", args,
+      r = newObject "rounds", args,
         puzzles: args.puzzles or []
         drive: args.drive or null
+      newDriveFolder "rounds", r._id, r.name
+      return r
     renameRound: (args) ->
-      renameObject "rounds", args
+      # get drive ID (racy)
+      drive = Rounds.findOne(args.id)?.drive
+      result = renameObject "rounds", args
+      # rename google drive folder
+      renameDriveFolder drive, args.name if (result and drive)
+      return result
     deleteRound: (args) ->
       rid = args.id
+      # get drive ID (racy)
+      drive = Rounds.findOne(args.id)?.drive
       # XXX disallow deletion unless round.puzzles is empty?
       # XXX or else move puzzles to some other round(s)
       # remove round itself
       r = deleteObject "rounds", args
       # remove from all roundgroups
       RoundGroups.update { rounds: rid },{ $pull: rounds: rid },{ multi: true }
-      # XXX: delete google drive folder
+      # delete google drive folder
+      deleteDriveFolder drive if drive
       # XXX: delete chat room logs?
       return r
 
@@ -375,29 +408,16 @@ drive_id_to_link = (id) ->
         drive: args.drive or null
         spreadsheet: args.spreadsheet or null
       # create google drive folder (server only)
-      return p unless Meteor.isServer
-      Meteor.http.post("#{GDRIVE_HOST}/puzzle/Codex: #{p.name}", (err, res) ->
-        if err
-          console.log "Error creating puzzle on Google Drive: ", err
-        if res.data
-          Puzzles.update p._id, { $set:
-            drive: res.data.id
-            spreadsheet: res.data.spread_id
-          }
-      )
+      newDriveFolder "puzzles", p._id, p.name
       return p
 
     renamePuzzle: (args) ->
       # get drive ID (racy)
       drive = Puzzles.findOne(args.id)?.drive
-      r = renameObject "puzzles", args
+      result = renameObject "puzzles", args
       # rename google drive folder
-      return r unless Meteor.isServer
-      Meteor.http.call("MOVE", "#{GDRIVE_HOST}/puzzle/#{drive}/Codex: #{args.name}", (err, res) ->
-        if err
-          console.log "Error renaming puzzle on Google Drive: ", err
-      )
-      return r
+      renameDriveFolder drive, args.name if (result and drive)
+      return result
 
     deletePuzzle: (args) ->
       pid = args.id
@@ -408,11 +428,7 @@ drive_id_to_link = (id) ->
       # remove from all rounds
       Rounds.update { puzzles: pid },{ $pull: puzzles: pid },{ multi: true }
       # delete google drive folder
-      return r unless Meteor.isServer
-      Meteor.http.del("#{GDRIVE_HOST}/puzzle/#{drive}", (err, res) ->
-        if err
-          console.log "Error deleting puzzle on Google Drive: ", err
-      )
+      deleteDriveFolder drive if drive
       # XXX: delete chat room logs?
       return r
 
