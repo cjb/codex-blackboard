@@ -337,6 +337,8 @@ Template.header_lastchats.lastchats = ->
         {sort: [["timestamp","desc"]], limit: LIMIT}
   m = m.fetch().reverse()
   return m
+Template.header_lastchats.body = ->
+  if this.bodyIsHtml then new Handlebars.SafeString(this.body) else this.body
 
 # subscribe when this template is in use/unsubscribe when it is destroyed
 Template.header_lastchats.created = ->
