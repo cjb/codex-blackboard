@@ -8,6 +8,9 @@ PRESENCE_KEEPALIVE_MINUTES = 2
 # URL for google-drive python server
 GDRIVE_HOST = 'http://hydro.laptop.org:5000'
 
+# Hard-coded URL for special folder used for Ringhunters chat.
+RINGHUNTERS_FOLDER = '0Bx954IXk0MK_bV9lQzZCMXpnLXM'
+
 # how many chats in a page?
 MESSAGE_PAGE = 150
 # how many oplogs in a page?
