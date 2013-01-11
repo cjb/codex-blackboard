@@ -370,13 +370,17 @@ drive_id_to_link = (id) ->
         solved: null
         solved_by: null
         drive: args.drive or null
+        spreadsheet: args.spreadsheet or null
       # create google drive folder (server only)
       return p unless Meteor.isServer
       Meteor.http.post("#{GDRIVE_HOST}/puzzle/Codex: #{p.name}", (err, res) ->
         if err
           console.log "Error creating puzzle on Google Drive: ", err
         if res.data
-          Puzzles.update p._id, { $set: drive: res.data.id }
+          Puzzles.update p._id, { $set:
+            drive: res.data.id
+            spreadsheet: res.data.spread_id
+          }
       )
       return p
 
