@@ -112,9 +112,11 @@ Template.header_breadcrumbs.puzzle = ->
 Template.header_breadcrumbs.type = -> Session.get('type')
 Template.header_breadcrumbs.id = -> Session.get('id')
 Template.header_breadcrumbs.drive = ->
+  return unless Session.get('type') in ['rounds','puzzles']
   collection(Session.get('type'))?.findOne(Session.get('id'))?.drive
 Template.header_breadcrumbs.events
   "click .bb-upload-file": (event, template) ->
+     return unless Session.get('type') in ['rounds','puzzles']
      folder = collection(Session.get('type'))?.findOne(Session.get('id'))?.drive
      return unless folder
      uploadToDriveFolder folder, (docs) ->

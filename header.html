@@ -37,17 +37,17 @@
     chat</a></li>
   {{/if}}
 </ul>
+  {{#if drive}}
 <span class="pull-right">
   <button type="button"
           class="bb-upload-file btn btn-inverse">
     <i class="icon-upload icon-white"></i> Upload file
   </button>
-  {{#if drive}}
   <a class="bb-drive-link btn btn-inverse"
      title="Open Drive Folder"
      href="{{drive_link drive}}"><i class="icon-inbox icon-white"></i></a>
-  {{/if}}
 </span>
+  {{/if}}
   {{#if currentPageEquals "chat"}}
     {{> chat_header }}
   {{/if}}
