@@ -30,16 +30,7 @@ Template.puzzle.events
     event.preventDefault()
     drive = this.puzzle.drive
     return unless drive
-    uploadView = new google.picker.DocsUploadView()\
-      .setParent(drive)
-    new google.picker.PickerBuilder()\
-      .setAppId('365816747654.apps.googleusercontent.com')\
-      .setTitle('Upload Item')\
-      .addView(uploadView)\
-      .enableFeature(google.picker.Feature.NAV_HIDDEN)\
-      .enableFeature(google.picker.Feature.MULTISELECT_ENABLED)\
-      .setCallback(pickerCallback)\
-      .build().setVisible true
+    uploadToDriveFolder drive, (docs) -> console.log docs
 
 # presumably we also want to subscribe to the puzzle's chat room
 # and presence information at some point.

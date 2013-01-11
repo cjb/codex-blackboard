@@ -68,10 +68,11 @@ Template.messages.email = ->
 
 Template.messages.body = ->
   body = this.message.body
-  body = Handlebars._escape(body)
-  body = body.replace(/\n|\r\n?/g, '<br/>')
-  body = convertURLsToLinksAndImages(body)
-  body = highlightNick(body) unless this.message.system
+  unless this.message.bodyIsHtml
+    body = Handlebars._escape(body)
+    body = body.replace(/\n|\r\n?/g, '<br/>')
+    body = convertURLsToLinksAndImages(body)
+    body = highlightNick(body) unless this.message.system
   new Handlebars.SafeString(body)
 
 Template.chat_header.room_name = -> prettyRoomName()

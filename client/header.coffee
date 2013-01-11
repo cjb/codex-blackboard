@@ -111,6 +111,53 @@ Template.header_breadcrumbs.puzzle = ->
   else null
 Template.header_breadcrumbs.type = -> Session.get('type')
 Template.header_breadcrumbs.id = -> Session.get('id')
+Template.header_breadcrumbs.drive = ->
+  collection(Session.get('type'))?.findOne(Session.get('id'))?.drive
+Template.header_breadcrumbs.events
+  "click .bb-upload-file": (event, template) ->
+     folder = collection(Session.get('type'))?.findOne(Session.get('id'))?.drive
+     return unless folder
+     uploadToDriveFolder folder, (docs) ->
+        message = "uploaded "+(for doc in docs
+          "<a href='#{doc.url}'><img src='#{doc.iconUrl}' />#{doc.name}</a> "
+        ).join(', ')
+        Meteor.call 'newMessage',
+          body: message
+          bodyIsHtml: true
+          nick: Session.get 'nick'
+          action: true
+          room_name: Session.get('type')+'/'+Session.get('id')
+Template.header_breadcrumbs.rendered = ->
+  # tool tips
+  $(this.findAll('a.bb-drive-link[title]')).tooltip placement: 'bottom'
+# preserve buttons with tooltips, so they don't leak
+Template.header_breadcrumbs.preserve
+  'a.bb-drive-link[title]': (node) -> node.title
+  'a.bb-drive-link[data-original-title]': (node) ->
+     $(node).attr('data-original-title')
+
+uploadToDriveFolder = (folder, callback) ->
+  uploadView = new google.picker.DocsUploadView()\
+    .setParent(folder)
+  pickerCallback = (data) ->
+    switch data[google.picker.Response.ACTION]
+      when "loaded"
+        return
+      when google.picker.Action.PICKED
+        doc = data[google.picker.Response.DOCUMENTS][0]
+        url = doc[google.picker.Document.URL]
+        callback data[google.picker.Response.DOCUMENTS]
+      else
+        console.log 'Unexpected action:', data
+  new google.picker.PickerBuilder()\
+    .setAppId('365816747654.apps.googleusercontent.com')\
+    .setTitle('Upload Item')\
+    .addView(uploadView)\
+    .enableFeature(google.picker.Feature.NAV_HIDDEN)\
+    .enableFeature(google.picker.Feature.MULTISELECT_ENABLED)\
+    .setCallback(pickerCallback)\
+    .build().setVisible true
+
 
 ############## nick selection ####################
 Template.header_nickmodal.nickModalVisible = -> Session.get 'nickModalVisible'

@@ -424,6 +424,7 @@ drive_id_to_link = (id) ->
     newMessage: (args)->
       newMsg =
         body: args.body or ""
+        bodyIsHtml: args.bodyIsHtml or false
         nick: canonical(args.nick or "")
         system: args.system or false
         action: args.action or false
