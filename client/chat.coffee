@@ -72,9 +72,12 @@ Template.messages.body = ->
   unless this.message.bodyIsHtml
     body = Handlebars._escape(body)
     body = body.replace(/\n|\r\n?/g, '<br/>')
-    body = convertURLsToLinksAndImages(body)
+    body = convertURLsToLinksAndImages(body, this.message._id)
     body = highlightNick(body) unless this.message.system
   new Handlebars.SafeString(body)
+
+Template.messages.preserve
+  ".inline-image[id]": (node) -> node.id
 
 Template.chat_header.room_name = -> prettyRoomName()
 Template.chat_header.whos_here = ->
@@ -83,14 +86,16 @@ Template.chat_header.whos_here = ->
 
 # Utility functions
 
-linkOrLinkedImage = (url) ->
-  if url.match(/.(png|jpg|jpeg|gif)$/i)
-    "<a href=\"" + url + "\" target='_blank'><img src=\"" + url + "\" class='inline-image'></a>"
-  else
-    "<a href=\"" + url + "\" target='_blank'>" + url + "</a>"
 
-convertURLsToLinksAndImages = (html) ->
-  html.replace(/(http(s?):\/\/[^ ]+)/, linkOrLinkedImage)
+convertURLsToLinksAndImages = (html, id) ->
+  linkOrLinkedImage = (url, id) ->
+    inner = url
+    if url.match(/.(png|jpg|jpeg|gif)$/i)
+      inner = "<img src='#{url}' class='inline-image' id='#{id}'>"
+    "<a href='#{url}' target='_blank'>#{inner}</a>"
+  count = 0
+  html.replace /(http(s?):\/\/[^ ]+)/, (url) ->
+    linkOrLinkedImage url, "#{id}-#{count++}"
 
 highlightNick = (html) ->
   nickRE = new RegExp(Session.get("nick"))
