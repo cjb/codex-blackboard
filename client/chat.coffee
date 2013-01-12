@@ -169,7 +169,12 @@ scrollMessagesView = ->
   # comment in showUnreadMessagesAlert.
   instachat.scrolledToBottom = true
   window.setTimeout ->
-    $("body").scrollTo 'max'
+    # first try using html5, then fallback to jquery
+    last = document?.querySelector?('.bb-chat-messages > *:last-child')
+    if last?.scrollIntoView?
+      last.scrollIntoView()
+    else
+      $("body").scrollTo 'max'
     # the scroll handler below will reset scrolledToBottom to be false
     instachat.scrolledToBottom = true
   , 200
@@ -189,6 +194,10 @@ $('.bb-message-body .inline-image').live 'load mouseenter', (event) ->
 
 # unstick from bottom if the user manually scrolls
 $(window).scroll (event) ->
+  # set to false, just in case older browser doesn't have scroll properties
+  instachat.scrolledToBottom = false
+  return unless document?.body?.scrollTop? and document?.body?.scrollHeight?
+  return unless document?.body?.parentElement?.clientHeight?
   scrollPos = document.body.scrollTop + document.body.parentElement.clientHeight
   scrollMax = document.body.scrollHeight
   atBottom = (scrollPos >= scrollMax)
