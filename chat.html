@@ -5,7 +5,9 @@
 
   <div class="navbar navbar-inverse navbar-fixed-bottom bb-chat-footer">
     <div class="navbar-inner">
+      {{#if hasNick}}
       {{> messages_input}}
+      {{/if}}
     </div>
   </div>
 

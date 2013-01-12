@@ -153,6 +153,7 @@ joinRoom = (type, id) ->
   scrollMessagesView()
   $("#messageInput").select()
   instachat.keepalive = ->
+    return unless Session.get('nick')
     Meteor.call "setPresence"
       nick: Session.get('nick')
       room_name: Session.get "room_name"
@@ -311,6 +312,7 @@ unreadMessage = (doc)->
     showUnreadMessagesAlert()
 
 
+Template.chat.hasNick = -> Session.get('nick') or false
 Template.chat.created = ->
   this.afterFirstRender = ->
     # created callback means that we've switched to chat, but
@@ -330,10 +332,11 @@ cleanupChat = ->
   if instachat.keepaliveInterval
     Meteor.clearInterval instachat.keepaliveInterval
     instachat.keepalive = instachat.keepaliveInterval = undefined
-  Meteor.call "setPresence"
-    nick: Session.get('nick')
-    room_name: Session.get "room_name"
-    present: false
+  if Session.get('nick')
+    Meteor.call "setPresence"
+      nick: Session.get('nick')
+      room_name: Session.get "room_name"
+      present: false
 
 Template.chat.destroyed = ->
   hideMessageAlert()

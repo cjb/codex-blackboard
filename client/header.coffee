@@ -177,6 +177,7 @@ Template.header_nickmodal_contents.created = ->
   this.afterFirstRender = =>
     $('#nickPickModal').one 'hide', ->
       Session.set 'nickModalVisible', undefined
+    $('#nickSuccess').val('false')
     $('#nickPickModal').modal keyboard: false, backdrop:"static"
     $('#nickInput').select()
     firstNick = Session.get 'nick' or ''
@@ -250,13 +251,15 @@ $("#nickPick").live "submit", ->
             cb()
       tagsetter realname, 'Real Name', ->
         tagsetter gravatar, 'Gravatar'
+    $('#nickSuccess').val('true')
     $('#nickPickModal').modal 'hide'
 
   hideMessageAlert()
   return false
 
-changeNick = (cb=(->)) ->
-  $('#nickPickModal').one 'hide', -> cb()
+changeNick = (cb) ->
+  $('#nickPickModal').one 'hide', ->
+    cb?() if $('#nickSuccess').val() is 'true'
   Session.set 'nickModalVisible', true
 
 ensureNick = (cb=(->)) ->
