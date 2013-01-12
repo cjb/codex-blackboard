@@ -23,6 +23,7 @@ Handlebars.registerHelper 'link', (args) ->
 
 $('a.puzzles-link, a.rounds-link, a.chat-link, a.home-link, a.oplogs-link').live 'click', (event) ->
   return unless event.button is 0 # check right-click
+  return if event.ctrlKey or event.shiftKey # check ctrl/shift clicks
   event.preventDefault()
   Router.navigate $(this).attr('href'), {trigger:true}
 
