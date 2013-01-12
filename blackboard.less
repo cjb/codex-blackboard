@@ -155,7 +155,7 @@ body {
   }
   .bb-tag-table td.bb-editable { min-height: 24px; }
   /* tweak table column to make room for add tag/up/down icons */
-  td.puzzle-name { padding-right: (14px)*3 + 4px; }
+  td.puzzle-name > div { padding-right: (14px)*3; }
 }
 #bb-tables {
   background: white;
@@ -234,9 +234,14 @@ body {
       font-family: 'Inconsolata', 'Andale Mono', Courier, monospace;
       text-transform: uppercase;
     }
+    .puzzle-name > div {
+      /* relative positioning context for .bb-puzzle-add-move.
+       * Note that firefox doesn't allow position: relative on a table cell */
+      position: relative;
+    }
     .puzzle-name .bb-puzzle-add-move {
       display: block; width: 14px*3; height: 14px;
-      position: absolute; right: 2px; top: 3px;
+      position: absolute; right: -2px; top: 3px;
       .bb-add-tag, .bb-move-up, .bb-move-down {
         float: left;
         i { margin-top: 0px; }

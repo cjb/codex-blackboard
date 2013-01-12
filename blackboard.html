@@ -151,7 +151,7 @@
 
 <template name="blackboard_puzzle">
   <tr><!-- {{id}} -->
-    <td class="puzzle-name">
+    <td class="puzzle-name"><div>{{! div needed to establish relative pos }}
       <div class="bb-editable" data-bbedit="puzzles/{{puzzle._id}}/title">
       {{#if editing "puzzles" puzzle._id "title"}}
         <input type="text" value="{{puzzle.name}}"
@@ -178,7 +178,7 @@
         </div>
       {{/if}}
       {{#with puzzle}}{{>blackboard_puzzle_tags}}{{/with}}
-    </td>
+    </div></td>
     <td class="puzzle-answer bb-editable"
         data-bbedit="puzzles/{{puzzle._id}}/answer">
       {{#if editing "puzzles" puzzle._id "answer"}}
