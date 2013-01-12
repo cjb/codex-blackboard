@@ -368,6 +368,16 @@ body {
   }
 }
 
+@media (min-width: 480px) and (max-width: 979px) {
+  /* re-fix the chat footer to the bottom */
+  .bb-chat-footer.navbar-fixed-bottom {
+    position: fixed;
+    margin-left: 0; margin-right: 0;
+    .navbar-inner { padding: 0; }
+  }
+  .bb-chat-messages { margin-bottom: 15px+26px; }
+}
+
 /* Landscape phones
 ------------------------- */
 @media (max-width: 480px) {

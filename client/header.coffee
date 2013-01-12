@@ -25,7 +25,12 @@ $('a.puzzles-link, a.rounds-link, a.chat-link, a.home-link, a.oplogs-link').live
   return unless event.button is 0 # check right-click
   return if event.ctrlKey or event.shiftKey # check ctrl/shift clicks
   event.preventDefault()
-  Router.navigate $(this).attr('href'), {trigger:true}
+  if $(this).hasClass('bb-pop-out')
+    window.open $(event.currentTarget).attr('href'), 'Pop out', \
+      ("height=480,width=480,menubar=no,toolbar=no,personalbar=no,"+\
+       "status=yes,resizeable=yes,scrollbars=yes")
+  else
+    Router.navigate $(this).attr('href'), {trigger:true}
 
 Handlebars.registerHelper 'drive_link', (args) ->
   args = keyword_or_positional 'id', args

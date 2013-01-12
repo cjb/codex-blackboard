@@ -32,8 +32,13 @@
 {{/unless}}
 
 {{#if round.spreadsheet}}
-<a align="center" href="{{spread_link round.spreadsheet}}" target="_blank">Open
-spreadsheet in new window</a>
+<a align="center" href="{{spread_link round.spreadsheet}}"
+   target="_blank"><i class='icon-fullscreen'></i>
+Open spreadsheet in new window</a>
+
+<a href="/chat/rounds/{{round._id}}" class="chat-link bb-pop-out"
+   target="chat{{round._id}}"><i class="icon-share-alt"></i>
+Pop out a chat window</a>
 
 <iframe class="bb-spreadsheet-frame" frameborder='0' src='https://docs.google.com/spreadsheet/ccc?key={{round.spreadsheet}}&widget=true&chrome=false'></iframe>
 {{else}}
