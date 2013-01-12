@@ -30,6 +30,9 @@ $('a.puzzles-link, a.rounds-link, a.chat-link, a.home-link, a.oplogs-link').live
 Handlebars.registerHelper 'drive_link', (args) ->
   args = keyword_or_positional 'id', args
   return drive_id_to_link(args.id)
+Handlebars.registerHelper 'spread_link', (args) ->
+  args = keyword_or_positional 'id', args
+  return spread_id_to_link(args.id)
 
 # nicks
 Handlebars.registerHelper 'nickOrName', (args) ->

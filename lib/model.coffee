@@ -195,7 +195,9 @@ canonical = (s) ->
   return s
 
 drive_id_to_link = (id) ->
-  return "https://docs.google.com/folder/d/#{id}/edit"
+  "https://docs.google.com/folder/d/#{id}/edit"
+spread_id_to_link = (id) ->
+  "https://docs.google.com/spreadsheet/ccc?key=#{id}"
 
 (->
   # private helpers, not exported
