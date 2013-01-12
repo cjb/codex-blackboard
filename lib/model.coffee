@@ -285,8 +285,11 @@ drive_id_to_link = (id) ->
     Meteor.http.call "MOVE", "#{GDRIVE_HOST}/puzzle/#{drive}/Codex: #{new_name}", (err, res) ->
       if err
         console.log "Error renaming folder on Google Drive: ", err
-  deleteDriveFolder = (drive) ->
+  deleteDriveFolder = (drive, spread_id=null) ->
     return unless Meteor.isServer
+    if spread_id
+      Meteor.http.del "#{GDRIVE_HOST}/puzzle/#{spread_id}", (err, res) ->
+        console.log "Error deleting spreadsheet on Google Drive: #{err}" if err
     Meteor.http.del "#{GDRIVE_HOST}/puzzle/#{drive}", (err, res) ->
       if err
         console.log "Error deleting folder on Google Drive: ", err
@@ -388,7 +391,9 @@ drive_id_to_link = (id) ->
     deleteRound: (args) ->
       rid = args.id
       # get drive ID (racy)
-      drive = Rounds.findOne(args.id)?.drive
+      old = Rounds.findOne(args.id)
+      drive = old?.drive
+      spread_id = old?.spread_id
       # XXX disallow deletion unless round.puzzles is empty?
       # XXX or else move puzzles to some other round(s)
       # remove round itself
@@ -396,7 +401,7 @@ drive_id_to_link = (id) ->
       # remove from all roundgroups
       RoundGroups.update { rounds: rid },{ $pull: rounds: rid },{ multi: true }
       # delete google drive folder
-      deleteDriveFolder drive if drive
+      deleteDriveFolder drive, spread_id if drive
       # XXX: delete chat room logs?
       return r
 
@@ -422,13 +427,15 @@ drive_id_to_link = (id) ->
     deletePuzzle: (args) ->
       pid = args.id
       # get drive ID (racy)
-      drive = Puzzles.findOne(args.id)?.drive
+      old = Puzzles.findOne(args.id)
+      drive = old?.drive
+      spread_id = old?.spread_id
       # remove puzzle itself
       r = deleteObject "puzzles", args
       # remove from all rounds
       Rounds.update { puzzles: pid },{ $pull: puzzles: pid },{ multi: true }
       # delete google drive folder
-      deleteDriveFolder drive if drive
+      deleteDriveFolder drive, spread_id if drive
       # XXX: delete chat room logs?
       return r
 
