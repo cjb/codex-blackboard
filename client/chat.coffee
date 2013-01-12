@@ -225,11 +225,7 @@ $("#joinRoom").live "submit", ->
       $("#roomName").val prettyRoomName()
   return false
 
-$("#messageForm").live "submit", (e) ->
-  e.preventDefault() # don't actually submit the form!
-  $message = $ "#messageInput"
-  message  = $message.val()
-  $message.val ""
+Template.messages_input.submit = (message) ->
   return unless message
   args =
     nick: Session.get 'nick'
@@ -263,6 +259,15 @@ $("#messageForm").live "submit", (e) ->
   if (+Session.get('timestamp'))
     Router.navigate "/chat/#{Session.get 'room_name'}", {trigger:true}
   return
+Template.messages_input.events
+  "keydown textarea": (event, template) ->
+     # implicit submit on enter (but not shift-enter or ctrl-enter)
+     return unless event.which is 13 and not (event.shiftKey or event.ctrlKey)
+     event.preventDefault() # prevent insertion of enter
+     $message = $ event.currentTarget
+     message = $message.val()
+     $message.val ""
+     Template.messages_input.submit message
 
 
 # alert for unread messages
