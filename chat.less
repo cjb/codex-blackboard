@@ -12,6 +12,7 @@
 .bb-chat-messages {
   @chat-arrow-size: 6px;
   @chat-arrow-height: 15px;
+  @gravatar-size: 48px;
   .media {
     position: relative; /* establish context for arrow placement */
     margin-bottom: 6px;
@@ -39,7 +40,8 @@
     &:before, &:after {
       content:"";
       position: absolute;
-      top: @chat-arrow-height; left: 75px - @chat-arrow-size;
+      top: @chat-arrow-height;
+      left: @gravatar-size + 10px + 1px - @chat-arrow-size;
       width: 0; height: 0;
       border-color: transparent;
       border-style: solid;
@@ -49,11 +51,12 @@
     &:before {
       border-width: (@chat-arrow-size + 2px) (@chat-arrow-size + 1px) (@chat-arrow-size + 2px) 0;
       border-right-color: #ccc;
-      left: 74px - @chat-arrow-size; top: @chat-arrow-height - 2px;
+      top: @chat-arrow-height - 2px;
+      left: @gravatar-size + 10px - @chat-arrow-size;
     }
   }
   .bb-message-body {
-    min-height: 48px; /* match avatar height */
+    min-height: @gravatar-size; /* match gravatar height */
     background-color: white;
     box-sizing: border-box;
     padding: 2px 5px;
