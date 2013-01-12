@@ -177,7 +177,7 @@ scrollMessagesView = ->
       $("body").scrollTo 'max'
     # the scroll handler below will reset scrolledToBottom to be false
     instachat.scrolledToBottom = true
-  , 200
+  , 10
 
 # Event Handlers
 $("button.mute").live "click", ->
