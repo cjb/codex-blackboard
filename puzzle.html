@@ -7,6 +7,7 @@
 
 {{#with puzzle}}{{> blackboard_tags }}{{/with}}
 
+{{#unless "true"}}
 <ul>
 <li>Round: {{link id=round._id}}</li>
 <li><a href="/chat/puzzles/{{puzzle._id}}" class="chat-link">Chat room for this puzzle</a></li>
@@ -15,12 +16,20 @@
 <li><a href="{{drive_link puzzle.drive}}" class="bb-drive-upload">Upload file to google drive for this puzzle</a></li>
 </ul>
 
-{{#unless "true"}}
 Experimental:
 <ul>
 <li><a href="{{drive_link puzzle.drive}}" class="bb-drive-select">Select file from google drive</a></li>
 </ul>
 {{/unless}}
+
+{{#if puzzle.spreadsheet}}
+<a align="center" href="{{puzzle.spreadsheet}}" target="_blank">Open
+spreadsheet in new window</a>
+
+<iframe class="bb-spreadsheet-frame" frameborder='0' src='https://docs.google.com/spreadsheet/ccc?key={{puzzle.spreadsheet}}&widget=true&chrome=false'></iframe>
+{{else}}
+<p>No spreadsheet.</p>
+{{/if}}
 
 {{/with}}
 

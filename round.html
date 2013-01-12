@@ -21,6 +21,7 @@
 
 {{#with round}}{{> blackboard_tags }}{{/with}}
 
+{{#unless "true"}}
 <ul>
 <li><a href="/chat/rounds/{{round._id}}" class="chat-link">Chat room for this round</a></li>
 
@@ -28,6 +29,16 @@
 
 <li><a href="{{drive_link round.drive}}" class="bb-drive-upload">Upload file to google drive for this round</a></li>
 </ul>
+{{/unless}}
+
+{{#if round.spreadsheet}}
+<a align="center" href="{{round.spreadsheet}}" target="_blank">Open
+spreadsheet in new window</a>
+
+<iframe class="bb-spreadsheet-frame" frameborder='0' src='https://docs.google.com/spreadsheet/ccc?key={{round.spreadsheet}}&widget=true&chrome=false'></iframe>
+{{else}}
+<p>No spreadsheet.</p>
+{{/if}}
 
  {{/with}}
 
