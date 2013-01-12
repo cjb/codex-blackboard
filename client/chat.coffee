@@ -143,7 +143,7 @@ joinRoom = (type, id) ->
   roomName = type + '/' + id
   # xxx: could record the room name in a set here.
   Session.set "room_name", roomName
-  Router.goToChat(type, id)
+  Router.goToChat(type, id, Session.get('timestamp'))
   scrollMessagesView()
   $("#messageInput").select()
   instachat.keepalive = ->

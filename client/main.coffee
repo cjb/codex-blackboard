@@ -68,8 +68,8 @@ BlackboardRouter = Backbone.Router.extend
 
   urlFor: (type,id) ->
     "/#{type}/#{id}"
-  chatUrlFor: (type, id) ->
-    "/chat" + this.urlFor(type,id)
+  chatUrlFor: (type, id, timestamp) ->
+    "/chat" + this.urlFor(type,id) + (if (+timestamp) then "/#{+timestamp}" else "")
 
   goToRound: (round) ->
     this.navigate(this.urlFor("rounds",round._id), {trigger:true})
@@ -77,8 +77,8 @@ BlackboardRouter = Backbone.Router.extend
   goToPuzzle: (puzzle) ->
     this.navigate(this.urlFor("puzzles",puzzle._id), {trigger:true})
 
-  goToChat: (type, id) ->
-    this.navigate(this.chatUrlFor(type, id), {trigger:true})
+  goToChat: (type, id, timestamp) ->
+    this.navigate(this.chatUrlFor(type, id, timestamp), {trigger:true})
 
 Router = new BlackboardRouter()
 Backbone.history.start {pushState: true}
