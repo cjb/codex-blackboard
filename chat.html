@@ -63,7 +63,7 @@
 </div>
       {{else}}
 <div class="media {{#if message.to}}bb-message-pm{{/if}} {{#if followup}}bb-message-followup{{/if}}">
-  {{gravatar id=email image="wavatar" size=64 classes="media-object pull-left img-rounded" }}
+  {{gravatar id=email image="wavatar" size=48 classes="media-object pull-left img-rounded" }}
   <div class="media-body bb-message-body">
     <div class="pull-right timestamp">{{pretty_ts message.timestamp}}</div>
     <h5 class="media-heading"><span title="{{message.nick}}">{{nickOrName message.nick}}</span>

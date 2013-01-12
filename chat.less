@@ -14,9 +14,9 @@
   @chat-arrow-height: 15px;
   .media {
     position: relative; /* establish context for arrow placement */
-    margin-bottom: 10px;
+    margin-bottom: 6px;
     &.bb-message-followup {
-      margin-top: -13px;
+      margin-top: -9px;
       &:before, &:after {
         visibility: hidden;
       }
@@ -35,7 +35,7 @@
         .media-heading { display: none; }
       }
     }
-    &, &:first-child { margin-top: 10px; }
+    &, &:first-child { margin-top: 6px; }
     &:before, &:after {
       content:"";
       position: absolute;
@@ -53,7 +53,7 @@
     }
   }
   .bb-message-body {
-    min-height: 64px; /* match avatar height */
+    min-height: 48px; /* match avatar height */
     background-color: white;
     box-sizing: border-box;
     padding: 2px 5px;
