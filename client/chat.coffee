@@ -184,13 +184,15 @@ $("button.mute").live "click", ->
   Session.set "mute", $.cookie "mute"
 
 # ensure that we stay stuck to bottom even after images load
-$('.bb-message-body .inline-image').on 'load.bb-chat', (event) ->
+$('.bb-message-body .inline-image').live 'load mouseenter', (event) ->
   scrollMessagesView() if instachat.scrolledToBottom
 
 # unstick from bottom if the user manually scrolls
 $(window).scroll (event) ->
-  # XXX should see if we're at bottom
-  instachat.scrolledToBottom = false
+  scrollPos = document.body.scrollTop + document.body.parentElement.clientHeight
+  scrollMax = document.body.scrollHeight
+  atBottom = (scrollPos >= scrollMax)
+  instachat.scrolledToBottom = atBottom
 
 # Form Interceptors
 $("#joinRoom").live "submit", ->
@@ -243,6 +245,7 @@ $("#messageForm").live "submit", (e) ->
         args.to = args.nick
         args.body = "tried to /msg an UNKNOWN USER: " + message
         args.action = true
+  instachat.scrolledToBottom = true
   Meteor.call 'newMessage', args
   # make sure we're looking at the most recent messages
   if (+Session.get('timestamp'))
