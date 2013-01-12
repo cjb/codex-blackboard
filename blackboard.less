@@ -82,7 +82,8 @@ body {
     margin-top: @vert-padding;
     padding: 0 (15px + @right-size) 0 (14px + @left-size);
     & > .left { margin-left: (-@left-size); }
-    & > .right { margin-right: (-@right-size); }
+    & > .right { margin-right: (-@right-size);
+                 a[title], a[data-original-title] { position:relative; } }
     &, .messageRow { .ellipsis; }
   }
   .bb-lastchat .messageRow {
