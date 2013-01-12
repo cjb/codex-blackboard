@@ -84,9 +84,9 @@ Template.chat_header.whos_here = ->
 
 linkOrLinkedImage = (url) ->
   if url.match(/.(png|jpg|jpeg|gif)$/i)
-    "<a href=\"" + url + "\"><img src=\"" + url + "\" class=\"inline-image\"></a>"
+    "<a href=\"" + url + "\" target='_blank'><img src=\"" + url + "\" class='inline-image'></a>"
   else
-    "<a href=\"" + url + "\">" + url + "</a>"
+    "<a href=\"" + url + "\" target='_blank'>" + url + "</a>"
 
 convertURLsToLinksAndImages = (html) ->
   html.replace(/(http(s?):\/\/[^ ]+)/, linkOrLinkedImage)

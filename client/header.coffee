@@ -127,7 +127,7 @@ Template.header_breadcrumbs.events
      return unless folder
      uploadToDriveFolder folder, (docs) ->
         message = "uploaded "+(for doc in docs
-          "<a href='#{doc.url}'><img src='#{doc.iconUrl}' />#{doc.name}</a> "
+          "<a href='#{doc.url}' target='_blank'><img src='#{doc.iconUrl}' />#{doc.name}</a> "
         ).join(', ')
         Meteor.call 'newMessage',
           body: message
