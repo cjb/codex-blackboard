@@ -12,6 +12,7 @@ instachat["UTCOffset"] = new Date().getTimezoneOffset() * 60000
 instachat["alertWhenUnreadMessages"] = false
 instachat["messageAlertInterval"]    = undefined
 instachat["unreadMessages"]          = 0
+instachat["scrolledToBottom"]        = true
 
 # Collection Subscriptions
 Meteor.autosubscribe ->
@@ -34,7 +35,7 @@ Meteor.autosubscribe ->
     room_name: Session.get("room_name")
   .observe
     added: (item) ->
-      scrollMessagesView()
+      scrollMessagesView() if instachat.scrolledToBottom
       unreadMessage(item) unless item.system
 
 # Template Binding
@@ -161,8 +162,11 @@ scrollMessagesView = ->
   # using window.setTimeout here instead of Meteor.setTimeout because
   # scrollMessagesView is called inside a reactive context.  See the
   # comment in showUnreadMessagesAlert.
+  instachat.scrolledToBottom = true
   window.setTimeout ->
     $("body").scrollTo 'max'
+    # the scroll handler below will reset scrolledToBottom to be false
+    instachat.scrolledToBottom = true
   , 200
 
 # Event Handlers
@@ -173,6 +177,15 @@ $("button.mute").live "click", ->
     $.cookie "mute", true, {expires: 365, path: '/'}
 
   Session.set "mute", $.cookie "mute"
+
+# ensure that we stay stuck to bottom even after images load
+$('.bb-message-body .inline-image').on 'load.bb-chat', (event) ->
+  scrollMessagesView() if instachat.scrolledToBottom
+
+# unstick from bottom if the user manually scrolls
+$(window).scroll (event) ->
+  # XXX should see if we're at bottom
+  instachat.scrolledToBottom = false
 
 # Form Interceptors
 $("#joinRoom").live "submit", ->
