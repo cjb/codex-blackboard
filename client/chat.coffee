@@ -94,7 +94,7 @@ convertURLsToLinksAndImages = (html, id) ->
       inner = "<img src='#{url}' class='inline-image' id='#{id}'>"
     "<a href='#{url}' target='_blank'>#{inner}</a>"
   count = 0
-  html.replace /(http(s?):\/\/[^ ]+)/, (url) ->
+  html.replace /(http(s?):\/\/[^ ]+)/g, (url) ->
     linkOrLinkedImage url, "#{id}-#{count++}"
 
 highlightNick = (html) ->
