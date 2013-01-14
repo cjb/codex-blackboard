@@ -201,18 +201,18 @@
     <td class="puzzle-status bb-editable"
         data-bbedit="tags/{{puzzle._id}}/status/value">
       {{#if editing "tags" puzzle._id "status" "value"}}
-        <input type="text" value="{{status}}"
+        <input type="text" value="{{tag "status"}}"
                class="input-block-level" autofocus />
       {{else}}
         {{#if canEdit}}
           <i class="bb-edit-icon icon-pencil pull-right"
              title="Change the status of this puzzle"></i>
-          {{#if status}}
+          {{#if tag "status"}}
             <i class="bb-delete-icon icon-remove pull-left"
                title="Delete the status message for this puzzle"></i>
           {{/if}}
         {{/if}}
-        {{status}}
+        {{tag "status"}}
       {{/if}}
     </td>
     {{#unless canEdit}}

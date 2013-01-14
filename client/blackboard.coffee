@@ -212,8 +212,8 @@ Template.blackboard_round.puzzles = ->
     rXpY: "r#{this.round_num}p#{1+index}"
    } for id, index in this.round.puzzles)
 
-Template.blackboard_puzzle.status = ->
-  return (getTag this.puzzle, "status") or ""
+Template.blackboard_puzzle.tag = (name) ->
+  return (getTag this.puzzle, name) or ''
 Template.blackboard_puzzle.whos_working = ->
   return Presence.find
     room_name: ("puzzles/"+this.puzzle?._id)
