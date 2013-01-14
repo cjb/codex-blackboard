@@ -218,30 +218,6 @@ Template.blackboard_puzzle.whos_working = ->
   return Presence.find
     room_name: ("puzzles/"+this.puzzle?._id)
 
-Template.blackboard_puzzle.pretty_ts = (timestamp, brief) ->
-  duration = (Session.get('currentTime') or UTCNow()) - timestamp
-  seconds = Math.floor(duration/1000)
-  return "in the future" if seconds < -60
-  return "just now" if seconds < 60
-  [minutes, seconds] = [Math.floor(seconds/60), seconds % 60]
-  [hours,   minutes] = [Math.floor(minutes/60), minutes % 60]
-  [days,    hours  ] = [Math.floor(hours  /24), hours   % 24]
-  [weeks,   days   ] = [Math.floor(days   / 7), days    % 7]
-  ago = (s) -> (s.replace(/^\s+/,'') + " ago")
-  s = ""
-  s += " #{weeks} week" if weeks > 0
-  s += "s" if weeks > 1
-  return ago(s) if s and brief
-  s += " #{days} day" if days > 0
-  s += "s" if days > 1
-  return ago(s) if s and brief
-  s += " #{hours} hour" if hours > 0
-  s += "s" if hours > 1
-  return ago(s) if s and brief
-  s += " #{minutes} minute" if minutes > 0
-  s += "s" if minutes > 1
-  return ago(s)
-
 # Subscribe to all group, round, and puzzle information
 Meteor.autosubscribe ->
   return unless Session.equals("currentPage", "blackboard")

@@ -223,8 +223,8 @@
     </td>
     <td class="puzzle-update">
       {{#isolate}}
-      {{#if puzzle.solved}}solved {{pretty_ts puzzle.solved}}
-      {{else}}added {{pretty_ts puzzle.created}}
+      {{#if puzzle.solved}}solved {{pretty_ts timestamp=puzzle.solved style="brief duration"}}
+      {{else}}added {{pretty_ts timestamp=puzzle.created style="brief duration"}}
       {{/if}}
       {{/isolate}}
     </td>

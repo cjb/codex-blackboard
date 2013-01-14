@@ -55,16 +55,46 @@ Handlebars.registerHelper 'gravatar', (args) ->
 
 # timestamps
 Handlebars.registerHelper 'pretty_ts', (args) ->
-  timestamp = (keyword_or_positional 'timestamp', args).timestamp
+  args = keyword_or_positional 'timestamp', args
+  timestamp = args.timestamp
   return unless timestamp
-  d = new Date(timestamp)
-  hrs = d.getHours()
-  ampm = if hrs < 12 then 'AM' else 'PM'
-  hrs = 12 if hrs is 0
-  hrs = (hrs-12) if hrs > 12
-  min = d.getMinutes()
-  min = if min < 10 then "0" + min else min
-  hrs + ":" + min + ' ' + ampm
+  style = (args.style or "time")
+  switch (style)
+    when "time"
+      d = new Date(timestamp)
+      hrs = d.getHours()
+      ampm = if hrs < 12 then 'AM' else 'PM'
+      hrs = 12 if hrs is 0
+      hrs = (hrs-12) if hrs > 12
+      min = d.getMinutes()
+      min = if min < 10 then "0" + min else min
+      hrs + ":" + min + ' ' + ampm
+    when "duration", "brief_duration", "brief duration"
+      brief = (style isnt 'duration')
+      duration = (Session.get('currentTime') or UTCNow()) - timestamp
+      seconds = Math.floor(duration/1000)
+      return "in the future" if seconds < -60
+      return "just now" if seconds < 60
+      [minutes, seconds] = [Math.floor(seconds/60), seconds % 60]
+      [hours,   minutes] = [Math.floor(minutes/60), minutes % 60]
+      [days,    hours  ] = [Math.floor(hours  /24), hours   % 24]
+      [weeks,   days   ] = [Math.floor(days   / 7), days    % 7]
+      ago = (s) -> (s.replace(/^\s+/,'') + " ago")
+      s = ""
+      s += " #{weeks} week" if weeks > 0
+      s += "s" if weeks > 1
+      return ago(s) if s and brief
+      s += " #{days} day" if days > 0
+      s += "s" if days > 1
+      return ago(s) if s and brief
+      s += " #{hours} hour" if hours > 0
+      s += "s" if hours > 1
+      return ago(s) if s and brief
+      s += " #{minutes} minute" if minutes > 0
+      s += "s" if minutes > 1
+      return ago(s)
+    else
+      "Unknown timestamp style: #{style}"
 
 ############## log in/protect/mute panel ####################
 Template.header_loginmute.volumeIcon = ->
