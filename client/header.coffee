@@ -23,7 +23,7 @@ Handlebars.registerHelper 'link', (args) ->
 
 $('a.puzzles-link, a.rounds-link, a.chat-link, a.home-link, a.oplogs-link').live 'click', (event) ->
   return unless event.button is 0 # check right-click
-  return if event.ctrlKey or event.shiftKey # check ctrl/shift clicks
+  return if event.ctrlKey or event.shiftKey or event.altKey # check alt/ctrl/shift clicks
   event.preventDefault()
   if $(this).hasClass('bb-pop-out')
     window.open $(event.currentTarget).attr('href'), 'Pop out', \
