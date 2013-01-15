@@ -113,6 +113,71 @@
       <th class="puzzle-update">Last update</th>
       {{/unless}}
     </tr>
+    {{! META }}
+    <tr>
+      <td class="puzzle-name"><div>
+        <b>{{link id=round._id title=rX text="ROUND/META" editing=canEdit}}</b>
+        {{#if canEdit}}
+        <div class="bb-puzzle-add-move" data-bbedit="rounds/{{round._id}}">
+        <button class="btn btn-link bb-add-tag"
+             title="Add tag to puzzle">
+          <i class="icon-tags"></i>
+          <i class="icon-plus"></i>
+        </button>
+        </div>
+        {{/if}}
+        {{#with round}}{{>blackboard_puzzle_tags}}{{/with}}
+      </div></td>
+      <td class="puzzle-answer bb-editable"
+          data-bbedit="tags/{{round._id}}/meta_answer/value">
+      {{#if editing "tags" round._id "meta_answer" "value"}}
+        <input type="text" value="{{tag "meta_answer"}}"
+               class="input-block-level" autofocus />
+      {{else}}
+        {{#if canEdit}}
+          <i class="bb-edit-icon icon-pencil pull-right"
+             title="Change the meta answer for this round"></i>
+          {{#if tag "meta_answer"}}
+            <i class="bb-delete-icon icon-remove pull-left"
+               title="Delete the meta answer for this round"></i>
+          {{/if}}
+        {{/if}}
+        <b>{{tag "meta_answer"}}</b>
+      {{/if}}
+      </td>
+      <td class="puzzle-status bb-editable"
+        data-bbedit="tags/{{round._id}}/status/value">
+      {{#if editing "tags" round._id "status" "value"}}
+        <input type="text" value="{{tag "status"}}"
+               class="input-block-level" autofocus />
+      {{else}}
+        {{#if canEdit}}
+          <i class="bb-edit-icon icon-pencil pull-right"
+             title="Change the status of this round meta"></i>
+          {{#if tag "status"}}
+            <i class="bb-delete-icon icon-remove pull-left"
+               title="Delete the status message for this round meta"></i>
+          {{/if}}
+        {{/if}}
+        {{tag "status"}}
+      {{/if}}
+      </td>
+    {{#unless canEdit}}
+    <td class="puzzle-working">
+      <span class="comma-list">
+      {{#each whos_working}}{{> nick_presence }}{{/each}}
+      </span>
+    </td>
+    <td class="puzzle-update">
+      {{#isolate}}
+      {{#if tag "meta_answer"}}solved {{pretty_ts timestamp=round.touched style="brief duration"}}{{! XXX }}
+      {{else}}added {{pretty_ts timestamp=round.created style="brief duration"}}
+      {{/if}}
+      {{/isolate}}
+    </td>
+    {{/unless}}
+    </tr>
+
     {{#each puzzles}}
       {{> blackboard_puzzle}}
     {{/each}}
@@ -120,17 +185,19 @@
   {{else}}
   <p><i>No puzzles in this round yet.</i></p>
   {{/if}}
-  {{#with round}}{{>blackboard_tags}}{{/with}}
+  {{#unless "true"}}{{#with round}}{{>blackboard_tags}}{{/with}}{{/unless}}
   {{#if canEdit}}
   <div class="bb-round-buttons" data-bbedit="rounds/{{round._id}}">
      <button class="btn btn-mini btn-inverse bb-add-puzzle">
        <i class="icon-plus icon-white"></i>
        Add new puzzle to this round
      </button>
+     {{#unless "true"}}
      <button class="btn btn-mini btn-inverse bb-add-tag">
        <i class="icon-tag icon-white"></i>
        Add new tag to this round
      </button>
+     {{/unless}}
      <button class="btn btn-mini btn-inverse bb-move-down">
        <i class="icon-arrow-down icon-white"></i>
        Move round down
@@ -233,10 +300,10 @@
 </template>
 
 <template name="blackboard_tags">
-  <dl class="dl-horizontal">{{#each tags}}
+  <dl class="dl-horizontal">{{#each tags _id}}
     <dt class="bb-editable"
-        data-bbedit="tags/{{../_id}}/{{canon}}/name">
-      {{#if editing "tags" ../_id canon "name"}}
+        data-bbedit="tags/{{id}}/{{canon}}/name">
+      {{#if editing "tags" id canon "name"}}
         <input type="text" value="{{name}}"
                class="input-block-level" autofocus />
       {{else}}
@@ -248,8 +315,8 @@
       {{/if}}
      </dt>
     <dd class="bb-editable"
-        data-bbedit="tags/{{../_id}}/{{canon}}/value">
-      {{#if editing "tags" ../_id canon "value"}}
+        data-bbedit="tags/{{id}}/{{canon}}/value">
+      {{#if editing "tags" id canon "value"}}
         <input type="text" value="{{value}}"
                class="input-block-level" autofocus />
       {{else}}
@@ -267,12 +334,11 @@
 
 <template name="blackboard_puzzle_tags">
   <table class="bb-tag-table"><tbody>{{!
-    }}{{#each tags}}{{!
-      }}{{#unless equal canon "status"}}
+    }}{{#each tags _id}}
         <tr>
           <td class="bb-editable"
-              data-bbedit="tags/{{../../_id}}/{{canon}}/name">
-            {{#if editing "tags" ../../_id canon "name"}}
+              data-bbedit="tags/{{id}}/{{canon}}/name">
+            {{#if editing "tags" id canon "name"}}
               <input type="text" value="{{name}}"
                      class="input-block-level" autofocus />
             {{else}}
@@ -284,8 +350,8 @@
             {{/if}}
           </td>
           <td class="bb-editable"
-              data-bbedit="tags/{{../../_id}}/{{canon}}/value">
-            {{#if editing "tags" ../../_id canon "value"}}
+              data-bbedit="tags/{{id}}/{{canon}}/value">
+            {{#if editing "tags" id canon "value"}}
               <input type="text" value="{{value}}"
                      class="input-block-level" autofocus />
             {{else}}
@@ -299,7 +365,6 @@
             {{/if}}
           </td>
         </tr>
-      {{/unless}}{{!
-    }}{{/each}}{{!
+      {{/each}}{{!
   }}</tbody></table>
 </template>

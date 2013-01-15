@@ -198,7 +198,12 @@ processBlackboardEdit =
     tags = collection(n.type).findOne(id).tags
     t = (tag for tag in tags when tag.canon is canon)[0]
     # special case for 'status' tag, which might not previously exist
-    t = {name:'Status',canon:'status',value:''} if (canon is 'status') and not t
+    for special in ['Status', 'Meta Answer']
+      if (not t) and canon is canonical(special)
+        t =
+          name: special
+          canon: canonical(special)
+          value: ''
     # set tag (overwriting previous value)
     Meteor.call 'setTag', n.type, id, t.name, text, Session.get('nick')
 
@@ -211,12 +216,25 @@ Template.blackboard_round.puzzles = ->
     puzzle: Puzzles.findOne(id) or { _id: id }
     rXpY: "r#{this.round_num}p#{1+index}"
    } for id, index in this.round.puzzles)
+Template.blackboard_round.tag = (name) ->
+  return (getTag this.round, name) or ''
+Template.blackboard_round.whos_working = ->
+  return Presence.find
+    room_name: ("rounds/"+this.round?._id)
 
 Template.blackboard_puzzle.tag = (name) ->
   return (getTag this.puzzle, name) or ''
 Template.blackboard_puzzle.whos_working = ->
   return Presence.find
     room_name: ("puzzles/"+this.puzzle?._id)
+
+Template.blackboard_puzzle_tags.tags = (id) ->
+  isRound = ('puzzles' of this)
+  { id: id, name: t.name, canon: t.canon, value: t.value } \
+    for t in (this?.tags or []) when not \
+        (Session.equals('currentPage', 'blackboard') and \
+         (t.canon is 'status' or (isRound and t.canon is 'meta_answer')))
+Template.blackboard_tags.tags = Template.blackboard_puzzle_tags.tags
 
 # Subscribe to all group, round, and puzzle information
 Meteor.autosubscribe ->
