@@ -29,14 +29,16 @@ Meteor.autosubscribe ->
 Meteor.autosubscribe ->
   return unless Session.equals("currentPage", "chat")
   return unless (+Session.get('timestamp')) is 0
-  # the autosubscribe magic will tear down 'observe's
+  # the autosubscribe magic *doesn't* tear down 'observe's
   # live query handle when room_name or currentPage changes
-  Messages.find
+  # we need to handle that ourselves...
+  handle = Messages.find
     room_name: Session.get("room_name")
   .observe
     added: (item) ->
       scrollMessagesView() if instachat.scrolledToBottom
       unreadMessage(item) unless item.system
+  Meteor.deps.Context.current.onInvalidate -> handle.stop()
 
 # Template Binding
 Template.messages.room_name = -> Session.get('room_name')
