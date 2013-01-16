@@ -41,7 +41,7 @@ body {
   font-family: 'Droid Sans', sans-serif;
 }
 .bb-puzzleround, .bb-chat-messages {
-  margin-top: 40px; /* allow space for breadcrumbs in navbar */
+  padding-top: 40px; /* allow space for breadcrumbs in navbar */
 }
 .bb-puzzleround {
   padding-right: 2px; padding-left: 2px;
@@ -294,6 +294,65 @@ body {
     }
     td.puzzle-update {
       font-size: 85%;
+    }
+  }
+}
+
+/* special hack for 100% height layout w/ vertical slider,
+   used on puzzle and round pages */
+html.fullHeight {
+
+  &, body, #bb-body, #bb-content, .bb-puzzleround,
+  .bb-splitter, .bb-splitter > .bb-top-content, .bb-splitter iframe {
+    height: 100%;
+  }
+  #bb-body, #bb-content, .bb-puzzleround,
+  .bb-splitter, .bb-splitter > div, .bb-splitter iframe {
+    -webkit-box-sizing: border-box;
+       -moz-box-sizing: border-box;
+            box-sizing: border-box;
+  }
+  /* splitter! */
+  .bb-puzzleround {
+    position: relative; /* establish positioning context */
+    width: 100%;
+    padding-left: 0px; padding-right: 0px;
+    .bb-splitter {
+       position: relative;
+       &, & > div { width:100%; }
+       /* top padding here also anchors the margin in the embedded <h1>
+          element and fixes an odd-looking 10px shift */
+       padding-top: 6px; /* for slider (shifted to center) */
+       padding-bottom: 500px; /* for bottom pane */
+       & > .bb-top-content {
+         margin-top: -6px; /* shift extra space to bottom */
+         overflow: auto;
+       }
+       .bb-top-content, .bb-bottom-header {
+         padding-left: 2px; padding-right: 2px;
+       }
+       & > .bb-splitter-handle {
+         height: 6px;
+         background: #ccc url('/img/hgrabber.gif') no-repeat center;
+         cursor: n-resize;
+         &:hover { background-color: #aaa; }
+       }
+       &.active {
+         & > .bb-splitter-handle { background-color: #e88; }
+         .bb-top-content, .bb-bottom-content { pointer-events: none; }
+       }
+       & > .bb-bottom-content {
+         position: absolute;
+         height: 500px;
+         left: 0; bottom: 0;
+         .bb-bottom-header {
+           position: absolute; width: 400px; height: 20px; top: 0; left: 0;
+         }
+         iframe {
+           padding-top: 0px; /* was 26px, but we're chosing to overlap header */
+           border-top: none;
+         }
+       }
     }
   }
 }

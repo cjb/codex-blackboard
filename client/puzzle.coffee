@@ -7,11 +7,21 @@ Template.puzzle.data = ->
   r.round_num = 1 + group?.round_start + \
                 (group?.rounds or []).indexOf(round?._id)
   return r
+Template.puzzle.created = ->
+  $('html').addClass('fullHeight')
+  this.afterFirstRender = ->
+    Splitter.size.set()
 Template.puzzle.rendered = ->
+  $('html').addClass('fullHeight')
+  this.afterFirstRender?()
+  this.afterFirstRender = null
+  # set page title
   type = Session.get('type')
   id = Session.get('id')
-  name = collection(type)?.findOne(id)?.name
+  name = collection(type)?.findOne(id)?.name or id
   $("title").text("Puzzle: "+name)
+Template.puzzle.destroyed = ->
+  $('html').removeClass('fullHeight')
 
 Template.puzzle.events
   "click .bb-drive-select": (event, template) ->
@@ -31,6 +41,7 @@ Template.puzzle.events
     drive = this.puzzle.drive
     return unless drive
     uploadToDriveFolder drive, (docs) -> console.log docs
+  "mousedown .bb-splitter-handle": (e,t) -> Splitter.handleEvent(e,t)
 
 # presumably we also want to subscribe to the puzzle's chat room
 # and presence information at some point.

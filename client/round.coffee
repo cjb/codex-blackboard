@@ -5,17 +5,29 @@ Template.round.data = ->
   r.round_num = 1 + group?.round_start + \
                 (group?.rounds or []).indexOf(round?._id)
   return r
+Template.round.created = ->
+  $('html').addClass('fullHeight')
+  this.afterFirstRender = ->
+    Splitter.size.set()
 Template.round.rendered = ->
+  $('html').addClass('fullHeight')
+  this.afterFirstRender?()
+  this.afterFirstRender = null
+  # set page title
   type = Session.get('type')
   id = Session.get('id')
-  name = collection(type)?.findOne(id)?.name
+  name = collection(type)?.findOne(id)?.name or id
   $("title").text("Round: "+name)
+Template.round.destroyed = ->
+  $('html').removeClass('fullHeight')
+
 Template.round.events
   "click .bb-drive-upload": (event, template) ->
     event.preventDefault()
     drive = this.round.drive
     return unless drive
     uploadToDriveFolder drive, (docs) -> console.log docs
+  "mousedown .bb-splitter-handle": (e,t) -> Splitter.handleEvent(e, t)
 
 # presumably we also want to subscribe to the round's chat room
 # and presence information at some point.
