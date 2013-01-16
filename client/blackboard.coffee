@@ -17,7 +17,7 @@ Meteor.startup ->
     added: (p, beforeIndex) ->
       # check the solved timestamp -- if it's within the last minute
       # (fudge factor), and the page isn't newly-loaded, play the sound.
-      if p.solved and p.solved > (UTCNow() - SOUND_THRESHOLD_MS)
+      if p.solved #and p.solved > (UTCNow() - SOUND_THRESHOLD_MS)
         if (UTCNow() - blackboard.initialPageLoad) > SOUND_THRESHOLD_MS
           unless Session.get 'mute'
             blackboard.newAnswerSound.play()
