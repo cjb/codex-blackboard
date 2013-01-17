@@ -370,7 +370,9 @@ html.fullHeight {
 @media (max-width: 979px) {
   /* navbar becomes unfixed below 980px */
   .navbar-fixed-top, .bb-chat-messages { margin-bottom: 0; }
-  .navbar-fixed-bottom, .bb-chat-messages, .bb-puzzleround { margin-top: 0; }
+  .navbar-fixed-bottom { margin-top: 0; }
+  .navbar-fixed-top .navbar-inner { padding: 0; }
+  .bb-chat-messages, .bb-puzzle-round { padding-top: 0; }
   .bb-chat-footer { margin-left: -20px; margin-right: -20px; }
   #bb-body {
     padding-top: 0;
@@ -387,6 +389,25 @@ html.fullHeight {
       /* unfix sidebar */
       position: static;
       width: 100%;
+    }
+  }
+  /* fixup fullHeight stuff */
+  html.fullHeight {
+    body { padding-right: 0; padding-left: 0; }
+    #bb-content {
+      & > .bb-topbar {
+        position: absolute;
+        top: 0; height: 109px;
+        left: 0; right: 0; width: auto;
+        padding: 0;
+        margin: 0;
+      }
+      & > .bb-puzzleround {
+        position: absolute;
+        left: 20px; right: 20px; width: auto;
+        top: 109px; bottom: 3px; height: auto;
+        padding-top: 0;
+      }
     }
   }
 }

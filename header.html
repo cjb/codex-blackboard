@@ -14,6 +14,18 @@
 <template name="header_breadcrumbs">
 {{#unless currentPageEquals "blackboard"}}
 <div class='bb-breadcrumbs'>
+  {{#if drive}}
+<span class="bb-drive-buttons">
+  <button type="button"
+          class="bb-upload-file btn btn-inverse">
+    <i class="icon-upload icon-white"></i> Upload file
+  </button>
+  <a class="bb-drive-link btn btn-inverse"
+     title="Open Drive Folder"
+     target="_blank"
+     href="{{drive_link drive}}"><i class="icon-inbox icon-white"></i></a>
+</span>
+  {{/if}}
 <ul class="nav">
   <li><a href="/" class="home-link"><i class="icon-home icon-white"></i> Blackboard</a></li>
   {{#if round}}
@@ -37,18 +49,6 @@
     chat</a></li>
   {{/if}}
 </ul>
-  {{#if drive}}
-<span class="pull-right">
-  <button type="button"
-          class="bb-upload-file btn btn-inverse">
-    <i class="icon-upload icon-white"></i> Upload file
-  </button>
-  <a class="bb-drive-link btn btn-inverse"
-     title="Open Drive Folder"
-     target="_blank"
-     href="{{drive_link drive}}"><i class="icon-inbox icon-white"></i></a>
-</span>
-  {{/if}}
   {{#if currentPageEquals "chat"}}
     {{> chat_header }}
   {{/if}}
