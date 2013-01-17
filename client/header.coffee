@@ -1,5 +1,6 @@
 # templates, event handlers, and subscriptions for the site-wide
 # header bar, including the login modals and general Handlebars helpers
+HUNT_YEAR = 2013 # used to make wiki links
 
 keyword_or_positional = (name, args) ->
   return args.hash unless (not args?) or \
@@ -136,6 +137,23 @@ Template.header_loginmute.events
     canEdit = $(event.currentTarget).attr('data-canEdit') is 'true'
     Session.set 'canEdit', canEdit or undefined
     Session.set 'editing', undefined # abort current edit, whatever it is
+Template.header_loginmute.wikipage = ->
+  return '' if Session.equals('currentPage', 'blackboard')
+  [type, id] = [Session.get('type'), Session.get('id')]
+  return '' unless (type and id)
+  switch type
+    when 'puzzles'
+      round = Rounds.findOne puzzles: id
+      group = RoundGroups.findOne rounds: round?._id
+      puzzle_num = 1 + (round?.puzzles or []).indexOf(id)
+      round_num = 1 + group?.round_start + \
+        (group?.rounds or []).indexOf(round?._id)
+      "#{HUNT_YEAR}_R#{round_num}P#{puzzle_num}"
+    when 'rounds'
+      group = RoundGroups.findOne rounds: id
+      round_num = 1 + group?.round_start + \
+        (group?.rounds or []).indexOf(id)
+      "#{HUNT_YEAR}_R#{round_num}P0"
 
 ############## breadcrumbs #######################
 Template.header_breadcrumbs.round = ->
