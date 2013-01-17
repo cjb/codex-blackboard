@@ -395,7 +395,7 @@ SAMPLE_NICKS = [
 ]
 
 Meteor.startup ->
-  if RoundGroups.find().count() is 0
+  if 0 # RoundGroups.find().count() is 0
     # note that Meteor.call is async... this causes some slight issues...
     WHO='cscott'
     extend = (a,b) ->
