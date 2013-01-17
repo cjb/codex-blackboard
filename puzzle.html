@@ -6,7 +6,8 @@
 <div class="bb-splitter">
 <div class="bb-top-content">{{! start top of splitter }}
 
-<h1>Puzzle <small>{{puzzle.name}} (r{{round_num}}p{{puzzle_num}})</small></h1>
+<h1>Puzzle <small>{{puzzle.name}}
+  (<a class="bb-wiki" href="{{#wiki}}2013_R{{round_num}}P{{puzzle_num}}{{/wiki}}">wiki r{{round_num}}p{{puzzle_num}}</a>)</small></h1>
 
 {{#with puzzle}}{{> blackboard_tags }}{{/with}}
 

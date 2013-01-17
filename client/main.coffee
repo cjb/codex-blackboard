@@ -21,6 +21,12 @@ Handlebars.registerHelper 'editing', (args..., options) ->
   return false unless (Session.get 'nick') and (Session.get 'canEdit')
   return Session.equals 'editing', args.join('/')
 
+WIKI_HOST = 'http://wiki.codexian.us'
+Handlebars.registerHelper 'wiki', (options) ->
+  contents = options.fn(this)
+  return WIKI_HOST unless contents
+  "#{WIKI_HOST}/index.php?title=#{contents}"
+
 CLIENT_UUID = Meteor.uuid() # this identifies this particular client instance
 DEFAULT_HOST = 'codexian.us' # this is used to create gravatars from nicks
 

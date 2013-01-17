@@ -114,6 +114,8 @@ body {
     padding-top: 1px;
     margin-bottom: -1px;
   }
+
+  .bb-wiki { text-transform: uppercase; }
 }
 #bb-sidebar {
   .bb-sidenav {
@@ -129,6 +131,7 @@ body {
 
     position: fixed; /* for wide screens */
 
+    & > li:first-child { text-align: center; /* wiki link */ }
     li.nav-header, li > a { .ellipsis; }
 
     /* Chevrons */
