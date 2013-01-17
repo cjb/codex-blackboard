@@ -8,19 +8,17 @@ Meteor.startup ->
   blackboard.newAnswerSound = new Audio "sound/that_was_easy.wav"
   # set up a persistent query so we can play the sound whenever we get a new
   # answer
-  # note that this observe 'leaks' -- we're not seeing it up/tearing it
+  # note that this observe 'leaks' -- we're not setting it up/tearing it
   # down with the blackboard page, we're going to play the sound whatever
   # page the user is currently on.  This is "fun".  Trust us...
-  Meteor.subscribe 'newly-answered-puzzles'
-  query = Puzzles.find $and: [ {answer: $ne: null}, {answer: $exists: true} ]
-  query.observe
-    added: (p, beforeIndex) ->
-      # check the solved timestamp -- if it's within the last minute
-      # (fudge factor), and the page isn't newly-loaded, play the sound.
-      if p.solved #and p.solved > (UTCNow() - SOUND_THRESHOLD_MS)
-        if (UTCNow() - blackboard.initialPageLoad) > SOUND_THRESHOLD_MS
-          unless Session.get 'mute'
-            blackboard.newAnswerSound.play()
+  Meteor.subscribe 'last-answered-puzzle'
+  # ignore added; that's just the startup state.  Watch 'changed'
+  LastAnswer.find({}).observe
+    changed: (doc, atIndex, oldDoc) ->
+      return if doc.puzzle is oldDoc.puzzle # answer changed, not really new
+      console.log 'that was easy', doc, oldDoc
+      unless Session.get 'mute'
+        blackboard.newAnswerSound.play()
 
 # Returns an event map that handles the "escape" and "return" keys and
 # "blur" events on a text input (given by selector) and interprets them

@@ -37,6 +37,14 @@ OpLogs = BBCollection.oplogs = new Meteor.Collection "oplogs"
 Names = BBCollection.names = \
   if Meteor.isClient then new Meteor.Collection 'names' else null
 
+# LastAnswer is a synthetic collection created by the server which gives the
+# solution time of the most recently-solved puzzle.
+#    _id: random UUID
+#    solved: solution time
+#    puzzle: id of most recently solved puzzle
+LastAnswer = BBCollection.last_answer = \
+  if Meteor.isClient then new Meteor.Collection 'last-answer' else null
+
 # RoundGroups are:
 #   _id: mongodb id
 #   name: string

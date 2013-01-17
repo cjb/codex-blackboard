@@ -17,10 +17,36 @@ Meteor.publish 'presence-for-room', (room_name) ->
 
 # this is for the "that was easy" sound effect
 # everyone is subscribed to this all the time
-Meteor.publish 'newly-answered-puzzles', ->
-  Puzzles.find { $and: [ {answer: $ne: null}, {answer: $exists: true} ] },
-    sort: [['solved','desc']]
-    limit: 5
+Meteor.publish 'last-answered-puzzle', ->
+  collection = 'last-answer'
+  self = this
+  uuid = Meteor.uuid()
+  recent = null
+  started = false
+  max = (doc) ->
+    if doc.solved?
+      if (not recent?) or (doc.solved > recent)
+        recent = doc.solved
+        return true
+    return false
+  publishIfMax = (doc) ->
+    return unless max(doc)
+    self.set collection, uuid, {solved:recent, puzzle:doc._id}
+    self.flush() if started
+  handle = Puzzles.find({
+    $and: [ {answer: $ne: null}, {answer: $exists: true} ]
+  }).observe
+    added: (doc,idx) -> publishIfMax(doc)
+    changed: (doc, atIndex, oldDoc) -> publishIfMax(doc)
+  # observe only returns after initial added callbacks.
+  # if we still don't have a 'recent' (possibly because no puzzles have
+  # been answered), set it to current time
+  publishIfMax(solved:UTCNow()) unless recent?
+  # okay, mark the subscription as ready.
+  self.complete()
+  self.flush()
+  started = true
+  self.onStop -> handle.stop()
 
 # limit site traffic by only pushing out changes relevant to a certain
 # roundgroup, round, or puzzle
