@@ -72,7 +72,7 @@ Template.blackboard.rendered = ->
   this.afterFirstRender?()
   this.afterFirstRender = null
   #  page title
-  $("title").text("Blackboard")
+  $("title").text("Codex Puzzle Blackboard")
   # update bootstrap "scroll spy" component when rounds list changes
   ss = $("body").data("scrollspy")
   ss.refresh()
