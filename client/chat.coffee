@@ -239,7 +239,7 @@ Template.messages_input.submit = (message) ->
     when "/me"
       args.body = rest
       args.action = true
-    when "/msg"
+    when "/msg", "/m"
       # find who it's to
       [to, rest] = rest.split(/\s+([^]*)/, 2)
       while rest
