@@ -219,12 +219,14 @@ Template.blackboard_round.tag = (name) ->
 Template.blackboard_round.whos_working = ->
   return Presence.find
     room_name: ("rounds/"+this.round?._id)
+  , sort: ["nick"]
 
 Template.blackboard_puzzle.tag = (name) ->
   return (getTag this.puzzle, name) or ''
 Template.blackboard_puzzle.whos_working = ->
   return Presence.find
     room_name: ("puzzles/"+this.puzzle?._id)
+  , sort: ["nick"]
 
 Template.blackboard_puzzle_tags.tags = (id) ->
   isRound = ('puzzles' of this)
