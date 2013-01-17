@@ -367,6 +367,13 @@ html.fullHeight {
 -------------------------------------------------- */
 
 /* tweak heading for narrow displays */
+@media (max-width: 1270px) {
+  #bb-tables.bb-canEdit > h1 .bb-hide-when-narrow { display: none; }
+}
+@media (max-width: 1114px) {
+  #bb-tables.bb-canEdit > h1.bb-blackboard-h1 { white-space: nowrap; }
+  #bb-tables.bb-canEdit > h1 .bb-hide-when-narrower { display: none; }
+}
 @media (max-width: 1088px) {
   #bb-tables > h1 .bb-hide-when-narrow { display: none; }
 }
