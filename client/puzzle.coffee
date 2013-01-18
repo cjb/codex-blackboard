@@ -10,7 +10,7 @@ Template.puzzle.data = ->
 Template.puzzle.created = ->
   $('html').addClass('fullHeight')
   this.afterFirstRender = ->
-    Splitter.size.set()
+    Splitter.vsize.set()
 Template.puzzle.rendered = ->
   $('html').addClass('fullHeight')
   this.afterFirstRender?()

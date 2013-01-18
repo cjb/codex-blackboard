@@ -9,7 +9,7 @@ Template.round.data = ->
 Template.round.created = ->
   $('html').addClass('fullHeight')
   this.afterFirstRender = ->
-    Splitter.size.set()
+    Splitter.vsize.set()
 Template.round.rendered = ->
   $('html').addClass('fullHeight')
   this.afterFirstRender?()

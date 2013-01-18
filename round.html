@@ -6,34 +6,33 @@
 <div class="bb-splitter">
 <div class="bb-top-content">{{! start top of splitter }}
 
+<div class="bb-top-left-content">{{! start top left splitter }}
+  <table class="table">{{! tables for layout, oh my }}
+    <tr><td>
+
 <h1>Round <small>{{round.name}}
   (<a class="bb-wiki" href="{{#wiki}}2013_R{{round_num}}P0{{/wiki}}">wiki r{{round_num}}p0</a>)</small></h1>
 
-<div class="navbar"><div class="navbar-inner">
-  <a class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
-    <span class="icon-bar"></span>
-    <span class="icon-bar"></span>
-    <span class="icon-bar"></span>
-  </a>
-  <a class="brand">Puzzles:</a>
-  <div class="nav-collapse collapse">
-  <ul class="nav">
-  {{#each round.puzzles}}<li>{{link this}}</li>{{/each}}
-  </ul>
-  </div>
-</div></div>
-
 {{#with round}}{{> blackboard_tags }}{{/with}}
 
-{{#unless "true"}}
-<ul>
-<li><a href="/chat/rounds/{{round._id}}" class="chat-link">Chat room for this round</a></li>
+    </td><td>
 
-<li><a href="{{drive_link round.drive}}">Google drive folder for this round</a></li>
+<table class="bb-round-answers table table-bordered table-condensed">
+  <tr><th>Puzzle in round</th><th>Answer</th></tr>
+  {{#each puzzles}}
+  <tr><td>{{link _id}}</td><td class="answer">{{#if answer}}{{answer}}{{/if}}</td></tr>
+  {{/each}}
+</table>
 
-<li><a href="{{drive_link round.drive}}" class="bb-drive-upload">Upload file to google drive for this round</a></li>
-</ul>
-{{/unless}}
+   </td></tr>
+ </table>
+</div>
+
+<div class="bb-splitter-handle"></div>
+
+<div class="bb-top-right-content">{{! start top right splitter }}
+  <h2>CHAT!</h2>
+</div>
 
 </div> {{! end top of splitter }}
 
