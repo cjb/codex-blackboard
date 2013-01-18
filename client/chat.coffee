@@ -250,6 +250,10 @@ Template.messages_input.submit = (message) ->
         whos_here[whos_here.length-1] = 'and ' + whos_here[whos_here.length-1]
         whos_here = whos_here.join(', ')
       args.body = "looks around and sees: #{whos_here}"
+    when "/nick"
+      args.to = args.nick
+      args.action = true
+      args.body = "needs to log out and log in again to change nicks"
     when "/msg", "/m"
       # find who it's to
       [to, rest] = rest.split(/\s+([^]*)/, 2)
