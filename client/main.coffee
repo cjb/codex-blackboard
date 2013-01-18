@@ -34,12 +34,6 @@ DEFAULT_HOST = 'codexian.us' # this is used to create gravatars from nicks
 Meteor.subscribe 'all-names'
 # subscribe to all nicks all the time
 Meteor.subscribe 'all-nicks'
-# we might subscribe to all-puzzles, all-rounds, all-roundgroups, too.
-if BB_SUB_ALL
-  Meteor.subscribe 'all-roundgroups'
-  Meteor.subscribe 'all-rounds'
-  Meteor.subscribe 'all-puzzles'
-  Meteor.subscribe 'all-presence'
 
 # Router
 BlackboardRouter = Backbone.Router.extend
