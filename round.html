@@ -11,7 +11,9 @@
     <tr><td>
 
 <h1>Round <small>{{round.name}}
-  (<a class="bb-wiki" href="{{#wiki}}2013_R{{round_num}}P0{{/wiki}}">wiki r{{round_num}}p0</a>)</small></h1>
+  (<a class="bb-wiki" href="{{#wiki}}2013_R{{round_num}}P0{{/wiki}}">wiki r{{round_num}}p0</a>)
+  {{#if round.link}}(<a href="{{round.link}}" target="_blank">puzzle link</a>){{/if}}
+</small></h1>
 
 {{#with round}}{{> blackboard_tags }}{{/with}}
 
