@@ -22,6 +22,9 @@ Template.round.rendered = ->
 Template.round.destroyed = ->
   $('html').removeClass('fullHeight')
 
+Template.round.preserve
+  "iframe[src]": (node) -> node.src
+
 Template.round.events
   "click .bb-drive-upload": (event, template) ->
     event.preventDefault()

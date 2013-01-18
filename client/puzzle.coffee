@@ -23,6 +23,9 @@ Template.puzzle.rendered = ->
 Template.puzzle.destroyed = ->
   $('html').removeClass('fullHeight')
 
+Template.puzzle.preserve
+  "iframe[src]": (node) -> node.src
+
 Template.puzzle.events
   "click .bb-drive-select": (event, template) ->
     event.preventDefault()
