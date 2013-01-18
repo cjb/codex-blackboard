@@ -34,18 +34,20 @@
 
 <div class="bb-top-right-content">{{! start top right splitter }}
 
-{{> messages }}
+<div class="bb-message-container">
+  {{> messages }}
+</div>
 
 <div class="bb-chat-input bb-chat-footer">
   {{> messages_input }}
-</div>
-
 </div>
 
 <div class="bb-chat-pop-out">
   <a href="/chat/rounds/{{round._id}}" class="chat-link bb-pop-out"
      target="chat{{round._id}}"><i class="icon-share-alt"></i>
 Pop out</a>
+</div>
+
 </div>
 
 </div> {{! end top of splitter }}

@@ -24,6 +24,11 @@
   & > *::after { content: ", "; }
   & > *:last-child::after { content:""; }
 }
+.border-box {
+  -webkit-box-sizing: border-box;
+     -moz-box-sizing: border-box;
+          box-sizing: border-box;
+}
 .bb-no-wrap {
   white-space: nowrap;
 }
@@ -316,11 +321,7 @@ html.fullHeight {
   }
   #bb-body, #bb-content, .bb-puzzleround,
   .bb-splitter, .bb-splitter > div, .bb-splitter iframe,
-  .bb-top-content > div {
-    -webkit-box-sizing: border-box;
-       -moz-box-sizing: border-box;
-            box-sizing: border-box;
-  }
+  .bb-top-content > div { .border-box; }
   /* splitter! */
   .bb-puzzleround {
     position: relative; /* establish positioning context */
@@ -389,24 +390,32 @@ html.fullHeight {
            /* chat stylin' */
            background: url('/img/grid_noise.png');
            background-attachment: fixed;
+           overflow: hidden;
+           .bb-message-container, .bb-chat-messages { .border-box; }
+           .bb-message-container {
+             overflow: auto;
+             position: absolute;
+             left: 0; right: 0;
+             top: 0; bottom: 36px;
+           }
            .bb-chat-messages {
              padding: 5px 2px 0 2px;
              margin-bottom: 0;
-             -webkit-box-sizing: border-box;
-                -moz-box-sizing: border-box;
-                     box-sizing: border-box;
            }
            .bb-chat-footer {
+             position: absolute;
+             left: 0; right: 0; margin-left: 0; margin-right: 0;
+             bottom: 0; height: 36px;
              background: url('/img/irongrip.png');
-             #messageInput { margin-top: 1px; }
+             #messageInput { margin-top: 3px; }
            }
-         }
-         .bb-chat-pop-out {
-           position: absolute; top: 0; right: 14px;
-           background: white;
-           border: 1px solid #888;
-           padding-left: 2px; padding-right: 4px;
-           border-bottom-left-radius: 5px;
+           .bb-chat-pop-out {
+             position: absolute; top: 0; right: 14px;
+             background: white;
+             border: 1px solid #888;
+             padding-left: 2px; padding-right: 4px;
+             border-bottom-left-radius: 5px;
+           }
          }
        }
     }
