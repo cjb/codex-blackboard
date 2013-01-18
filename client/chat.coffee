@@ -233,7 +233,7 @@ Template.messages_input.submit = (message) ->
       args.body = "should read <a href='http://wiki.codexian.us/index.php?title=Chat_System' target='_blank'>Chat System</a> on the wiki"
       args.bodyIsHtml = true
       args.action = true
-    when "/users", "/show"
+    when "/users", "/show", "/list"
       args.to = args.nick
       args.action = true
       whos_here = \
