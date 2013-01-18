@@ -298,7 +298,9 @@ hideMessageAlert = ->
 
 unreadMessage = (doc)->
   unless Session.equals('nick', doc["nick"]) || doc.system || Session.get "mute"
-    instachat.unreadMessageSound.play()
+    # only ping if message mentions you
+    if doc.body?.indexOf(Session.get('nick')) >= 0 and not doc.bodyIsHtml
+      instachat.unreadMessageSound.play()
 
   if instachat.alertWhenUnreadMessages
     instachat.unreadMessages += 1
