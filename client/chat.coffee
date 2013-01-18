@@ -231,6 +231,7 @@ Template.messages_input.submit = (message) ->
     when "/msg", "/m"
       # find who it's to
       [to, rest] = rest.split(/\s+([^]*)/, 2)
+      missingMessage = (not rest)
       while rest
         n = Nicks.findOne canon: canonical(to)
         break if n
@@ -243,7 +244,8 @@ Template.messages_input.submit = (message) ->
         # error: unknown user
         # record this attempt as a PM to yourself
         args.to = args.nick
-        args.body = "tried to /msg an UNKNOWN USER: " + message
+        args.body = "tried to /msg an UNKNOWN USER: #{message}"
+        args.body = "tried to say nothing: #{message}" if missingMessage
         args.action = true
   instachat.scrolledToBottom = true
   Meteor.call 'newMessage', args
