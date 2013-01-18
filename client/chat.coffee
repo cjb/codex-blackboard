@@ -233,6 +233,23 @@ Template.messages_input.submit = (message) ->
       args.body = "should read <a href='http://wiki.codexian.us/index.php?title=Chat_System' target='_blank'>Chat System</a> on the wiki"
       args.bodyIsHtml = true
       args.action = true
+    when "/users", "/show"
+      args.to = args.nick
+      args.action = true
+      whos_here = \
+        Presence.find({room_name: args.room_name}, {sort:["nick"]}).fetch()
+      whos_here = whos_here.map (obj) ->
+        if obj.foreground then obj.nick else "(#{obj.nick})"
+      if whos_here.length == 0
+        whos_here = "nobody"
+      else if whos_here.length == 1
+        whos_here = whos_here[0]
+      else if whos_here.length == 2
+        whos_here = whos_here.join(' and ')
+      else
+        whos_here[whos_here.length-1] = 'and ' + whos_here[whos_here.length-1]
+        whos_here = whos_here.join(', ')
+      args.body = "looks around and sees: #{whos_here}"
     when "/msg", "/m"
       # find who it's to
       [to, rest] = rest.split(/\s+([^]*)/, 2)
