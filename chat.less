@@ -16,6 +16,7 @@
   .media {
     position: relative; /* establish context for arrow placement */
     margin-bottom: 6px;
+    .timestamp.pull-right { margin-bottom: 0; }
     &.bb-message-followup {
       margin-top: -9px;
       &:before, &:after {
@@ -94,10 +95,15 @@
   }
 }
 @media (max-width: 480px) {
-  .bb-chat-messages .media {
-    /* hide chat bubble arrows when display gets too narrow */
-    &:before, &:after { display: none; }
-    .timestamp { float: right; /* still */ }
+  .bb-chat-messages {
+    .media {
+      /* hide chat bubble arrows when display gets too narrow */
+      &:before, &:after { display: none; }
+      .timestamp { float: right; /* still */ }
+      .media-object.pull-left { display: none; }
+    }
+    .bb-message-action, .bb-message-system { padding-left: 6px; }
+    .bb-message-body { min-height: 0; }
   }
 }
 .messageRow, .actionRow {
