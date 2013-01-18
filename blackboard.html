@@ -328,8 +328,10 @@
              title="Delete this tag and value"></i>
           <i class="bb-edit-icon icon-pencil pull-right"
              title="Edit the value of this tag"></i>
+          {{value}}
+        {{else}}
+          {{#linkify}}{{value}}{{/linkify}}
         {{/if}}
-        {{value}}
       {{/if}}
     </dd>
   {{/each}}</dl>

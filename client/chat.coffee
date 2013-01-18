@@ -84,7 +84,7 @@ Template.chat_header.whos_here = ->
 convertURLsToLinksAndImages = (html, id) ->
   linkOrLinkedImage = (url, id) ->
     inner = url
-    if url.match(/.(png|jpg|jpeg|gif)$/i)
+    if url.match(/.(png|jpg|jpeg|gif)$/i) and id?
       inner = "<img src='#{url}' class='inline-image' id='#{id}'>"
     "<a href='#{url}' target='_blank'>#{inner}</a>"
   count = 0

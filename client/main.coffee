@@ -27,6 +27,11 @@ Handlebars.registerHelper 'wiki', (options) ->
   return WIKI_HOST unless contents
   "#{WIKI_HOST}/index.php?title=#{contents}"
 
+Handlebars.registerHelper 'linkify', (options) ->
+  contents = options.fn(this)
+  contents = convertURLsToLinksAndImages(Handlebars._escape(contents))
+  return new Handlebars.SafeString(contents)
+
 CLIENT_UUID = Meteor.uuid() # this identifies this particular client instance
 DEFAULT_HOST = 'codexian.us' # this is used to create gravatars from nicks
 
