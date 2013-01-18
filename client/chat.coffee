@@ -228,6 +228,11 @@ Template.messages_input.submit = (message) ->
     when "/me"
       args.body = rest
       args.action = true
+    when "/help"
+      args.to = args.nick
+      args.body = "should read <a href='http://wiki.codexian.us/index.php?title=Chat_System' target='_blank'>Chat System</a> on the wiki"
+      args.bodyIsHtml = true
+      args.action = true
     when "/msg", "/m"
       # find who it's to
       [to, rest] = rest.split(/\s+([^]*)/, 2)
