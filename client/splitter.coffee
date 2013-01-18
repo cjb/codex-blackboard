@@ -28,7 +28,6 @@ Splitter =
       $('.bb-top-right-content').css 'width', +size
       +size
   handleEvent: (event, template) ->
-    console.log $(event.currentTarget).closest('.bb-top-content')
     if $(event.currentTarget).closest('.bb-top-content').length
       this.handleHEvent event, template
     else
