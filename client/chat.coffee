@@ -26,20 +26,6 @@ Meteor.autosubscribe ->
   # we always subscribe to all-nicks... but otherwise we could subscribe to
   # nick-for-room or some such
 
-Meteor.autosubscribe ->
-  return unless Session.equals("currentPage", "chat")
-  return unless (+Session.get('timestamp')) is 0
-  # the autosubscribe magic *doesn't* tear down 'observe's
-  # live query handle when room_name or currentPage changes
-  # we need to handle that ourselves...
-  handle = Messages.find
-    room_name: Session.get("room_name")
-  .observe
-    added: (item) ->
-      scrollMessagesView() if instachat.scrolledToBottom
-      unreadMessage(item) unless item.system
-  Meteor.deps.Context.current.onInvalidate -> handle.stop()
-
 # Template Binding
 Template.messages.room_name = -> Session.get('room_name')
 Template.messages.timestamp = -> +Session.get('timestamp')
@@ -80,6 +66,8 @@ Template.messages.body = ->
 
 Template.messages.preserve
   ".inline-image[id]": (node) -> node.id
+Template.messages.rendered = ->
+  scrollMessagesView() if instachat.scrolledToBottom
 
 Template.chat_header.room_name = -> prettyRoomName()
 Template.chat_header.whos_here = ->
@@ -167,20 +155,15 @@ joinRoom = (type, id) ->
   instachat.keepaliveInterval = Meteor.setInterval instachat.keepalive, (PRESENCE_KEEPALIVE_MINUTES*60*1000)
 
 scrollMessagesView = ->
-  # using window.setTimeout here instead of Meteor.setTimeout because
-  # scrollMessagesView is called inside a reactive context.  See the
-  # comment in showUnreadMessagesAlert.
   instachat.scrolledToBottom = true
-  window.setTimeout ->
-    # first try using html5, then fallback to jquery
-    last = document?.querySelector?('.bb-chat-messages > *:last-child')
-    if last?.scrollIntoView?
-      last.scrollIntoView()
-    else
-      $("body").scrollTo 'max'
-    # the scroll handler below will reset scrolledToBottom to be false
-    instachat.scrolledToBottom = true
-  , 10
+  # first try using html5, then fallback to jquery
+  last = document?.querySelector?('.bb-chat-messages > *:last-child')
+  if last?.scrollIntoView?
+    last.scrollIntoView()
+  else
+    $("body").scrollTo 'max'
+  # the scroll handler below will reset scrolledToBottom to be false
+  instachat.scrolledToBottom = true
 
 # Event Handlers
 $("button.mute").live "click", ->
@@ -349,3 +332,18 @@ $(window).unload -> cleanupChat()
 # App startup
 Meteor.startup ->
   instachat.unreadMessageSound = new Audio "/sound/Electro_-S_Bainbr-7955.wav"
+
+Meteor.autosubscribe ->
+  unless Session.equals("currentPage", "chat") and \
+         (+Session.get('timestamp')) is 0
+    hideMessageAlert()
+    return
+  # the autosubscribe magic *doesn't* tear down 'observe's
+  # live query handle when room_name or currentPage changes
+  # we need to handle that ourselves...
+  handle = Messages.find
+    room_name: Session.get("room_name")
+  .observe
+    added: (item) ->
+      unreadMessage(item) unless item.system
+  Meteor.deps.Context.current.onInvalidate -> handle.stop()
