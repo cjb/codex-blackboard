@@ -50,14 +50,15 @@ BlackboardRouter = Backbone.Router.extend
 
   RoundPage: (id) ->
     this.Page("round", "rounds", id)
+    Session.set "timestamp", 0
 
   PuzzlePage: (id) ->
     this.Page("puzzle", "puzzles", id)
+    Session.set "timestamp", 0
 
   ChatPage: (type,id,timestamp=0) ->
     id = "0" if type is "general"
     this.Page("chat", type, id)
-    Session.set "room_name", (type+'/'+id)
     Session.set "timestamp", +timestamp
 
   OpLogPage: (timestamp) ->
@@ -68,6 +69,7 @@ BlackboardRouter = Backbone.Router.extend
     Session.set "currentPage", page
     Session.set "type", type
     Session.set "id", id
+    Session.set "room_name", (type+'/'+id)
     # cancel modals if they were active
     $('#nickPickModal').modal 'hide'
     $('#confirmModal').modal 'hide'

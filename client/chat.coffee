@@ -14,18 +14,6 @@ instachat["messageAlertInterval"]    = undefined
 instachat["unreadMessages"]          = 0
 instachat["scrolledToBottom"]        = true
 
-# Collection Subscriptions
-Meteor.autosubscribe ->
-  return unless Session.equals("currentPage", "chat")
-  room_name = Session.get 'room_name'
-  return unless room_name
-  nick = Session.get 'nick' or null
-  timestamp = (+Session.get('timestamp')) or Number.MAX_VALUE
-  Meteor.subscribe 'presence-for-room', room_name
-  Meteor.subscribe 'paged-messages', nick, room_name, timestamp
-  # we always subscribe to all-nicks... but otherwise we could subscribe to
-  # nick-for-room or some such
-
 # Template Binding
 Template.messages.room_name = -> Session.get('room_name')
 Template.messages.timestamp = -> +Session.get('timestamp')
@@ -66,6 +54,21 @@ Template.messages.body = ->
 
 Template.messages.preserve
   ".inline-image[id]": (node) -> node.id
+Template.messages.created = ->
+  instachat.scrolledToBottom = true
+  this.run = Meteor.autorun =>
+    this.sub1?.stop?()
+    this.sub2?.stop?()
+    room_name = Session.get 'room_name'
+    return unless room_name
+    this.sub1 = Meteor.subscribe 'presence-for-room', room_name
+    nick = Session.get 'nick' or null
+    timestamp = (+Session.get('timestamp')) or Number.MAX_VALUE
+    this.sub2 = Meteor.subscribe 'paged-messages', nick, room_name, timestamp
+Template.messages.destroyed = ->
+    this.sub1?.stop?()
+    this.sub2?.stop?()
+    this.run.stop()
 Template.messages.rendered = ->
   scrollMessagesView() if instachat.scrolledToBottom
 
@@ -180,6 +183,7 @@ $('.bb-message-body .inline-image').live 'load mouseenter', (event) ->
 
 # unstick from bottom if the user manually scrolls
 $(window).scroll (event) ->
+  return unless Session.equals('currentPage', 'chat')
   # set to false, just in case older browser doesn't have scroll properties
   instachat.scrolledToBottom = false
   [body, html] = [document.body, document.body?.parentElement]
