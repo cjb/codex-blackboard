@@ -49,6 +49,7 @@ Template.puzzle.events
 # presumably we also want to subscribe to the puzzle's chat room
 # and presence information at some point.
 Meteor.autosubscribe ->
+  return if BB_SUB_ALL
   return unless Session.equals("type", "puzzles")
   puzzle_id = Session.get('id')
   return unless puzzle_id

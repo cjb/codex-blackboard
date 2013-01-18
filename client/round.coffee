@@ -36,6 +36,7 @@ Template.round.events
 # presumably we also want to subscribe to the round's chat room
 # and presence information at some point.
 Meteor.autosubscribe ->
+  return if BB_SUB_ALL
   return unless Session.equals("type", "rounds")
   round_id = Session.get('id')
   return unless round_id
