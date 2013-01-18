@@ -55,6 +55,9 @@ Template.blackboard.rounds = ->
     round_num: 1+index+this.round_start
     round: Rounds.findOne(id) or { _id: id, name: Names.findOne(id)?.name }
     rX: "r#{1+index+this.round_start}"
+    num_puzzles: (Rounds.findOne(id)?.puzzles or []).length
+    num_solved: (p for p in (Rounds.findOne(id)?.puzzles or []) when \
+                 Puzzles.findOne(p)?.answer).length
    } for id, index in this.rounds)
    r.reverse() if Session.get 'sortReverse'
    return r
