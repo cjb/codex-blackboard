@@ -59,7 +59,7 @@ Meteor.publish 'my-nick', (nick) -> Nicks.find canon: canonical(nick)
 
 # only publish last page of messages
 Meteor.publish 'recent-messages', (nick, room_name) ->
-  nick = nick or null
+  nick = canonical(nick or '') or null
   Messages.find {
     room_name: room_name
     $or: [ { nick: nick }, { to: $in: [null, nick] } ]
@@ -71,7 +71,7 @@ Meteor.publish 'recent-messages', (nick, room_name) ->
 # 'more' messages by passing in the timestamp of the first message
 # on the current page we're looking at
 Meteor.publish 'paged-messages', (nick, room_name, timestamp) ->
-  nick = nick or null
+  nick = canonical(nick or '') or null
   Messages.find {
     room_name: room_name
     timestamp: $lt: +timestamp
