@@ -44,7 +44,6 @@ if BB_SUB_ALL
   Meteor.subscribe 'all-roundgroups'
   Meteor.subscribe 'all-rounds'
   Meteor.subscribe 'all-puzzles'
-  Meteor.subscribe 'all-presence'
 
 # Router
 BlackboardRouter = Backbone.Router.extend

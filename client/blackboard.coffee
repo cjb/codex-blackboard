@@ -242,12 +242,11 @@ Template.blackboard_tags.tags = Template.blackboard_puzzle_tags.tags
 # Subscribe to all group, round, and puzzle information
 Meteor.autosubscribe ->
   return unless Session.equals("currentPage", "blackboard")
+  Meteor.subscribe 'all-presence'
   return if BB_SUB_ALL
   Meteor.subscribe 'all-roundgroups'
   Meteor.subscribe 'all-rounds'
   Meteor.subscribe 'all-puzzles'
-  # also subscribe to all presence information
-  Meteor.subscribe 'all-presence'
 
 # Update 'currentTime' every minute or so to allow pretty_ts to magically
 # update
