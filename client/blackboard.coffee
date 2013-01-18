@@ -239,6 +239,7 @@ Template.blackboard_tags.tags = Template.blackboard_puzzle_tags.tags
 # Subscribe to all group, round, and puzzle information
 Meteor.autosubscribe ->
   return unless Session.equals("currentPage", "blackboard")
+  return if BB_SUB_ALL
   Meteor.subscribe 'all-roundgroups'
   Meteor.subscribe 'all-rounds'
   Meteor.subscribe 'all-puzzles'

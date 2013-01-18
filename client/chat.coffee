@@ -61,7 +61,8 @@ Template.messages.created = ->
     this.sub2?.stop?()
     room_name = Session.get 'room_name'
     return unless room_name
-    this.sub1 = Meteor.subscribe 'presence-for-room', room_name
+    unless BB_SUB_ALL
+      this.sub1 = Meteor.subscribe 'presence-for-room', room_name
     nick = Session.get 'nick' or null
     timestamp = (+Session.get('timestamp')) or Number.MAX_VALUE
     this.sub2 = Meteor.subscribe 'paged-messages', nick, room_name, timestamp
@@ -368,7 +369,7 @@ $(window).unload -> cleanupChat()
 Meteor.startup ->
   instachat.unreadMessageSound = new Audio "/sound/Electro_-S_Bainbr-7955.wav"
 
-Meteor.autosubscribe ->
+Meteor.autorun ->
   unless Session.equals("currentPage", "chat") and \
          (+Session.get('timestamp')) is 0
     hideMessageAlert()
