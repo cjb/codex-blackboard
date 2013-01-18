@@ -146,17 +146,7 @@ joinRoom = (type, id) ->
   Router.goToChat(type, id, Session.get('timestamp'))
   scrollMessagesView()
   $("#messageInput").select()
-  instachat.keepalive = ->
-    return unless Session.get('nick')
-    Meteor.call "setPresence"
-      nick: Session.get('nick')
-      room_name: Session.get "room_name"
-      present: true
-      foreground: isVisible() # foreground/background tab status
-      uuid: CLIENT_UUID # identify this tab
-  instachat.keepalive()
-  # send a keep alive every N minutes
-  instachat.keepaliveInterval = Meteor.setInterval instachat.keepalive, (PRESENCE_KEEPALIVE_MINUTES*60*1000)
+  startupChat()
 
 scrollMessagesView = ->
   instachat.scrolledToBottom = true
@@ -349,11 +339,25 @@ Template.chat.rendered = ->
   this.afterFirstRender?()
   this.afterFirstRender = undefined
 
+startupChat = ->
+  return if instachat.keepaliveInterval?
+  instachat.keepalive = ->
+    return unless Session.get('nick')
+    Meteor.call "setPresence"
+      nick: Session.get('nick')
+      room_name: Session.get "room_name"
+      present: true
+      foreground: isVisible() # foreground/background tab status
+      uuid: CLIENT_UUID # identify this tab
+  instachat.keepalive()
+  # send a keep alive every N minutes
+  instachat.keepaliveInterval = Meteor.setInterval instachat.keepalive, (PRESENCE_KEEPALIVE_MINUTES*60*1000)
+
 cleanupChat = ->
-  if instachat.keepaliveInterval
+  if instachat.keepaliveInterval?
     Meteor.clearInterval instachat.keepaliveInterval
     instachat.keepalive = instachat.keepaliveInterval = undefined
-  if Session.get('nick')
+  if Session.get('nick') and false # causes bouncing. just let it time out.
     Meteor.call "setPresence"
       nick: Session.get('nick')
       room_name: Session.get "room_name"

@@ -8,6 +8,7 @@ Template.round.data = ->
   return r
 Template.round.created = ->
   $('html').addClass('fullHeight')
+  startupChat()
   this.afterFirstRender = ->
     Splitter.vsize.set()
 Template.round.rendered = ->
@@ -21,6 +22,7 @@ Template.round.rendered = ->
   $("title").text("Round: "+name)
 Template.round.destroyed = ->
   $('html').removeClass('fullHeight')
+  cleanupChat()
 
 Template.round.preserve
   "iframe[src]": (node) -> node.src

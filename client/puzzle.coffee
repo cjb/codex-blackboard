@@ -9,6 +9,7 @@ Template.puzzle.data = ->
   return r
 Template.puzzle.created = ->
   $('html').addClass('fullHeight')
+  startupChat()
   this.afterFirstRender = ->
     Splitter.vsize.set()
 Template.puzzle.rendered = ->
@@ -22,6 +23,7 @@ Template.puzzle.rendered = ->
   $("title").text("Puzzle: "+name)
 Template.puzzle.destroyed = ->
   $('html').removeClass('fullHeight')
+  cleanupChat()
 
 Template.puzzle.preserve
   "iframe[src]": (node) -> node.src
