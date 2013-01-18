@@ -34,6 +34,16 @@ Experimental:
 
 {{> messages }}
 
+<div class="bb-chat-input bb-chat-footer">
+  {{> messages_input }}
+</div>
+
+</div>
+
+<div class="bb-chat-pop-out">
+  <a href="/chat/puzzles/{{puzzle._id}}" class="chat-link bb-pop-out"
+     target="chat{{puzzle._id}}"><i class="icon-share-alt"></i>
+Pop out</a>
 </div>
 
 </div> {{! end top of splitter }}
@@ -47,10 +57,6 @@ Experimental:
 <a align="center" href="{{spread_link puzzle.spreadsheet}}"
    target="_blank"><i class='icon-fullscreen'></i>
 Open spreadsheet in new window</a>
-
-<a href="/chat/puzzles/{{puzzle._id}}" class="chat-link bb-pop-out"
-   target="chat{{puzzle._id}}"><i class="icon-share-alt"></i>
-Pop out a chat window</a>
 </div>
 
 <iframe class="bb-spreadsheet-frame" frameborder='0' src='https://docs.google.com/spreadsheet/ccc?key={{puzzle.spreadsheet}}&widget=true&chrome=false'></iframe>

@@ -215,6 +215,8 @@ $("#joinRoom").live "submit", ->
       $("#roomName").val prettyRoomName()
   return false
 
+Template.messages_input.hasNick = -> Session.get('nick') or false
+
 Template.messages_input.submit = (message) ->
   return unless message
   args =
@@ -301,7 +303,6 @@ unreadMessage = (doc)->
     showUnreadMessagesAlert()
 
 
-Template.chat.hasNick = -> Session.get('nick') or false
 Template.chat.created = ->
   this.afterFirstRender = ->
     # created callback means that we've switched to chat, but

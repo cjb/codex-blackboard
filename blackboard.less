@@ -356,7 +356,7 @@ html.fullHeight {
          height: 500px;
          left: 0; bottom: 0;
          .bb-bottom-header {
-           position: absolute; width: 400px; height: 20px; top: 0; left: 0;
+           position: absolute; width: 360px; height: 20px; top: 0; left: 43px;
          }
          iframe {
            padding-top: 0px; /* was 26px, but we're chosing to overlap header */
@@ -391,10 +391,22 @@ html.fullHeight {
            background-attachment: fixed;
            .bb-chat-messages {
              padding: 5px 2px 0 2px;
+             margin-bottom: 0;
              -webkit-box-sizing: border-box;
                 -moz-box-sizing: border-box;
                      box-sizing: border-box;
            }
+           .bb-chat-footer {
+             background: url('/img/irongrip.png');
+             #messageInput { margin-top: 1px; }
+           }
+         }
+         .bb-chat-pop-out {
+           position: absolute; top: 0; right: 14px;
+           background: white;
+           border: 1px solid #888;
+           padding-left: 2px; padding-right: 4px;
+           border-bottom-left-radius: 5px;
          }
        }
     }

@@ -5,9 +5,7 @@
 
   <div class="navbar navbar-inverse navbar-fixed-bottom bb-chat-footer">
     <div class="navbar-inner">
-      {{#if hasNick}}
       {{> messages_input}}
-      {{/if}}
     </div>
   </div>
 
@@ -34,11 +32,13 @@
 </template>
 
 <template name="messages_input">
+      {{#if hasNick}}
       <form id="messageForm" class="navbar-form">
         <textarea id="messageInput" class="input-block-level" rows="1"
                placeholder="Type your message and press enter..."
                autocomplete="off" ></textarea>
       </form>
+      {{/if}}
 </template>
 
 
