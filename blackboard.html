@@ -330,7 +330,11 @@
              title="Edit the value of this tag"></i>
           {{value}}
         {{else}}
-          {{#linkify}}{{value}}{{/linkify}}
+          {{#if value}}
+            {{#linkify}}{{value}}{{/linkify}}
+          {{else}}
+            &nbsp; {{! make sure right-hand side stays in place! }}
+          {{/if}}
         {{/if}}
       {{/if}}
     </dd>
