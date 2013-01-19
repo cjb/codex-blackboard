@@ -63,6 +63,9 @@ Template.messages.created = ->
     return unless room_name
     this.sub1 = Meteor.subscribe 'presence-for-room', room_name
     nick = (if BB_DISABLE_PM then null else Session.get 'nick') or null
+    # re-enable private messages, but just in ringhunters (for codexbot)
+    if BB_DISABLE_PM and room_name is "general/0"
+      nick = Session.get 'nick'
     timestamp = (+Session.get('timestamp')) or Number.MAX_VALUE
     this.sub2 = Meteor.subscribe 'paged-messages', nick, room_name, timestamp
 Template.messages.destroyed = ->
