@@ -48,3 +48,12 @@ Meteor.autosubscribe ->
   return unless r
   for p in r.puzzles
     Meteor.subscribe 'puzzle-by-id', p
+
+## Helper function for linking puzzles in rounds to the hunt-running site
+updateHuntLinks = (round_prefix) ->
+  # round prefix is something like "http://www.coinheist.com/indiana/"
+  Rounds.update Session.get("id"), $set: link: round_prefix
+  Rounds.findOne(Session.get("id")).puzzles \
+    .map((p) -> Puzzles.findOne p).filter((p) -> not p.link ) \
+    .forEach (p) ->
+      Puzzles.update p._id, $set: link: "#{round_prefix}#{p.canon}"
