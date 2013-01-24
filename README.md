@@ -7,7 +7,7 @@ Meteor app for coordating solving for our MIT Mystery Hunt team.  To run:
     $ meteor
     <browse to localhost:3000>
 
-Note that you'll code is pushed live to the server as you make changes, so
+Note that your code is pushed live to the server as you make changes, so
 you can just leave meteor running.  Occassionally we make changes to the
 database schema -- add new sample data, change how things are organized, etc.
 In those cases:
