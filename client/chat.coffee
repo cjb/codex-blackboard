@@ -295,10 +295,10 @@ $("#messageInput").live "focus", ->
 showUnreadMessagesAlert = ->
   return if instachat.messageAlertInterval
   # we use window.setInterval here instead of Meteor.setInterval because
-  # this is run in a reactive context (from autosubscribe) and Meteor
+  # this is run in a reactive context (from autorun) and Meteor
   # will complain if you set intervals inside a reactive context because
-  # it doesn't know how to cancel them.  That's okay -- we're doing that
-  # ourself.  So use window.setInterval to go behind Meteor's back.
+  # it doesn't know how to cancel them.  That's okay -- we're doing the
+  # cancellation ourself.  So use window.setInterval to go behind Meteor's back.
   instachat.messageAlertInterval = window.setInterval ->
     title = $("title")
     name = "Chat: "+prettyRoomName()
@@ -380,7 +380,7 @@ Meteor.autorun ->
          (+Session.get('timestamp')) is 0
     hideMessageAlert()
     return
-  # the autosubscribe magic *doesn't* tear down 'observe's
+  # the autorun magic *doesn't* tear down 'observe's
   # live query handle when room_name or currentPage changes
   # we need to handle that ourselves...
   handle = Messages.find

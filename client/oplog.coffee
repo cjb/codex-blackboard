@@ -16,7 +16,7 @@ Template.oplog.rendered = ->
   this.afterFirstRender?()
   this.afterFirstRender = undefined
 
-Meteor.autosubscribe ->
+Meteor.autorun ->
   return unless Session.equals("currentPage", "oplog")
   timestamp = +Session.get('timestamp')
   Meteor.subscribe 'paged-oplogs', (+timestamp) or Number.MAX_VALUE

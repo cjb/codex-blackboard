@@ -239,7 +239,7 @@ Template.blackboard_puzzle_tags.tags = (id) ->
 Template.blackboard_tags.tags = Template.blackboard_puzzle_tags.tags
 
 # Subscribe to all group, round, and puzzle information
-Meteor.autosubscribe ->
+Meteor.autorun ->
   return unless Session.equals("currentPage", "blackboard")
   Meteor.subscribe 'all-presence'
   return if BB_SUB_ALL
