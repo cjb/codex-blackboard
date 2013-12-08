@@ -17,6 +17,10 @@ In those cases:
 
 will wipe the old database and start afresh.
 
+## Installing Meteor
+
+Our blackboard app currently requires Meteor 0.5.5.
+
 At the moment the two ways to install Meteor are:
 
 * just make a git clone of the meteor repo and put it in $PATH, or
@@ -24,18 +28,26 @@ At the moment the two ways to install Meteor are:
 
 The first option is something like:
 
-    $ cd ~/3rdParty ; git clone git://github.com/meteor/meteor.git ; cd ~/bin ; ln -s ~/3rdParty/meteor/meteor .
+    $ cd ~/3rdParty
+    $ git clone git://github.com/meteor/meteor.git
+    $ cd meteor
+    $ git checkout v0.5.5
+    $ cd ~/bin ; ln -s ~/3rdParty/meteor/meteor .
 
 Note that meteor can run directly from its checkout, and figure out where to
-find the rest of its files itself.
+find the rest of its files itself.  (But it only follows a single symlink
+to its binary; a symlink can't point to another symlink.)
 
-The second option is "easier" but gives me the willies:
+The second option is "easier" but gives me the willies.  It's also not clear
+how to install archival versions of meteor:
 
     $ curl https://install.meteor.com | /bin/sh
 
 You should probably watch the screencast at http://meteor.com to get a sense
 of the framework; you might also want to check out the examples they've
 posted, too.
+
+## Goals, etc.
 
 The following links should give you a sense of the functionality we're
 attempting to reimplement (talk to us if you need a reminder of the
