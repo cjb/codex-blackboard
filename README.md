@@ -19,7 +19,7 @@ will wipe the old database and start afresh.
 
 ## Installing Meteor
 
-Our blackboard app currently requires Meteor 0.5.5.
+Our blackboard app currently requires Meteor 0.5.6.
 
 At the moment the two ways to install Meteor are:
 
@@ -31,7 +31,7 @@ The first option is something like:
     $ cd ~/3rdParty
     $ git clone git://github.com/meteor/meteor.git
     $ cd meteor
-    $ git checkout v0.5.5
+    $ git checkout v0.5.6
     $ cd ~/bin ; ln -s ~/3rdParty/meteor/meteor .
 
 Note that meteor can run directly from its checkout, and figure out where to
