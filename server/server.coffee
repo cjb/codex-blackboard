@@ -20,32 +20,46 @@ Meteor.publish 'presence-for-room', (room_name) ->
 Meteor.publish 'last-answered-puzzle', ->
   collection = 'last-answer'
   self = this
-  uuid = Meteor.uuid()
+  uuid = Random.id()
+
   recent = null
-  started = false
+  initializing = true
+
   max = (doc) ->
     if doc.solved?
-      if (not recent?) or (doc.solved > recent)
-        recent = doc.solved
+      if (not recent?.puzzle) or (doc.solved > recent.solved)
+        recent = {solved:doc.solved, puzzle:doc._id}
         return true
     return false
+
   publishIfMax = (doc) ->
     return unless max(doc)
-    self.set collection, uuid, {solved:recent, puzzle:doc._id}
-    self.flush() if started
+    self.changed collection, uuid, recent \
+      unless initializing
+  publishNone = ->
+    recent = {solved:UTCNow()} # "no recent solved puzzle"
+    self.changed collection, uuid, recent \
+      unless initializing
+
   handle = Puzzles.find({
     $and: [ {answer: $ne: null}, {answer: $exists: true} ]
   }).observe
-    added: (doc,idx) -> publishIfMax(doc)
-    changed: (doc, atIndex, oldDoc) -> publishIfMax(doc)
+    added: (doc) -> publishIfMax(doc)
+    changed: (doc, oldDoc) -> publishIfMax(doc)
+    removed: (doc) ->
+      publishNone() if doc._id is recent?.puzzle
+
   # observe only returns after initial added callbacks.
   # if we still don't have a 'recent' (possibly because no puzzles have
   # been answered), set it to current time
-  publishIfMax(solved:UTCNow()) unless recent?
+  publishNone() unless recent?
   # okay, mark the subscription as ready.
-  self.complete()
-  self.flush()
-  started = true
+  initializing = false
+  self.added collection, uuid, recent
+  self.ready()
+  # Stop observing the cursor when client unsubs.
+  # Stopping a subscription automatically takes care of sending the
+  # client any 'removed' messages
   self.onStop -> handle.stop()
 
 # limit site traffic by only pushing out changes relevant to a certain
@@ -94,25 +108,21 @@ Meteor.publish 'all-names', ->
   self = this
   handles = [ 'roundgroups', 'rounds', 'puzzles' ].map (type) ->
     collection(type).find({}).observe
-      added: (doc, idx) ->
-        self.set 'names', doc._id,
+      added: (doc) ->
+        self.added 'names', doc._id,
           type: type
           name: doc.name
           canon: canonical(doc.name)
-        self.flush()
-      removed: (doc,idx) ->
-        self.unset 'names', doc._id, ['_id','type','name','canon']
-        self.flush()
-      changed: (doc,idx,olddoc) ->
+      removed: (doc) ->
+        self.removed 'names', doc._id
+      changed: (doc,olddoc) ->
         return unless doc.name isnt olddoc.name
-        self.set 'names', doc._id,
+        self.changed 'names', doc._id,
           name: doc.name
           canon: canonical(doc.name)
-        self.flush()
   # observe only returns after initial added callbacks have run.  So now
   # mark the subscription as ready
-  self.complete()
-  self.flush()
+  self.ready()
   # stop observing the various cursors when client unsubs
   self.onStop ->
     handles.map (h) -> h.stop()

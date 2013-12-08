@@ -146,7 +146,7 @@ if Meteor.isServer
   # as the presence set changes
   initiallySuppressPresence = true
   Presence.find(present: true).observe
-    added: (presence, beforeIndex) ->
+    added: (presence) ->
       return if initiallySuppressPresence
       # look up a real name, if there is one
       n = Nicks.findOne canon: canonical(presence.nick)
@@ -158,7 +158,7 @@ if Meteor.isServer
         body: "#{name} joined the room."
         room_name: presence.room_name
         timestamp: UTCNow()
-    removed: (presence, atIndex) ->
+    removed: (presence) ->
       return if initiallySuppressPresence
       # look up a real name, if there is one
       n = Nicks.findOne canon: canonical(presence.nick)

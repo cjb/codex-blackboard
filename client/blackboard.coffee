@@ -13,7 +13,8 @@ Meteor.startup ->
   Meteor.subscribe 'last-answered-puzzle'
   # ignore added; that's just the startup state.  Watch 'changed'
   LastAnswer.find({}).observe
-    changed: (doc, atIndex, oldDoc) ->
+    changed: (doc, oldDoc) ->
+      return unless doc.puzzle? # 'no recent puzzle was solved'
       return if doc.puzzle is oldDoc.puzzle # answer changed, not really new
       console.log 'that was easy', doc, oldDoc
       unless Session.get 'mute'

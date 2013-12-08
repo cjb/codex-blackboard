@@ -1,10 +1,10 @@
 GENERAL_ROOM = 'Ringhunters'
 
-Session.set 'room_name', "general/0"
-Session.set 'nick'     , ($.cookie("nick") || "")
-Session.set 'mute'     , $.cookie("mute")
-Session.set 'type'     , 'general'
-Session.set 'id'       , '0'
+Session.setDefault 'room_name', "general/0"
+Session.setDefault 'nick'     , ($.cookie("nick") || "")
+Session.setDefault 'mute'     , $.cookie("mute")
+Session.setDefault 'type'     , 'general'
+Session.setDefault 'id'       , '0'
 
 # Globals
 instachat = {}

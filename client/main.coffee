@@ -32,7 +32,7 @@ Handlebars.registerHelper 'linkify', (options) ->
   contents = convertURLsToLinksAndImages(Handlebars._escape(contents))
   return new Handlebars.SafeString(contents)
 
-CLIENT_UUID = Meteor.uuid() # this identifies this particular client instance
+CLIENT_UUID = Random.id() # this identifies this particular client instance
 DEFAULT_HOST = 'codexian.us' # this is used to create gravatars from nicks
 
 # subscribe to the all-names feed all the time
