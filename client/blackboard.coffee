@@ -4,7 +4,6 @@ SOUND_THRESHOLD_MS = 30*1000 # 30 seconds
 blackboard = {} # store page global state
 
 Meteor.startup ->
-  blackboard.initialPageLoad = UTCNow()
   blackboard.newAnswerSound = new Audio "sound/that_was_easy.wav"
   # set up a persistent query so we can play the sound whenever we get a new
   # answer
