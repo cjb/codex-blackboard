@@ -407,11 +407,10 @@ Template.header_lastchats.body = ->
 
 # subscribe when this template is in use/unsubscribe when it is destroyed
 Template.header_lastchats.created = ->
-  this.run = Meteor.autorun =>
+  this.computation = Deps.autorun =>
     # use autorun to ensure subscription changes if/when nick does
     nick = if BB_DISABLE_PM then null else Session.get('nick')
-    this.sub?.stop?()
-    this.sub = Meteor.subscribe 'paged-messages', nick, 'general/0', Number.MAX_VALUE
+    sub = Meteor.subscribe 'paged-messages', nick, 'general/0', Number.MAX_VALUE
+    Deps.onInvalidate -> sub.stop()
 Template.header_lastchats.destroyed = ->
-  this.sub.stop()
-  this.run.stop()
+  this.computation.stop()

@@ -56,13 +56,17 @@ Template.messages.preserve
   ".inline-image[id]": (node) -> node.id
 Template.messages.created = ->
   instachat.scrolledToBottom = true
-  this.run = Meteor.autorun =>
-    this.sub1?.stop?()
-    this.sub2?.stop?()
+  this.computation = Deps.autorun =>
+    invalidator = =>
+      this.sub1?.stop?()
+      this.sub2?.stop?()
+      this.sub1 = this.sub2 = null
+      instachat.ready = false
+      instachat.unreadMessages = 0
+      hideMessageAlert()
+    invalidator()
     room_name = Session.get 'room_name'
     return unless room_name
-    instachat.unreadMessages = 0
-    instachat.ready = false
     this.sub1 = Meteor.subscribe 'presence-for-room', room_name
     nick = (if BB_DISABLE_PM then null else Session.get 'nick') or null
     # re-enable private messages, but just in ringhunters (for codexbot)
@@ -71,10 +75,9 @@ Template.messages.created = ->
     timestamp = (+Session.get('timestamp')) or Number.MAX_VALUE
     this.sub2 = Meteor.subscribe 'paged-messages', nick, room_name, timestamp,
       onReady: -> instachat.ready = true
+    Deps.onInvalidate invalidator
 Template.messages.destroyed = ->
-    this.sub1?.stop?()
-    this.sub2?.stop?()
-    this.run.stop()
+    this.computation.stop() # runs invalidation handler, too
 Template.messages.rendered = ->
   scrollMessagesView() if instachat.scrolledToBottom
 
@@ -349,7 +352,7 @@ startupChat = ->
   return if instachat.keepaliveInterval?
   instachat.keepalive = ->
     return unless Session.get('nick')
-    Meteor.call "setPresence"
+    Meteor.call "setPresence",
       nick: Session.get('nick')
       room_name: Session.get "room_name"
       present: true
@@ -364,7 +367,7 @@ cleanupChat = ->
     Meteor.clearInterval instachat.keepaliveInterval
     instachat.keepalive = instachat.keepaliveInterval = undefined
   if Session.get('nick') and false # causes bouncing. just let it time out.
-    Meteor.call "setPresence"
+    Meteor.call "setPresence",
       nick: Session.get('nick')
       room_name: Session.get "room_name"
       present: false
@@ -379,17 +382,17 @@ $(window).unload -> cleanupChat()
 Meteor.startup ->
   instachat.unreadMessageSound = new Audio "/sound/Electro_-S_Bainbr-7955.wav"
 
-Meteor.autorun ->
+Deps.autorun ->
   unless Session.equals("currentPage", "chat") and \
          (+Session.get('timestamp')) is 0
     hideMessageAlert()
     return
   # the autorun magic *doesn't* tear down 'observe's
-  # live query handle when room_name or currentPage changes
+  # live query handle when room_name or currentPage changes (but it should!)
   # we need to handle that ourselves...
   handle = Messages.find
     room_name: Session.get("room_name")
   .observe
     added: (item) ->
       unreadMessage(item) unless item.system
-  Meteor.deps.Context.current.onInvalidate -> handle.stop()
+  Deps.onInvalidate -> handle.stop()
