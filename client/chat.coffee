@@ -61,13 +61,16 @@ Template.messages.created = ->
     this.sub2?.stop?()
     room_name = Session.get 'room_name'
     return unless room_name
+    instachat.unreadMessages = 0
+    instachat.ready = false
     this.sub1 = Meteor.subscribe 'presence-for-room', room_name
     nick = (if BB_DISABLE_PM then null else Session.get 'nick') or null
     # re-enable private messages, but just in ringhunters (for codexbot)
     if BB_DISABLE_PM and room_name is "general/0"
       nick = Session.get 'nick'
     timestamp = (+Session.get('timestamp')) or Number.MAX_VALUE
-    this.sub2 = Meteor.subscribe 'paged-messages', nick, room_name, timestamp
+    this.sub2 = Meteor.subscribe 'paged-messages', nick, room_name, timestamp,
+      onReady: -> instachat.ready = true
 Template.messages.destroyed = ->
     this.sub1?.stop?()
     this.sub2?.stop?()
@@ -316,6 +319,7 @@ hideMessageAlert = ->
   $("title").text("Chat: "+prettyRoomName())
 
 unreadMessage = (doc)->
+  return unless instachat.ready # don't ping until we're done loading messages
   unless Session.equals('nick', doc["nick"]) || doc.system || Session.get "mute"
     # only ping if message mentions you
     if doc.body?.indexOf(Session.get('nick')) >= 0 and not doc.bodyIsHtml
