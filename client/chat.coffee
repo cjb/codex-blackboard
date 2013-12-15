@@ -280,6 +280,18 @@ Template.messages_input.submit = (message) ->
   return
 Template.messages_input.events
   "keydown textarea": (event, template) ->
+     if event.which is 9 # tab
+       event.preventDefault() # prevent tabbing away from input field
+       whos_here = Template.chat_header.whos_here().fetch()
+       $message = $ event.currentTarget
+       message = $message.val()
+       if message
+         for nick in whos_here
+           if nick.nick.indexOf(message) is 0
+             $message.val nick.nick + ": "
+           else if "@#{nick.nick}".indexOf(message) is 0
+             $message.val "@" + nick.nick + " "
+
      # implicit submit on enter (but not shift-enter or ctrl-enter)
      return unless event.which is 13 and not (event.shiftKey or event.ctrlKey)
      event.preventDefault() # prevent insertion of enter
