@@ -1,5 +1,5 @@
 [gerrit]
 host=review.gerrithub.io
 #port=29418
-project=cscott/codex-blackboard
-defaultbranch=master
+project=cjb/codex-blackboard
+defaultbranch=meteor-update
