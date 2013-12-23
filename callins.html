@@ -1,0 +1,41 @@
+<template name="callins">
+<div class="row-fluid bb-puzzleround">
+  <h2>Answer call-in queue</h2>
+  <div class="span8">
+    <table class="table">
+      <tr>
+        <th>Puzzle</th>
+        <th>Answer</th>
+        <th>Submitted</th>
+        <th>Last guess</th>
+        <th align="center">Resolution</th>
+      </tr>
+      {{#each callins}}
+        {{> callin_row }}
+      {{else}}
+      <tr><td colspan="5">
+        No answers in the call-in queue.
+      </td></tr>
+      {{/each}}
+    </table>
+  </div>
+</div>
+</template>
+
+<template name="callin_row">
+        <tr data-bbedit="{{_id}}">
+            <td>{{link puzzle}}</td>
+            <td class="answer">{{answer}}</td>
+            <td>{{pretty_ts this.created}}</td>
+            <td>{{#with lastAttempt puzzle}}{{pretty_ts timestamp}} <small>({{pretty_ts timestamp=timestamp style="brief duration"}})</small>{{else}}-{{/with}}</td>
+            {{#if sessionNick}}
+            <td class="btn-group">
+              <button class="btn btn-success bb-callin-correct">Correct</a>
+              <button class="btn btn-danger bb-callin-incorrect">Incorrect</a>
+              <button class="btn btn-warning bb-callin-cancel">Cancel</a>
+            </td>
+            {{else}}
+            <td class="text-warning">Log in to resolve answers in queue.</td>
+            {{/if}}
+        </tr>
+</template>

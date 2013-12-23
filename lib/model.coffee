@@ -101,6 +101,17 @@ Puzzles = BBCollection.puzzles = new Meteor.Collection "puzzles"
 if Meteor.isServer
   Puzzles._ensureIndex {canon: 1}, {unique:true, dropDups:true}
 
+# CallIns are:
+#   _id: mongodb id
+#   puzzle: _id of Puzzle
+#   answer: string (proposed answer to call in)
+#   created: timestamp
+#   created_by: _id of Nick
+CallIns = BBCollection.callins = new Meteor.Collection "callins"
+if Meteor.isServer
+   CallIns._ensureIndex {created: 1}, {}
+   CallIns._ensureIndex {puzzle: 1, answer: 1}, {unique:true, dropDups:true}
+
 # Nicks are:
 #   _id: mongodb id
 #   name: string
@@ -301,6 +312,7 @@ spread_id_to_link = (id) ->
     return true
 
   deleteObject = (type, args, options={}) ->
+    check type, ValidType
     check args, ObjectWith
       id: NonEmptyString
       who: NonEmptyString
@@ -505,6 +517,57 @@ spread_id_to_link = (id) ->
       # XXX: delete chat room logs?
       return r
 
+    newCallIn: (args) ->
+      check args, ObjectWith
+        puzzle: IdOrObject
+        answer: NonEmptyString
+        who: NonEmptyString
+      id = args.puzzle._id or args.puzzle
+      newObject "callins", {name:canonical(args.answer), who:args.who},
+        puzzle: id
+        answer: args.answer
+        who: args.who
+      , {suppressLog:true}
+      oplog "New answer #{args.answer} submitted for", "puzzles", id, args.who
+
+    correctCallIn: (args) ->
+      check args, ObjectWith
+        id: NonEmptyString
+        who: NonEmptyString
+      callin = CallIns.findOne(args.id)
+      throw new Meteor.Error(400, "bad callin") unless callin
+      # call-in is cancelled as a side-effect of setAnswer
+      Meteor.call "setAnswer",
+        puzzle: callin.puzzle
+        answer: callin.answer
+        who: args.who
+
+    incorrectCallIn: (args) ->
+      check args, ObjectWith
+        id: NonEmptyString
+        who: NonEmptyString
+      callin = CallIns.findOne(args.id)
+      throw new Meteor.Error(400, "bad callin") unless callin
+      # call-in is cancelled as a side-effect of addIncorrectAnswer
+      Meteor.call "addIncorrectAnswer",
+        puzzle: callin.puzzle
+        answer: callin.answer
+        who: args.who
+
+    cancelCallIn: (args) ->
+      check args, ObjectWith
+        id: NonEmptyString
+        who: NonEmptyString
+        suppressLog: Match.Optional(Boolean)
+      callin = CallIns.findOne(args.id)
+      throw new Meteor.Error(400, "bad callin") unless callin
+      unless args.suppressLog
+        oplog "Canceled call-in of #{callin.answer} for", "puzzles", callin.puzzle, args.who
+      deleteObject "callins",
+        id: args.id
+        who: args.who
+      , {suppressLog:true}
+
     newNick: (args) ->
       check args, ObjectWith
         name: NonEmptyString
@@ -519,7 +582,7 @@ spread_id_to_link = (id) ->
     deleteNick: (args) ->
       deleteObject "nicks", args, {suppressLog:true}
 
-    newMessage: (args)->
+    newMessage: (args) ->
       check args, Object
       newMsg =
         body: args.body or ""
@@ -770,6 +833,12 @@ spread_id_to_link = (id) ->
         touched: now
         touched_by: canonical(args.who)
       oplog "Found an answer to", "puzzles", id, args.who
+      # cancel any entries on the call-in queue for this puzzle
+      for c in CallIns.find(puzzle: id).fetch()
+        Meteor.call 'cancelCallIn',
+          id: c._id
+          who: args.who
+          suppressLog: (c.answer is args.answer)
       return true
 
     addIncorrectAnswer: (args) ->
@@ -788,7 +857,13 @@ spread_id_to_link = (id) ->
           timestamp: UTCNow()
           who: args.who
 
-      oplog "Incorrect answer #{args.answer} for ", "puzzles", id, args.who
+      oplog "Incorrect answer #{args.answer} for", "puzzles", id, args.who
+      # cancel any matching entries on the call-in queue for this puzzle
+      for c in CallIns.find(puzzle: id, answer: args.answer).fetch()
+        Meteor.call 'cancelCallIn',
+          id: c._id
+          who: args.who
+          suppressLog: true
       return true
 
     deleteAnswer: (args) ->
@@ -823,6 +898,7 @@ share.model =
   MESSAGE_PAGE: MESSAGE_PAGE
   OPLOG_PAGE: OPLOG_PAGE
   # collection types
+  CallIns: CallIns
   OpLogs: OpLogs
   Names: Names
   LastAnswer: LastAnswer

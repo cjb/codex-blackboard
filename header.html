@@ -41,6 +41,9 @@
   {{#if currentPageEquals "oplog"}}
   <li class="active"><a><i class="icon-time icon-white"></i> Operation Logs</a></li>
   {{else}}
+  {{#if currentPageEquals "callins"}}
+  <li class="active"><a><i class="icon-check icon-white"></i> Answer Queue</a></li>
+  {{/if}}
   <li class="{{#if currentPageEquals "chat"}}active{{else}}bb-omit-when-narrow{{/if}}">
   <a href="/chat/{{type}}/{{id}}" class="chat-link"><i class="icon-comment icon-white"></i>
     {{#if typeEquals "rounds"}}Round{{/if}}
