@@ -99,6 +99,16 @@ Puzzles = BBCollection.puzzles = new Meteor.Collection "puzzles"
 if Meteor.isServer
   Puzzles._ensureIndex {canon: 1}, {unique:true, dropDups:true}
 
+# CallIns are:
+#   _id: mongodb id
+#   puzzle: _id of Puzzle
+#   answer: string (proposed answer to call in)
+#   created: timestamp
+#   created_by: _id of Nick
+CallIns = BBCollection.callins = new Meteor.Collection "callins"
+if Meteor.isServer
+   CallIns._ensureIndex {created: 1}, {unique:true, dropDups:true}
+
 # Nicks are:
 #   _id: mongodb id
 #   name: string
@@ -240,7 +250,10 @@ spread_id_to_link = (id) ->
     Match.Where (o) ->
       return false if typeof(o) is not 'object'
       Object.keys(pattern).forEach (k) ->
+        console.log "checking #{k} #{pattern}"
+        console.log pattern
         check o[k], pattern[k]
+        console.log "success"
       true
 
   oplog = (message, type="", id="", who="") ->
@@ -502,6 +515,54 @@ spread_id_to_link = (id) ->
       # XXX: delete chat room logs?
       return r
 
+    newCallIn: (args) ->
+      check args, ObjectWith
+        puzzle: Object
+        answer: NonEmptyString
+        who: NonEmptyString
+      newObject "callins", args,
+        puzzle: args.puzzle
+        answer: args.answer
+        who: args.who
+      , {}, {suppressLog:true}
+      oplog "New answer #{args.answer} submitted for ", "puzzles", args.puzzle._id, args.who
+
+    correctCallin: (args) ->
+      check args, ObjectWith
+        id: NonEmptyString
+        who: NonEmptyString
+      callin = CallIns.findOne(args.id)
+      throw new Meteor.Error(400, "bad callin") unless callin
+      Meteor.call "setAnswer",
+        puzzle: callin.puzzle._id
+        answer: callin.answer
+        who: args.who
+      Meteor.call "cancelCallin", {id: callin._id}
+
+    incorrectCallin: (args) ->
+      check args, ObjectWith
+        id: NonEmptyString
+        who: NonEmptyString
+      callin = CallIns.findOne(args.id)
+      throw new Meteor.Error(400, "bad callin") unless callin
+      Meteor.call "addIncorrectAnswer",
+        puzzle: callin.puzzle._id
+        answer: callin.answer
+        who: args.who
+      Meteor.call "cancelCallin", {id: callin._id}
+
+    cancelCallin: (args) ->
+      check args, ObjectWith
+        id: NonEmptyString
+        who: NonEmptyString
+      callin = CallIns.findOne(args.id)
+      throw new Meteor.Error(400, "bad callin") unless callin
+      oplog "Canceled callin of #{callin.answer} for ", "puzzles", callin.puzzle._id, args.who
+      deleteObject "callins",
+        id: args.id
+        who: args.who
+      , {suppressLog:true}
+
     newNick: (args) ->
       check args, ObjectWith
         name: NonEmptyString
@@ -516,7 +577,7 @@ spread_id_to_link = (id) ->
     deleteNick: (args) ->
       deleteObject "nicks", args, {suppressLog:true}
 
-    newMessage: (args)->
+    newMessage: (args) ->
       check args, Object
       newMsg =
         body: args.body or ""
@@ -782,6 +843,8 @@ spread_id_to_link = (id) ->
       incorrectAnswers.push({answer: args.answer, timestamp: UTCNow(), who: args.who})
       Puzzles.update id, $set:
          incorrectAnswers: incorrectAnswers
+
+      oplog "Incorrect answer #{args.answer} for ", "puzzles", puzzle._id, args.who
       return true
 
     deleteAnswer: (args) ->
@@ -816,6 +879,7 @@ share.model =
   MESSAGE_PAGE: MESSAGE_PAGE
   OPLOG_PAGE: OPLOG_PAGE
   # collection types
+  CallIns: CallIns
   OpLogs: OpLogs
   Names: Names
   LastAnswer: LastAnswer

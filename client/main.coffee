@@ -7,7 +7,8 @@ chat = share.chat # import
 #   "puzzle"     -- puzzle information page
 #   "round"      -- round information (much like the puzzle page)
 #   "chat"       -- chat room
-
+#   "oplogs"     -- operation logs
+#   "callins"    -- answer queue
 Handlebars.registerHelper "equal", (a, b) -> a is b
 
 # session variables we want to make available from all templates
@@ -52,6 +53,7 @@ BlackboardRouter = Backbone.Router.extend
     "chat/:type/:id": "ChatPage"
     "chat/:type/:id/:timestamp": "ChatPage"
     "oplogs/:timestamp": "OpLogPage"
+    "callins": "CallInPage"
     "facts/": "FactsPage"
     "facts": "FactsPage" # be kind to lazy typists
     "loadtest/:which": "LoadTestPage"
@@ -75,6 +77,9 @@ BlackboardRouter = Backbone.Router.extend
   OpLogPage: (timestamp) ->
     this.Page("oplog", "general", "0")
     Session.set "timestamp", timestamp
+
+  CallInPage: ->
+    this.Page("callins", "general", "0")
 
   FactsPage: ->
     this.Page("facts", "general", "0")

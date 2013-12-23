@@ -1,0 +1,34 @@
+<template name="callins">
+<div class="row-fluid bb-puzzleround">
+  <div class="span8">
+    <table class="table">
+      <tr>
+        <th>Puzzle</th>
+        <th>Answer</th>
+        <th>Correct</th>
+        <th>Incorrect</th>
+        <th>Cancel callin</th>
+      </tr>
+      {{#each callins}}
+        {{> callin_row }}
+      {{else}}
+      <p align="center">
+        No callins.
+      </p>
+      {{/each}}
+    </table>
+  </div>
+</div>
+</template>
+
+<template name="callin_row">
+        <tr data-bbedit="{{_id}}">
+          <div class="btn-group">
+            <td>{{link puzzle._id}}</td>
+            <td>{{answer}}</td>
+            <td><button class="btn-success bb-callin-correct">Correct</a></td>
+            <td><button class="btn-danger bb-callin-incorrect">Incorrect</a></td>
+            <td><button class="btn-warning bb-callin-cancel">Cancel</a></td>
+          </div>
+        </tr>
+</template>
