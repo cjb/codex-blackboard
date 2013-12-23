@@ -103,6 +103,16 @@ Puzzles = BBCollection.puzzles = new Meteor.Collection "puzzles"
 if Meteor.isServer
   Puzzles._ensureIndex {canon: 1}, {unique:true, dropDups:true}
 
+# CallIns are:
+#   _id: mongodb id
+#   puzzle: _id of Puzzle
+#   answer: string (proposed answer to call in)
+#   created: timestamp
+#   created_by: _id of Nick
+CallIns = BBCollection.callins = new Meteor.Collection "callins"
+if Meteor.isServer
+   CallIns._ensureIndex {canon: 1}, {unique:true, dropDups:true}
+
 # Nicks are:
 #   _id: mongodb id
 #   name: string
@@ -482,6 +492,42 @@ spread_id_to_link = (id) ->
       # XXX: delete chat room logs?
       return r
 
+    newCallIn: (args) ->
+      throw new Meteor.Error(400, "missing puzzle") unless args.puzzle
+      throw new Meteor.Error(400, "missing answer") unless args.answer
+      throw new Meteor.Error(400, "missing who") unless args.who
+      # FIXME: oplog says "Added callin 5DN3P2NH (cjb4)", how to prettify?
+      newObject "callins", args,
+        puzzle: args.puzzle
+        answer: args.answer
+        who: args.who
+
+    correctCallin: (args) ->
+      throw new Meteor.Error(400, "missing callin") unless args.id
+      callin = CallIns.findOne(args.id)
+      puzzle = callin.puzzle._id
+      answer = callin.answer
+      who = callin.who
+      args = {puzzle: puzzle, answer: answer, who: who}
+      Meteor.call "setAnswer", args
+      Meteor.call "cancelCallin", {id: callin._id}
+
+    incorrectCallin: (args) ->
+      throw new Meteor.Error(400, "missing callin") unless args.id
+      callin = CallIns.findOne(args.id)
+      puzzle = callin.puzzle._id
+      answer = callin.answer
+      who = callin.who
+      args = {puzzle: puzzle, answer: answer, who: who}
+      Meteor.call "setIncorrectAnswer", args
+      Meteor.call "cancelCallin", {id: callin._id}
+
+    cancelCallin: (args) ->
+      throw new Meteor.Error(400, "missing callin") unless args.id
+      callin = CallIns.findOne(args.id)
+      args = {id: callin._id, who: callin.who}
+      deleteObject "callins", args, {suppressLog:true}
+
     newNick: (args) ->
       # a bit of a stretch but let's reuse the object type
       newObject "nicks",
@@ -751,6 +797,7 @@ share.model =
   MESSAGE_PAGE: MESSAGE_PAGE
   OPLOG_PAGE: OPLOG_PAGE
   # collection types
+  CallIns: CallIns
   OpLogs: OpLogs
   Names: Names
   LastAnswer: LastAnswer

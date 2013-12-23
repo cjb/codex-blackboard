@@ -106,6 +106,10 @@ Meteor.publish 'paged-oplogs', (timestamp) ->
      sort: [['timestamp','desc']]
      limit: model.OPLOG_PAGE
 
+Meteor.publish 'callins', ->
+  model.CallIns.find {},
+    sort: [["created","asc"]]
+
 # synthetic 'all-names' collection which maps ids to type/name/canon
 Meteor.publish 'all-names', ->
   self = this
