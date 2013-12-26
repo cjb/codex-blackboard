@@ -1,3 +1,7 @@
+share = @share
+model = share.model # import
+settings = share.settings # import
+
 NAVBAR_HEIGHT = 73 # keep in sync with @navbar-height in blackboard.less
 SOUND_THRESHOLD_MS = 30*1000 # 30 seconds
 
@@ -12,7 +16,7 @@ Meteor.startup ->
   # page the user is currently on.  This is "fun".  Trust us...
   Meteor.subscribe 'last-answered-puzzle'
   # ignore added; that's just the startup state.  Watch 'changed'
-  LastAnswer.find({}).observe
+  model.LastAnswer.find({}).observe
     changed: (doc, oldDoc) ->
       return unless doc.puzzle? # 'no recent puzzle was solved'
       return if doc.puzzle is oldDoc.puzzle # answer changed, not really new
@@ -48,16 +52,16 @@ Template.blackboard.sortReverse = -> Session.get 'sortReverse'
 ############## groups, rounds, and puzzles ####################
 Template.blackboard.roundgroups = ->
   dir = if Session.get 'sortReverse' then 'desc' else 'asc'
-  RoundGroups.find {}, sort: [["created", dir]]
+  model.RoundGroups.find {}, sort: [["created", dir]]
 # the following is a map() instead of a direct find() to preserve order
 Template.blackboard.rounds = ->
   r = ({
     round_num: 1+index+this.round_start
-    round: Rounds.findOne(id) or { _id: id, name: Names.findOne(id)?.name }
+    round: model.Rounds.findOne(id) or {_id: id, name: model.Names.findOne(id)?.name}
     rX: "r#{1+index+this.round_start}"
-    num_puzzles: (Rounds.findOne(id)?.puzzles or []).length
-    num_solved: (p for p in (Rounds.findOne(id)?.puzzles or []) when \
-                 Puzzles.findOne(p)?.answer).length
+    num_puzzles: (model.Rounds.findOne(id)?.puzzles or []).length
+    num_solved: (p for p in (model.Rounds.findOne(id)?.puzzles or []) when \
+                 model.Puzzles.findOne(p)?.answer).length
    } for id, index in this.rounds)
    r.reverse() if Session.get 'sortReverse'
    return r
@@ -128,10 +132,10 @@ Template.blackboard.events
      [type, id, rest...] = template.find_bbedit(event)
      message = "Are you sure you want to delete "
      if (type is'tags') or (rest[0] is 'title')
-       message += "this #{pretty_collection(type)}?"
+       message += "this #{model.pretty_collection(type)}?"
      else
-       message += "the #{rest[0]} of this #{pretty_collection(type)}?"
-     confirmationDialog
+       message += "the #{rest[0]} of this #{model.pretty_collection(type)}?"
+     share.confirmationDialog
        ok_button: 'Yes, delete it'
        no_button: 'No, cancel'
        message: message
@@ -186,24 +190,24 @@ processBlackboardEdit =
       Meteor.call 'setAnswer', {puzzle:id, answer:text, who:who}
   tags_name: (text, id, canon) ->
     who = Session.get('nick')
-    n = Names.findOne(id)
+    n = model.Names.findOne(id)
     if text is null # delete tag
       return Meteor.call 'deleteTag', n.type, id, canon, who
-    tags = collection(n.type).findOne(id).tags
+    tags = model.collection(n.type).findOne(id).tags
     t = (tag for tag in tags when tag.canon is canon)[0]
     Meteor.call 'setTag', n.type, id, text, t.value, who, (error,result) ->
-      if (t.canon isnt canonical(text)) and (not error)
+      if (t.canon isnt model.canonical(text)) and (not error)
         Meteor.call 'deleteTag', n.type, id, t.name, who
   tags_value: (text, id, canon) ->
-    n = Names.findOne(id)
-    tags = collection(n.type).findOne(id).tags
+    n = model.Names.findOne(id)
+    tags = model.collection(n.type).findOne(id).tags
     t = (tag for tag in tags when tag.canon is canon)[0]
     # special case for 'status' tag, which might not previously exist
     for special in ['Status', 'Meta Answer']
-      if (not t) and canon is canonical(special)
+      if (not t) and canon is model.canonical(special)
         t =
           name: special
-          canon: canonical(special)
+          canon: model.canonical(special)
           value: ''
     # set tag (overwriting previous value)
     Meteor.call 'setTag', n.type, id, t.name, text, Session.get('nick')
@@ -214,20 +218,20 @@ Template.blackboard_round.puzzles = ->
   ({
     round_num: this.round_num
     puzzle_num: 1 + index
-    puzzle: Puzzles.findOne(id) or { _id: id }
+    puzzle: model.Puzzles.findOne(id) or { _id: id }
     rXpY: "r#{this.round_num}p#{1+index}"
    } for id, index in this.round.puzzles)
 Template.blackboard_round.tag = (name) ->
-  return (getTag this.round, name) or ''
+  return (model.getTag this.round, name) or ''
 Template.blackboard_round.whos_working = ->
-  return Presence.find
+  return model.Presence.find
     room_name: ("rounds/"+this.round?._id)
   , sort: ["nick"]
 
 Template.blackboard_puzzle.tag = (name) ->
-  return (getTag this.puzzle, name) or ''
+  return (model.getTag this.puzzle, name) or ''
 Template.blackboard_puzzle.whos_working = ->
-  return Presence.find
+  return model.Presence.find
     room_name: ("puzzles/"+this.puzzle?._id)
   , sort: ["nick"]
 
@@ -243,12 +247,12 @@ Template.blackboard_tags.tags = Template.blackboard_puzzle_tags.tags
 Deps.autorun ->
   return unless Session.equals("currentPage", "blackboard")
   Meteor.subscribe 'all-presence'
-  return if BB_SUB_ALL
+  return if settings.BB_SUB_ALL
   Meteor.subscribe 'all-roundsandpuzzles'
 
 # Update 'currentTime' every minute or so to allow pretty_ts to magically
 # update
 Meteor.startup ->
   Meteor.setInterval ->
-    Session.set "currentTime", UTCNow()
+    Session.set "currentTime", model.UTCNow()
   , 60*1000

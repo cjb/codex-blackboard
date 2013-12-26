@@ -1,3 +1,7 @@
+share = @share
+model = share.model # import
+settings = share.settings # import
+
 GENERAL_ROOM = 'Ringhunters'
 
 Session.setDefault 'room_name', "general/0"
@@ -19,12 +23,12 @@ Template.messages.room_name = -> Session.get('room_name')
 Template.messages.timestamp = -> +Session.get('timestamp')
 Template.messages.messages  = ->
   timestamp = (+Session.get('timestamp')) or Number.MAX_VALUE
-  messages = Messages.find
+  messages = model.Messages.find
     room_name: Session.get("room_name")
     timestamp: $lt: timestamp
   ,
     sort: [['timestamp',"desc"]]
-    limit: MESSAGE_PAGE
+    limit: model.MESSAGE_PAGE
   sameNick = do ->
     prevContext = null
     (m) ->
@@ -39,9 +43,9 @@ Template.messages.messages  = ->
     message: m
 
 Template.messages.email = ->
-  cn = canonical(this.message.nick)
-  n = Nicks.findOne canon: cn
-  return getTag(n, 'Gravatar') or "#{cn}@#{DEFAULT_HOST}"
+  cn = model.canonical(this.message.nick)
+  n = model.Nicks.findOne canon: cn
+  return model.getTag(n, 'Gravatar') or "#{cn}@#{settings.DEFAULT_HOST}"
 
 Template.messages.body = ->
   body = this.message.body
@@ -68,9 +72,9 @@ Template.messages.created = ->
     room_name = Session.get 'room_name'
     return unless room_name
     this.sub1 = Meteor.subscribe 'presence-for-room', room_name
-    nick = (if BB_DISABLE_PM then null else Session.get 'nick') or null
+    nick = (if settings.BB_DISABLE_PM then null else Session.get 'nick') or null
     # re-enable private messages, but just in ringhunters (for codexbot)
-    if BB_DISABLE_PM and room_name is "general/0"
+    if settings.BB_DISABLE_PM and room_name is "general/0"
       nick = Session.get 'nick'
     timestamp = (+Session.get('timestamp')) or Number.MAX_VALUE
     this.sub2 = Meteor.subscribe 'paged-messages', nick, room_name, timestamp,
@@ -84,7 +88,7 @@ Template.messages.rendered = ->
 Template.chat_header.room_name = -> prettyRoomName()
 Template.chat_header.whos_here = ->
   roomName = Session.get('type') + '/' + Session.get('id')
-  return Presence.find {room_name: roomName}, {sort:["nick"]}
+  return model.Presence.find {room_name: roomName}, {sort:["nick"]}
 
 # Utility functions
 
@@ -144,14 +148,14 @@ prettyRoomName = ->
   type = Session.get('type')
   id = Session.get('id')
   name = if type is "general" then GENERAL_ROOM else \
-    Names.findOne(id)?.name
+    model.Names.findOne(id)?.name
   return (name or "unknown")
 
 joinRoom = (type, id) ->
   roomName = type + '/' + id
   # xxx: could record the room name in a set here.
   Session.set "room_name", roomName
-  Router.goToChat(type, id, Session.get('timestamp'))
+  share.Router.goToChat(type, id, Session.get('timestamp'))
   scrollMessagesView()
   $("#messageInput").select()
   startupChat()
@@ -202,11 +206,11 @@ $("#joinRoom").live "submit", ->
     # reset to old room name
     $("#roomName").val prettyRoomName()
   # is this the general room?
-  else if canonical(roomName) is canonical(GENERAL_ROOM)
+  else if model.canonical(roomName) is model.canonical(GENERAL_ROOM)
     joinRoom "general", "0"
   else
     # try to find room as a group, round, or puzzle name
-    n = Names.findOne canon: canonical(roomName)
+    n = model.Names.findOne canon: model.canonical(roomName)
     if n
       joinRoom n.type, n._id
     else
@@ -236,7 +240,7 @@ Template.messages_input.submit = (message) ->
       args.to = args.nick
       args.action = true
       whos_here = \
-        Presence.find({room_name: args.room_name}, {sort:["nick"]}).fetch()
+        model.Presence.find({room_name: args.room_name}, {sort:["nick"]}).fetch()
       whos_here = whos_here.map (obj) ->
         if obj.foreground then obj.nick else "(#{obj.nick})"
       if whos_here.length == 0
@@ -258,7 +262,7 @@ Template.messages_input.submit = (message) ->
       [to, rest] = rest.split(/\s+([^]*)/, 2)
       missingMessage = (not rest)
       while rest
-        n = Nicks.findOne canon: canonical(to)
+        n = model.Nicks.findOne canon: model.canonical(to)
         break if n
         [extra, rest] = rest.split(/\s+([^]*)/, 2)
         to += ' ' + extra
@@ -276,7 +280,7 @@ Template.messages_input.submit = (message) ->
   Meteor.call 'newMessage', args
   # make sure we're looking at the most recent messages
   if (+Session.get('timestamp'))
-    Router.navigate "/chat/#{Session.get 'room_name'}", {trigger:true}
+    share.Router.navigate "/chat/#{Session.get 'room_name'}", {trigger:true}
   return
 Template.messages_input.events
   "keydown textarea": (event, template) ->
@@ -349,7 +353,7 @@ Template.chat.created = ->
   this.afterFirstRender = ->
     # created callback means that we've switched to chat, but
     # can't call ensureNick until after firstRender
-    ensureNick ->
+    share.ensureNick ->
       type = Session.get('type')
       id = Session.get('id')
       joinRoom type, id
@@ -369,10 +373,10 @@ startupChat = ->
       room_name: Session.get "room_name"
       present: true
       foreground: isVisible() # foreground/background tab status
-      uuid: CLIENT_UUID # identify this tab
+      uuid: settings.CLIENT_UUID # identify this tab
   instachat.keepalive()
   # send a keep alive every N minutes
-  instachat.keepaliveInterval = Meteor.setInterval instachat.keepalive, (PRESENCE_KEEPALIVE_MINUTES*60*1000)
+  instachat.keepaliveInterval = Meteor.setInterval instachat.keepalive, (model.PRESENCE_KEEPALIVE_MINUTES*60*1000)
 
 cleanupChat = ->
   if instachat.keepaliveInterval?
@@ -402,9 +406,17 @@ Deps.autorun ->
   # the autorun magic *doesn't* tear down 'observe's
   # live query handle when room_name or currentPage changes (but it should!)
   # we need to handle that ourselves...
-  handle = Messages.find
+  handle = model.Messages.find
     room_name: Session.get("room_name")
   .observe
     added: (item) ->
       unreadMessage(item) unless item.system
   Deps.onInvalidate -> handle.stop()
+
+# exports
+share.chat =
+  convertURLsToLinksAndImages: convertURLsToLinksAndImages
+  startupChat: startupChat
+  cleanupChat: cleanupChat
+  hideMessageAlert: hideMessageAlert
+  joinRoom: joinRoom

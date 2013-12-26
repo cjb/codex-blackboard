@@ -1,8 +1,11 @@
+share = @share
+model = share.model
+
 Template.oplog.oplogs = ->
   timestamp = (+Session.get('timestamp')) or Number.MAX_VALUE
-  ops = OpLogs.find {timestamp: $lt: +timestamp},
+  ops = model.OpLogs.find {timestamp: $lt: +timestamp},
     sort: [["timestamp","desc"]]
-    limit: OPLOG_PAGE
+    limit: model.OPLOG_PAGE
   for oplog, i in ops.fetch().reverse()
     first: (i is 0)
     oplog: oplog

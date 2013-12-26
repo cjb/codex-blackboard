@@ -1,3 +1,7 @@
+share = @share
+settings = share.settings # import
+chat = share.chat # import
+
 # "Top level" templates:
 #   "blackboard" -- main blackboard page
 #   "puzzle"     -- puzzle information page
@@ -21,26 +25,22 @@ Handlebars.registerHelper 'editing', (args..., options) ->
   return false unless (Session.get 'nick') and (Session.get 'canEdit')
   return Session.equals 'editing', args.join('/')
 
-WIKI_HOST = 'http://wiki.codexian.us'
 Handlebars.registerHelper 'wiki', (options) ->
   contents = options.fn(this)
-  return WIKI_HOST unless contents
-  "#{WIKI_HOST}/index.php?title=#{contents}"
+  return settings.WIKI_HOST unless contents
+  "#{settings.WIKI_HOST}/index.php?title=#{contents}"
 
 Handlebars.registerHelper 'linkify', (options) ->
   contents = options.fn(this)
-  contents = convertURLsToLinksAndImages(Handlebars._escape(contents))
+  contents = chat.convertURLsToLinksAndImages(Handlebars._escape(contents))
   return new Handlebars.SafeString(contents)
-
-CLIENT_UUID = Random.id() # this identifies this particular client instance
-DEFAULT_HOST = 'codexian.us' # this is used to create gravatars from nicks
 
 # subscribe to the all-names feed all the time
 Meteor.subscribe 'all-names'
 # subscribe to all nicks all the time
 Meteor.subscribe 'all-nicks'
 # we might subscribe to all-roundsandpuzzles, too.
-if BB_SUB_ALL
+if settings.BB_SUB_ALL
   Meteor.subscribe 'all-roundsandpuzzles'
 
 # Router
@@ -96,5 +96,5 @@ BlackboardRouter = Backbone.Router.extend
   goToChat: (type, id, timestamp) ->
     this.navigate(this.chatUrlFor(type, id, timestamp), {trigger:true})
 
-Router = new BlackboardRouter()
+share.Router = new BlackboardRouter()
 Backbone.history.start {pushState: true}

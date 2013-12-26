@@ -1,6 +1,7 @@
 # cscott's very simple splitter widget
+share = @share
 
-Splitter =
+Splitter = share.Splitter =
   vsize:
     get: () -> $('.bb-bottom-content').height()
     set: (size) ->

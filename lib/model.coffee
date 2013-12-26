@@ -689,3 +689,31 @@ spread_id_to_link = (id) ->
 UTCNow = ->
   now = new Date()
   return now.getTime()
+
+# exports
+@share = {} unless @share?
+share = @share
+share.model =
+  # constants
+  PRESENCE_KEEPALIVE_MINUTES: PRESENCE_KEEPALIVE_MINUTES
+  RINGHUNTERS_FOLDER: RINGHUNTERS_FOLDER
+  MESSAGE_PAGE: MESSAGE_PAGE
+  OPLOG_PAGE: OPLOG_PAGE
+  # collection types
+  OpLogs: OpLogs
+  Names: Names
+  LastAnswer: LastAnswer
+  RoundGroups: RoundGroups
+  Rounds: Rounds
+  Puzzles: Puzzles
+  Nicks: Nicks
+  Messages: Messages
+  Presence: Presence
+  # helper methods
+  collection: collection
+  pretty_collection: pretty_collection
+  getTag: getTag
+  canonical: canonical
+  drive_id_to_link: drive_id_to_link
+  spread_id_to_link: spread_id_to_link
+  UTCNow: UTCNow

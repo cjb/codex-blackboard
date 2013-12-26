@@ -1,3 +1,7 @@
+share = @share
+model = share.model # import
+settings = share.settings # import
+
 # templates, event handlers, and subscriptions for the site-wide
 # header bar, including the login modals and general Handlebars helpers
 HUNT_YEAR = 2013 # used to make wiki links
@@ -12,7 +16,7 @@ keyword_or_positional = (name, args) ->
 # link various types of objects
 Handlebars.registerHelper 'link', (args) ->
   args = keyword_or_positional 'id', args
-  n = Names.findOne(args.id)
+  n = model.Names.findOne(args.id)
   return args.id.slice(0,8) unless n
   return (args.text or n.name) if args.editing
   extraclasses = if args.class then (' '+args.class) else ''
@@ -31,20 +35,20 @@ $('a.puzzles-link, a.rounds-link, a.chat-link, a.home-link, a.oplogs-link').live
       ("height=480,width=480,menubar=no,toolbar=no,personalbar=no,"+\
        "status=yes,resizeable=yes,scrollbars=yes")
   else
-    Router.navigate $(this).attr('href'), {trigger:true}
+    share.Router.navigate $(this).attr('href'), {trigger:true}
 
 Handlebars.registerHelper 'drive_link', (args) ->
   args = keyword_or_positional 'id', args
-  return drive_id_to_link(args.id)
+  return model.drive_id_to_link(args.id)
 Handlebars.registerHelper 'spread_link', (args) ->
   args = keyword_or_positional 'id', args
-  return spread_id_to_link(args.id)
+  return model.spread_id_to_link(args.id)
 
 # nicks
 Handlebars.registerHelper 'nickOrName', (args) ->
   nick = (keyword_or_positional 'nick', args).nick
-  n = Nicks.findOne canon: canonical(nick)
-  return getTag(n, 'Real Name') or nick
+  n = model.Nicks.findOne canon: model.canonical(nick)
+  return model.getTag(n, 'Real Name') or nick
 
 # gravatars
 Handlebars.registerHelper 'gravatar', (args) ->
@@ -72,7 +76,7 @@ Handlebars.registerHelper 'pretty_ts', (args) ->
       hrs + ":" + min + ' ' + ampm
     when "duration", "brief_duration", "brief duration"
       brief = (style isnt 'duration')
-      duration = (Session.get('currentTime') or UTCNow()) - timestamp
+      duration = (Session.get('currentTime') or model.UTCNow()) - timestamp
       seconds = Math.floor(duration/1000)
       return "in the future" if seconds < -60
       return "just now" if seconds < 60
@@ -106,12 +110,12 @@ Template.header_loginmute.volumeIcon = ->
 Template.header_loginmute.sessionNick = ->
   nick = Session.get 'nick'
   return nick unless nick
-  n = Nicks.findOne canon: canonical(nick)
+  n = model.Nicks.findOne canon: model.canonical(nick)
   return {
     name: n?.name or nick
-    canon: n?.canon or canonical(nick)
-    realname: getTag n, 'Real Name'
-    gravatar: (getTag n, 'Gravatar') or "#{nick}@#{DEFAULT_HOST}"
+    canon: n?.canon or model.canonical(nick)
+    realname: model.getTag n, 'Real Name'
+    gravatar: (model.getTag n, 'Gravatar') or "#{nick}@#{settings.DEFAULT_HOST}"
   }
 Template.header_loginmute.rendered = ->
   # tool tips
@@ -127,12 +131,12 @@ Template.header_loginmute.events
     ensureNick()
   "click .bb-logout": (event, template) ->
     event.preventDefault()
-    cleanupChat() if Session.equals('currentPage', 'chat')
+    share.chat.cleanupChat() if Session.equals('currentPage', 'chat')
     Session.set 'nick', undefined
     $.removeCookie 'nick', {path:'/'}
     if Session.equals('currentPage', 'chat')
       ensureNick -> # login again immediately
-        joinRoom Session.get('type'), Session.get('id')
+        share.chat.joinRoom Session.get('type'), Session.get('id')
   "click .bb-protect, click .bb-unprotect": (event, template) ->
     canEdit = $(event.currentTarget).attr('data-canEdit') is 'true'
     Session.set 'canEdit', canEdit or undefined
@@ -143,14 +147,14 @@ Template.header_loginmute.wikipage = ->
   return '' unless (type and id)
   switch type
     when 'puzzles'
-      round = Rounds.findOne puzzles: id
-      group = RoundGroups.findOne rounds: round?._id
+      round = model.Rounds.findOne puzzles: id
+      group = model.RoundGroups.findOne rounds: round?._id
       puzzle_num = 1 + (round?.puzzles or []).indexOf(id)
       round_num = 1 + group?.round_start + \
         (group?.rounds or []).indexOf(round?._id)
       "#{HUNT_YEAR}_R#{round_num}P#{puzzle_num}"
     when 'rounds'
-      group = RoundGroups.findOne rounds: id
+      group = model.RoundGroups.findOne rounds: id
       round_num = 1 + group?.round_start + \
         (group?.rounds or []).indexOf(id)
       "#{HUNT_YEAR}_R#{round_num}P0"
@@ -158,28 +162,28 @@ Template.header_loginmute.wikipage = ->
 ############## breadcrumbs #######################
 Template.header_breadcrumbs.round = ->
   if Session.equals('type', 'puzzles')
-    Rounds.findOne puzzles: Session.get("id")
+    model.Rounds.findOne puzzles: Session.get("id")
   else if Session.equals('type', 'rounds')
-    Rounds.findOne Session.get('id')
+    model.Rounds.findOne Session.get('id')
   else null
 Template.header_breadcrumbs.puzzle = ->
   if Session.equals('type', 'puzzles')
-    Puzzles.findOne Session.get('id')
+    model.Puzzles.findOne Session.get('id')
   else null
 Template.header_breadcrumbs.type = -> Session.get('type')
 Template.header_breadcrumbs.id = -> Session.get('id')
 Template.header_breadcrumbs.drive = -> switch Session.get('type')
   when 'general'
-    RINGHUNTERS_FOLDER
+    model.RINGHUNTERS_FOLDER
   when 'rounds', 'puzzles'
-    collection(Session.get('type'))?.findOne(Session.get('id'))?.drive
+    model.collection(Session.get('type'))?.findOne(Session.get('id'))?.drive
 Template.header_breadcrumbs.events
   "click .bb-upload-file": (event, template) ->
      folder = switch Session.get('type')
        when 'general'
-         RINGHUNTERS_FOLDER
+         model.RINGHUNTERS_FOLDER
        when 'rounds', 'puzzles'
-         collection(Session.get('type'))?.findOne(Session.get('id'))?.drive
+         model.collection(Session.get('type'))?.findOne(Session.get('id'))?.drive
      return unless folder
      uploadToDriveFolder folder, (docs) ->
         message = "uploaded "+(for doc in docs
@@ -200,7 +204,7 @@ Template.header_breadcrumbs.preserve
   'a.bb-drive-link[data-original-title]': (node) ->
      $(node).attr('data-original-title')
 
-uploadToDriveFolder = (folder, callback) ->
+uploadToDriveFolder = share.uploadToDriveFolder = (folder, callback) ->
   uploadView = new google.picker.DocsUploadView()\
     .setParent(folder)
   pickerCallback = (data) ->
@@ -246,18 +250,18 @@ Template.header_nickmodal_contents.created = ->
         return item
   this.typeaheadSource = (query,process) =>
     this.update(query)
-    (n.name for n in Nicks.find({}).fetch())
+    (n.name for n in model.Nicks.find({}).fetch())
   this.update = (query, options) =>
     # can we find an existing nick matching this?
-    n = if query then Nicks.findOne canon: canonical(query) else undefined
+    n = if query then model.Nicks.findOne canon: model.canonical(query) else undefined
     if (n or options?.force)
-      realname = getTag n, 'Real Name'
-      gravatar = getTag n, 'Gravatar'
+      realname = model.getTag n, 'Real Name'
+      gravatar = model.getTag n, 'Gravatar'
       $('#nickRealname').val(realname or '')
       $('#nickEmail').val(gravatar or '')
     this.updateGravatar()
   this.updateGravatar = () =>
-    email = $('#nickEmail').val() or ($('#nickInput').val()+'@'+DEFAULT_HOST)
+    email = $('#nickEmail').val() or "#{$('#nickInput').val()}@#{settings.DEFAULT_HOST}"
     gravatar = $.gravatar email,
       image: 'wavatar' # 'monsterid'
       classes: 'img-polaroid'
@@ -300,7 +304,7 @@ $("#nickPick").live "submit", ->
     Meteor.call 'newNick', {name: nick}, (error,n) ->
       tagsetter = (value, tagname, cb=(->)) ->
         value = value.replace(/^\s+|\s+$/g,"") # strip
-        if getTag(n, tagname) is value
+        if model.getTag(n, tagname) is value
           cb()
         else
           Meteor.call 'setTag', 'nicks', n._id, tagname, value, n.canon, ->
@@ -310,7 +314,7 @@ $("#nickPick").live "submit", ->
     $('#nickSuccess').val('true')
     $('#nickPickModal').modal 'hide'
 
-  hideMessageAlert()
+  share.chat.hideMessageAlert()
   return false
 
 changeNick = (cb) ->
@@ -318,7 +322,7 @@ changeNick = (cb) ->
     cb?() if $('#nickSuccess').val() is 'true'
   Session.set 'nickModalVisible', true
 
-ensureNick = (cb=(->)) ->
+ensureNick = share.ensureNick = (cb=(->)) ->
   if Session.get 'nick'
     cb()
   else if $.cookie('nick')
@@ -342,7 +346,7 @@ Template.header_confirmmodal_contents.events
      Template.header_confirmmodal_contents.cancel = false # do the thing!
      $('#confirmModal').modal 'hide'
 
-confirmationDialog = (options) ->
+confirmationDialog = share.confirmationDialog = (options) ->
   $('#confirmModal').one 'hide', ->
     Session.set 'confirmModalVisible', undefined
     options.ok?() unless Template.header_confirmmodal_contents.cancel
@@ -354,7 +358,7 @@ confirmationDialog = (options) ->
 ############## operation log in header ####################
 Template.header_lastupdates.lastupdates = ->
   LIMIT = 10
-  ologs = OpLogs.find {}, \
+  ologs = model.OpLogs.find {}, \
         {sort: [["timestamp","desc"]], limit: LIMIT}
   ologs = ologs.fetch()
   # now look through the entries and collect similar logs
@@ -368,7 +372,7 @@ Template.header_lastupdates.lastupdates = ->
       break
   type = ''
   if message[0].id
-    type = ' ' + pretty_collection(message[0].type) + \
+    type = ' ' + model.pretty_collection(message[0].type) + \
       (if message.length > 1 then 's ' else ' ')
   uniq = (array) ->
     seen = Object.create(null)
@@ -398,7 +402,7 @@ do ->
 ############## chat log in header ####################
 Template.header_lastchats.lastchats = ->
   LIMIT = 2
-  m = Messages.find {room_name: "general/0", system: false}, \
+  m = model.Messages.find {room_name: "general/0", system: false}, \
         {sort: [["timestamp","desc"]], limit: LIMIT}
   m = m.fetch().reverse()
   return m
@@ -409,7 +413,7 @@ Template.header_lastchats.body = ->
 Template.header_lastchats.created = ->
   this.computation = Deps.autorun =>
     # use autorun to ensure subscription changes if/when nick does
-    nick = if BB_DISABLE_PM then null else Session.get('nick')
+    nick = if settings.BB_DISABLE_PM then null else Session.get('nick')
     sub = Meteor.subscribe 'paged-messages', nick, 'general/0', Number.MAX_VALUE
     Deps.onInvalidate -> sub.stop()
 Template.header_lastchats.destroyed = ->

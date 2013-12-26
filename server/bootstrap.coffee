@@ -1,6 +1,8 @@
 # if the database is empty on server start, create some sample data.
 # (useful during development; disable this before hunt)
 POPULATE_DB_WHEN_RESET = true
+share = @share
+model = share.model
 
 SAMPLE_DATA = [
   name: "Mega man"
@@ -398,7 +400,7 @@ SAMPLE_NICKS = [
 ]
 
 Meteor.startup ->
-  if POPULATE_DB_WHEN_RESET and RoundGroups.find().count() is 0
+  if POPULATE_DB_WHEN_RESET and model.RoundGroups.find().count() is 0
     # note that Meteor.call is async... this causes some slight issues...
     WHO='cscott'
     extend = (a,b) ->
