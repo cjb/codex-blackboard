@@ -113,7 +113,7 @@ x private messages?
     the pm field get those messages
   x /msg support?
   - codexbot's help should be a pm
-- completion of nicks in the message compose box
+x completion of nicks in the message compose box
 - mouseover images should also scroll up if necessary
 - DDP unset support (if unset leaves an empty object, remove the object)
 - when deleting round/round groups, add the contained rounds/puzzles to a new
@@ -121,3 +121,5 @@ x private messages?
 x move puzzles up/down
 x chat archive page
 x oplog archive page
+--------------------
+- Add browser-policy package

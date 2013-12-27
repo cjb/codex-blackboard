@@ -511,7 +511,6 @@ spread_id_to_link = (id) ->
       check args, ObjectWith
         nick: NonEmptyString
         room_name: NonEmptyString
-      return unless Meteor.isServer
       # we're going to do the db operation only on the server, so that we
       # can safely use mongo's 'upsert' functionality.  otherwise
       # Meteor seems to get a little confused as it creates presence
@@ -520,13 +519,15 @@ spread_id_to_link = (id) ->
       # documents, not their existence) (this is also why we added the
       # 'presence' field instead of deleting entries outright when
       # a user goes away)
-      Presence.update
+      # IN METEOR 0.6.6 upsert support was added to the client.  So let's
+      # try to do this on both sides now.
+      #return unless Meteor.isServer
+      Presence.upsert
         nick: canonical(args.nick)
         room_name: args.room_name
       , $set:
           timestamp: UTCNow()
           present: args.present or false
-      , { upsert: true }
       return unless args.present
       # only set foreground if true or foreground_uuid matches; this
       # prevents bouncing if user has two tabs open, and one is foregrounded

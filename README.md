@@ -4,7 +4,6 @@ codex-blackboard
 Meteor app for coordating solving for our MIT Mystery Hunt team.  To run:
 
     $ cd codex-blackboard
-    $ meteor update --release 0.6.5.1  # only needed once
     $ meteor
     <browse to localhost:3000>
 
@@ -20,34 +19,39 @@ will wipe the old database and start afresh.
 
 ## Installing Meteor
 
-Our blackboard app currently requires Meteor 0.6.5.1.
+Our blackboard app currently requires Meteor 0.6.6.3.
 
 At the moment the two ways to install Meteor are:
 
 * just make a git clone of the meteor repo and put it in $PATH, or
 * use the package downloaded by their install shell script
 
-The first option is something like:
+The latter option is easier, and automatically downloads the correct
+version of meteor and all its dependencies, based on the contents of
+`codex-blackboard/.meteor/release`.  Simply cross your finger, trust
+in the meteor devs, and do:
+
+    $ curl https://install.meteor.com | /bin/sh
+
+You can read the script and manually install meteor this way as well;
+it just involves downloading a binary distribution and installing it
+in `~/.meteor`.
+
+If piping stuff from the internet directly to /bin/sh gives you the
+willies, then you can also run from a git checkout.  Something like:
 
     $ cd ~/3rdParty
     $ git clone git://github.com/meteor/meteor.git
     $ cd meteor
-    $ git checkout release/0.6.5.1
+    $ git checkout release/0.6.6.3
     $ cd ~/bin ; ln -s ~/3rdParty/meteor/meteor .
 
-Note that meteor can run directly from its checkout, and figure out where to
-find the rest of its files itself.  (But it only follows a single symlink
-to its binary; a symlink can't point to another symlink.)
-
-The second option is "easier" but gives me the willies:
-
-    $ curl https://install.meteor.com | /bin/sh
-
-and then something like:
-
-    $ cd codex-blackboard
-    $ meteor update --release 0.6.5.1
-    $ meteor run
+Meteor can run directly from its checkout, and figure out where to
+find the rest of its files itself --- but it only follows a single symlink
+to its binary; a symlink can't point to another symlink.  If you use a
+git checkout, you will be responsible for updating your checkout to
+the latest version of meteor when `codex-blackboard/.meteor/release`
+changes.
 
 You should probably watch the screencast at http://meteor.com to get a sense
 of the framework; you might also want to check out the examples they've
