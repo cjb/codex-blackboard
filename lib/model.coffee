@@ -302,23 +302,25 @@ spread_id_to_link = (id) ->
     check id, NonEmptyString
     check name, NonEmptyString
     return unless Meteor.isServer
-    HTTP.post "#{GDRIVE_HOST}/puzzle/Codex: #{name}", (err, res) ->
-      if err
-        console.log "Error creating folder on Google Drive: ", err
-      else if res?.data
-        collection(type).update id, { $set:
-          drive: res.data.id
-          spreadsheet: res.data.spread_id
-        }
-      else
-        console.log "Some other error creating folder: ", res
-  renameDriveFolder = (drive, new_name) ->
-    check drive, NonEmptyString
+    share.drive.createPuzzle(name).then (res) ->
+      collection(type).update id, { $set:
+        drive: res.id
+        spreadsheet: res.spreadId
+      }
+    .otherwise (err) ->
+      console.warn "Error creating folder on Google Drive: ", err
+    .done()
+
+  renameDriveFolder = (new_name, drive, spread) ->
     check new_name, NonEmptyString
+    check drive, NonEmptyString
+    check spread, Match.Optional(NonEmptyString)
     return unless Meteor.isServer
-    HTTP.call "MOVE", "#{GDRIVE_HOST}/puzzle/#{drive}/Codex: #{new_name}", (err, res) ->
-      if err
-        console.log "Error renaming folder on Google Drive: ", err
+    share.drive.renamePuzzle(new_name, drive, spread)\
+    .otherwise (err) ->
+      console.warn "Error renaming folder on Google Drive: ", err
+    .done()
+
   deleteDriveFolder = (drive, spread_id=null) ->
     check drive, NonEmptyString
     return unless Meteor.isServer
@@ -422,10 +424,12 @@ spread_id_to_link = (id) ->
         id: NonEmptyString
         name: NonEmptyString
       # get drive ID (racy)
-      drive = Rounds.findOne(args.id)?.drive
+      r = Rounds.findOne(args.id)
+      drive = r?.drive
+      spread = r?.spread_id
       result = renameObject "rounds", args
       # rename google drive folder
-      renameDriveFolder drive, args.name if (result and drive)
+      renameDriveFolder args.name, drive, spread if (result and drive?)
       return result
     deleteRound: (args) ->
       check args, ObjectWith

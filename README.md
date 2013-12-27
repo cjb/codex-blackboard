@@ -1,19 +1,25 @@
 codex-blackboard
 ================
 
-Meteor app for coordating solving for our MIT Mystery Hunt team.  To run:
+Meteor app for coordating solving for our MIT Mystery Hunt team.  To run,
+first obtain the password for our google drive account.  Then:
 
     $ cd codex-blackboard
-    $ meteor
+    $ echo '{ "password":"<password here>" }' > settings.json
+    $ meteor --settings settings.json
     <browse to localhost:3000>
 
-Note that your code is pushed live to the server as you make changes, so
-you can just leave meteor running.  Occassionally we make changes to the
+If you don't have the google drive password, you can just omit the
+`settings.json` file and the `--settings` option to meteor; the app
+will skip all the google drive integration steps.
+
+Your code is pushed live to the server as you make changes, so
+you can just leave `meteor` running.  Occassionally we make changes to the
 database schema -- add new sample data, change how things are organized, etc.
 In those cases:
 
     $ meteor reset
-    $ meteor
+    $ meteor --settings settings.json
 
 will wipe the old database and start afresh.
 
@@ -56,6 +62,24 @@ changes.
 You should probably watch the screencast at http://meteor.com to get a sense
 of the framework; you might also want to check out the examples they've
 posted, too.
+
+## Working with Google Drive
+
+We use JWT for authenticating with google drive.  The official
+documentation is a bit sparse.  I suggest you read the docs for the
+`gapitoken` package which describes how to make a `.pem` private key
+file for the service account associated with this app.  In order to
+avoid publicly exposing the private key in github, we then encrypt
+this private key file with a password, stored in `settings.json` but
+*not* checked in.  The server-side `Google.encrypt` function (in
+`packages/google/google.js`) can be used to create a properly
+encrypted key if the credentials or password ever needs to change.
+
+For development, it is useful to have a scratch drive folder which is
+specific to your development install and can be wiped out and reset.
+Add a `folder` key to your `settings.json` file to name this scratch
+folder.  For example:
+    {"password":"<password here>","folder":"My Dev Test Folder"}
 
 ## Goals, etc.
 

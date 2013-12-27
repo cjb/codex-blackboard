@@ -1,0 +1,173 @@
+{
+  "dependencies": {
+    "googleapis": {
+      "version": "0.4.7",
+      "dependencies": {
+        "request": {
+          "version": "2.25.0",
+          "dependencies": {
+            "qs": {
+              "version": "0.6.6"
+            },
+            "json-stringify-safe": {
+              "version": "5.0.0"
+            },
+            "forever-agent": {
+              "version": "0.5.0"
+            },
+            "tunnel-agent": {
+              "version": "0.3.0"
+            },
+            "http-signature": {
+              "version": "0.10.0",
+              "dependencies": {
+                "assert-plus": {
+                  "version": "0.1.2"
+                },
+                "asn1": {
+                  "version": "0.1.11"
+                },
+                "ctype": {
+                  "version": "0.5.2"
+                }
+              }
+            },
+            "hawk": {
+              "version": "1.0.0",
+              "dependencies": {
+                "hoek": {
+                  "version": "0.9.1"
+                },
+                "boom": {
+                  "version": "0.4.2"
+                },
+                "cryptiles": {
+                  "version": "0.2.2"
+                },
+                "sntp": {
+                  "version": "0.2.4"
+                }
+              }
+            },
+            "aws-sign": {
+              "version": "0.3.0"
+            },
+            "oauth-sign": {
+              "version": "0.3.0"
+            },
+            "cookie-jar": {
+              "version": "0.3.0"
+            },
+            "node-uuid": {
+              "version": "1.4.1"
+            },
+            "mime": {
+              "version": "1.2.11"
+            },
+            "form-data": {
+              "version": "0.1.2",
+              "dependencies": {
+                "combined-stream": {
+                  "version": "0.0.4",
+                  "dependencies": {
+                    "delayed-stream": {
+                      "version": "0.0.5"
+                    }
+                  }
+                },
+                "async": {
+                  "version": "0.2.9"
+                }
+              }
+            }
+          }
+        },
+        "async": {
+          "version": "0.2.6"
+        },
+        "gapitoken": {
+          "version": "0.1.0",
+          "dependencies": {
+            "jws": {
+              "version": "0.0.2",
+              "dependencies": {
+                "tap": {
+                  "version": "0.3.3",
+                  "dependencies": {
+                    "inherits": {
+                      "version": "1.0.0"
+                    },
+                    "yamlish": {
+                      "version": "0.0.5"
+                    },
+                    "slide": {
+                      "version": "1.1.5"
+                    },
+                    "runforcover": {
+                      "version": "0.0.2",
+                      "dependencies": {
+                        "bunker": {
+                          "version": "0.1.2",
+                          "dependencies": {
+                            "burrito": {
+                              "version": "0.2.12",
+                              "dependencies": {
+                                "traverse": {
+                                  "version": "0.5.2"
+                                },
+                                "uglify-js": {
+                                  "version": "1.1.1"
+                                }
+                              }
+                            }
+                          }
+                        }
+                      }
+                    },
+                    "nopt": {
+                      "version": "2.1.2",
+                      "dependencies": {
+                        "abbrev": {
+                          "version": "1.0.4"
+                        }
+                      }
+                    },
+                    "mkdirp": {
+                      "version": "0.3.5"
+                    },
+                    "difflet": {
+                      "version": "0.2.6",
+                      "dependencies": {
+                        "traverse": {
+                          "version": "0.6.6"
+                        },
+                        "charm": {
+                          "version": "0.1.2"
+                        },
+                        "deep-is": {
+                          "version": "0.1.2"
+                        }
+                      }
+                    },
+                    "deep-equal": {
+                      "version": "0.0.0"
+                    },
+                    "buffer-equal": {
+                      "version": "0.0.0"
+                    }
+                  }
+                },
+                "base64url": {
+                  "version": "0.0.3"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "when": {
+      "version": "2.7.1"
+    }
+  }
+}
