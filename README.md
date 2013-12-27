@@ -4,7 +4,7 @@ codex-blackboard
 Meteor app for coordating solving for our MIT Mystery Hunt team.  To run:
 
     $ cd codex-blackboard
-    $ meteor update --release 0.6.3  # only needed once
+    $ meteor update --release 0.6.4  # only needed once
     $ meteor
     <browse to localhost:3000>
 
@@ -20,7 +20,7 @@ will wipe the old database and start afresh.
 
 ## Installing Meteor
 
-Our blackboard app currently requires Meteor 0.6.3.
+Our blackboard app currently requires Meteor 0.6.4.
 
 At the moment the two ways to install Meteor are:
 
@@ -32,7 +32,7 @@ The first option is something like:
     $ cd ~/3rdParty
     $ git clone git://github.com/meteor/meteor.git
     $ cd meteor
-    $ git checkout release/0.6.3
+    $ git checkout release/0.6.4
     $ cd ~/bin ; ln -s ~/3rdParty/meteor/meteor .
 
 Note that meteor can run directly from its checkout, and figure out where to
@@ -46,7 +46,7 @@ The second option is "easier" but gives me the willies:
 and then something like:
 
     $ cd codex-blackboard
-    $ meteor update --release 0.6.3
+    $ meteor update --release 0.6.4
     $ meteor run
 
 You should probably watch the screencast at http://meteor.com to get a sense
