@@ -123,3 +123,5 @@ x chat archive page
 x oplog archive page
 --------------------
 - Add browser-policy package
+- Add autoupdate package
+- Add facts package
