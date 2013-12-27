@@ -1,5 +1,4 @@
 'use strict'
-share = @share
 model = share.model # import
 
 Meteor.publish 'all-roundsandpuzzles', -> [

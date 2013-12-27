@@ -1,6 +1,5 @@
 # This file contains various constants used throughout the client code.
 'use strict'
-share = @share
 settings = share.settings = {}
 
 # subscribe to all rounds/all puzzles, or try to be more granular?

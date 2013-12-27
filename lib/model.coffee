@@ -299,7 +299,7 @@ spread_id_to_link = (id) ->
     check id, NonEmptyString
     check name, NonEmptyString
     return unless Meteor.isServer
-    Meteor.http.post "#{GDRIVE_HOST}/puzzle/Codex: #{name}", (err, res) ->
+    HTTP.post "#{GDRIVE_HOST}/puzzle/Codex: #{name}", (err, res) ->
       if err
         console.log "Error creating folder on Google Drive: ", err
       else if res?.data
@@ -313,16 +313,16 @@ spread_id_to_link = (id) ->
     check drive, NonEmptyString
     check new_name, NonEmptyString
     return unless Meteor.isServer
-    Meteor.http.call "MOVE", "#{GDRIVE_HOST}/puzzle/#{drive}/Codex: #{new_name}", (err, res) ->
+    HTTP.call "MOVE", "#{GDRIVE_HOST}/puzzle/#{drive}/Codex: #{new_name}", (err, res) ->
       if err
         console.log "Error renaming folder on Google Drive: ", err
   deleteDriveFolder = (drive, spread_id=null) ->
     check drive, NonEmptyString
     return unless Meteor.isServer
     if spread_id
-      Meteor.http.del "#{GDRIVE_HOST}/puzzle/#{spread_id}", (err, res) ->
+      HTTP.del "#{GDRIVE_HOST}/puzzle/#{spread_id}", (err, res) ->
         console.log "Error deleting spreadsheet on Google Drive: #{err}" if err
-    Meteor.http.del "#{GDRIVE_HOST}/puzzle/#{drive}", (err, res) ->
+    HTTP.del "#{GDRIVE_HOST}/puzzle/#{drive}", (err, res) ->
       if err
         console.log "Error deleting folder on Google Drive: ", err
 
@@ -730,8 +730,6 @@ UTCNow = ->
   return now.getTime()
 
 # exports
-@share = {} unless @share?
-share = @share
 share.model =
   # constants
   PRESENCE_KEEPALIVE_MINUTES: PRESENCE_KEEPALIVE_MINUTES

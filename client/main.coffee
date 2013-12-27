@@ -1,5 +1,4 @@
 'use strict'
-share = @share
 settings = share.settings # import
 chat = share.chat # import
 

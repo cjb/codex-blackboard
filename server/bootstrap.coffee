@@ -1,5 +1,4 @@
 'use strict'
-share = @share
 model = share.model
 
 # if the database is empty on server start, create some sample data.
