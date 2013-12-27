@@ -9,6 +9,7 @@ Session.setDefault 'nick'     , ($.cookie("nick") || "")
 Session.setDefault 'mute'     , $.cookie("mute")
 Session.setDefault 'type'     , 'general'
 Session.setDefault 'id'       , '0'
+Session.setDefault 'timestamp', 0
 
 # Globals
 instachat = {}
@@ -64,7 +65,8 @@ Template.messages.created = ->
     invalidator = =>
       this.sub1?.stop?()
       this.sub2?.stop?()
-      this.sub1 = this.sub2 = null
+      this.sub3?.stop?()
+      this.sub1 = this.sub2 = this.sub3 = null
       instachat.ready = false
       instachat.unreadMessages = 0
       hideMessageAlert()
@@ -77,8 +79,16 @@ Template.messages.created = ->
     if settings.BB_DISABLE_PM and room_name is "general/0"
       nick = Session.get 'nick'
     timestamp = (+Session.get('timestamp')) or Number.MAX_VALUE
-    this.sub2 = Meteor.subscribe 'paged-messages', nick, room_name, timestamp,
-      onReady: -> instachat.ready = true
+    ready = 0
+    onReady = -> instachat.ready = true if (++ready) is 2
+    if nick?
+      this.sub2 = \
+        Meteor.subscribe 'paged-messages-nick', nick, room_name, timestamp,
+          onReady: onReady
+    else
+      onReady()
+    this.sub3 = Meteor.subscribe 'paged-messages', room_name, timestamp,
+      onReady: onReady
     Deps.onInvalidate invalidator
 Template.messages.destroyed = ->
   this.computation.stop() # runs invalidation handler, too
