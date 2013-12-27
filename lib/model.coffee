@@ -28,6 +28,8 @@ BBCollection = Object.create(null) # create new object w/o any inherited cruft
 #   id: string -- type/id give a mongodb reference to the object modified
 #                 so we can hyperlink to it.
 OpLogs = BBCollection.oplogs = new Meteor.Collection "oplogs"
+if Meteor.isServer
+  OpLogs._ensureIndex {timestamp:-1}, {}
 
 # Names is a synthetic collection created by the server which indexes
 # the names and ids of RoundGroups, Rounds, and Puzzles:
@@ -124,7 +126,8 @@ if Meteor.isServer
 #   timestamp: timestamp
 Messages = BBCollection.messages = new Meteor.Collection "messages"
 if Meteor.isServer
-  Messages._ensureIndex {timestamp:-1}, {}
+  Messages._ensureIndex {to:1, room_name:1, timestamp:-1}, {}
+  Messages._ensureIndex {nick:1, room_name:1, timestamp:-1}, {}
 
 # Chat room presence
 #   nick: canonicalized string, as in Messages

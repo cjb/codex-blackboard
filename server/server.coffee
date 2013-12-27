@@ -74,34 +74,39 @@ Meteor.publish 'roundgroup-for-round', (id) -> model.RoundGroups.find rounds: id
 
 Meteor.publish 'my-nick', (nick) -> model.Nicks.find canon: model.canonical(nick)
 
-# only publish last page of messages
-Meteor.publish 'recent-messages', (nick, room_name) ->
-  nick = model.canonical(nick or '') or null
-  model.Messages.find {
-    room_name: room_name
-    $or: [ { nick: nick }, { to: $in: [null, nick] } ]
-  },
-    sort:[["timestamp","desc"]]
-    limit: model.MESSAGE_PAGE
-
+# get recent messages
 # paged version: specify page boundary by timestamp, so we can display
 # 'more' messages by passing in the timestamp of the first message
 # on the current page we're looking at
-Meteor.publish 'paged-messages', (nick, room_name, timestamp) ->
-  nick = model.canonical(nick or '') or null
+Meteor.publish 'paged-messages', (room_name, timestamp) ->
+  timestamp = (+timestamp) or Number.MAX_VALUE
   model.Messages.find {
     room_name: room_name
     timestamp: $lt: +timestamp
-    $or: [ { nick: nick }, { to: $in: [null, nick] } ]
+    to: null # no pms
+  },
+     sort: [['timestamp','desc']]
+     limit: model.MESSAGE_PAGE
+# same thing, but nick-specific.  Note that between paged-messages and
+# paged-messages-nick we'll almost certainly get more than MESSAGE_PAGE
+# messages -- but that's ok.  We'll do a limit on the client-side; it's
+# worth it because we can share the big query and paged-messages-nick
+# should be small/light-weight.
+Meteor.publish 'paged-messages-nick', (nick, room_name, timestamp) ->
+  timestamp = (+timestamp) or Number.MAX_VALUE
+  nick = model.canonical(nick or '') or null
+  return (model.Messages.find {}, {limit:0}) unless nick?
+  model.Messages.find {
+    room_name: room_name
+    timestamp: $lt: +timestamp
+    $or: [ { nick: nick }, { to: nick } ]
   },
      sort: [['timestamp','desc']]
      limit: model.MESSAGE_PAGE
 
-# same thing for operation log
-Meteor.publish 'recent-oplogs', ->
-  model.OpLogs.find {}, {sort: [["timestamp","desc"]], limit: 20}
-
+# same idea, for operation log
 Meteor.publish 'paged-oplogs', (timestamp) ->
+  timestamp = (+timestamp) or Number.MAX_VALUE
   model.OpLogs.find {timestamp: $lt: +timestamp},
      sort: [['timestamp','desc']]
      limit: model.OPLOG_PAGE

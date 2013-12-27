@@ -389,7 +389,7 @@ Template.header_lastupdates.lastupdates = ->
 
 # subscribe when this template is in use/unsubscribe when it is destroyed
 Template.header_lastupdates.created = ->
-  this.sub = Meteor.subscribe 'recent-oplogs'
+  this.sub = Meteor.subscribe 'paged-oplogs', 0
 Template.header_lastupdates.destroyed = ->
   this.sub.stop()
 # add tooltip to 'more' links, and preserve then so they doesn't leak
@@ -417,7 +417,8 @@ Template.header_lastchats.created = ->
   this.computation = Deps.autorun ->
     # use autorun to ensure subscription changes if/when nick does
     nick = if settings.BB_DISABLE_PM then null else Session.get('nick')
-    sub = Meteor.subscribe 'paged-messages', nick, 'general/0', Number.MAX_VALUE
-    Deps.onInvalidate -> sub.stop()
+    sub1 = Meteor.subscribe 'paged-messages-nick', nick, 'general/0', 0
+    sub2 = Meteor.subscribe 'paged-messages', 'general/0', 0
+    Deps.onInvalidate -> ( sub1.stop() ; sub2.stop() )
 Template.header_lastchats.destroyed = ->
   this.computation.stop()
