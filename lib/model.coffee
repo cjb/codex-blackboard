@@ -702,6 +702,20 @@ spread_id_to_link = (id) ->
       oplog "Found an answer to", "puzzles", id, args.who
       return true
 
+    setIncorrectAnswer: (args) ->
+      id = args.puzzle._id or args.puzzle
+      throw new Meteor.Error(400, "missing puzzle") unless id
+      throw new Meteor.Error(400, "missing answer") unless args.answer
+      throw new Meteor.Error(400, "missing who") unless args.who
+      now = UTCNow()
+
+      puzzle = Puzzles.findOne(id)
+      incorrectAnswers = puzzle.incorrectAnswers or Array()
+      incorrectAnswers.push({answer: args.answer, timestamp: UTCNow(), who: args.who})
+      Puzzles.update id, $set:
+         incorrectAnswers: incorrectAnswers
+      return true
+
     deleteAnswer: (args) ->
       id = args.puzzle._id or args.puzzle
       check id, NonEmptyString

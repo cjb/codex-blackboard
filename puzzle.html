@@ -18,6 +18,11 @@
     <dt>Answer</dt><dd class="answer">{{puzzle.answer}}</dd>
   </dl>
 {{/if}}
+<dl class="dl-horizontal">
+{{#each puzzle.incorrectAnswers}}
+  <dt>Incorrect answer</dt><dd class="answer"><span class="timestamp">{{pretty_ts timestamp}} </span>{{answer}}</dd>
+{{/each}}
+</dl>
 
 {{#unless "true"}}
 <ul>
