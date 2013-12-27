@@ -769,6 +769,21 @@ spread_id_to_link = (id) ->
       oplog "Found an answer to", "puzzles", id, args.who
       return true
 
+    addIncorrectAnswer: (args) ->
+      id = args.puzzle._id or args.puzzle
+      check id, NonEmptyString
+      check args, ObjectWith
+        answer: NonEmptyString
+        who: NonEmptyString
+      now = UTCNow()
+
+      puzzle = Puzzles.findOne(id)
+      incorrectAnswers = puzzle.incorrectAnswers or []
+      incorrectAnswers.push({answer: args.answer, timestamp: UTCNow(), who: args.who})
+      Puzzles.update id, $set:
+         incorrectAnswers: incorrectAnswers
+      return true
+
     deleteAnswer: (args) ->
       check args, ObjectWith
         puzzle: IdOrObject
