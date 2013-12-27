@@ -1,8 +1,10 @@
+'use strict'
+share = @share
+model = share.model
+
 # if the database is empty on server start, create some sample data.
 # (useful during development; disable this before hunt)
 POPULATE_DB_WHEN_RESET = true
-share = @share
-model = share.model
 
 SAMPLE_DATA = [
   name: "Mega man"

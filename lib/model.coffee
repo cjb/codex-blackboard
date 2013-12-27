@@ -1,3 +1,4 @@
+'use strict'
 # Blackboard -- data model
 # Loaded on both the client and the server
 

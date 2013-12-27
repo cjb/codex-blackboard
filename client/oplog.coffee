@@ -1,3 +1,4 @@
+'use strict'
 share = @share
 model = share.model
 

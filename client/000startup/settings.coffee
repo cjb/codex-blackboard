@@ -1,4 +1,5 @@
 # This file contains various constants used throughout the client code.
+'use strict'
 share = @share
 settings = share.settings = {}
 

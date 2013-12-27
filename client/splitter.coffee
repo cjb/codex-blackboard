@@ -1,4 +1,5 @@
 # cscott's very simple splitter widget
+'use strict'
 share = @share
 
 Splitter = share.Splitter =
