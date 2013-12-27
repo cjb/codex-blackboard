@@ -216,6 +216,17 @@ spread_id_to_link = (id) ->
   canonicalTags = (tags) ->
     ({name:tag.name,canon:canonical(tag.name),value:tag.value} for tag in tags)
 
+  NonEmptyString = Match.Where (x) ->
+    check x, String
+    return x.length > 0
+  # This is like Match.ObjectIncluding, but we don't require `o` to be
+  # a plain object
+  ObjectWith = (pattern) ->
+    Match.Where (o) ->
+      Object.keys(pattern).forEach (k) ->
+        check o[k], pattern[k]
+      true
+
   oplog = (message, type="", id="", who="") ->
     OpLogs.insert
       timestamp: UTCNow()
@@ -225,8 +236,9 @@ spread_id_to_link = (id) ->
       nick: canonical(who)
 
   newObject = (type, args, extra, options={}) ->
-    throw new Meteor.Error(400, "missing name") unless args.name
-    throw new Meteor.Error(400, "missing who") unless args.who
+    check args, ObjectWith
+      name: NonEmptyString
+      who: NonEmptyString
     now = UTCNow()
     object =
       name: args.name
@@ -250,9 +262,10 @@ spread_id_to_link = (id) ->
     return object
 
   renameObject = (type, args, options={}) ->
-    throw new Meteor.Error(400, "missing id") unless args.id
-    throw new Meteor.Error(400, "missing name") unless args.name
-    throw new Meteor.Error(400, "missing who") unless args.who
+    check args, ObjectWith
+      id: NonEmptyString
+      name: NonEmptyString
+      who: NonEmptyString
     now = UTCNow()
 
     # Only perform the rename and oplog if the name is changing
@@ -270,8 +283,9 @@ spread_id_to_link = (id) ->
     return true
 
   deleteObject = (type, args, options={}) ->
-    throw new Meteor.Error(400, "missing id") unless args.id
-    throw new Meteor.Error(400, "missing who") unless args.who
+    check args, ObjectWith
+      id: NonEmptyString
+      who: NonEmptyString
     name = collection(type)?.findOne(args.id)?.name
     return false unless name
     unless options.suppressLog
@@ -281,6 +295,9 @@ spread_id_to_link = (id) ->
     return true
 
   newDriveFolder = (type, id, name) ->
+    check type, NonEmptyString
+    check id, NonEmptyString
+    check name, NonEmptyString
     return unless Meteor.isServer
     Meteor.http.post "#{GDRIVE_HOST}/puzzle/Codex: #{name}", (err, res) ->
       if err
@@ -293,11 +310,14 @@ spread_id_to_link = (id) ->
       else
         console.log "Some other error creating folder: ", res
   renameDriveFolder = (drive, new_name) ->
+    check drive, NonEmptyString
+    check new_name, NonEmptyString
     return unless Meteor.isServer
     Meteor.http.call "MOVE", "#{GDRIVE_HOST}/puzzle/#{drive}/Codex: #{new_name}", (err, res) ->
       if err
         console.log "Error renaming folder on Google Drive: ", err
   deleteDriveFolder = (drive, spread_id=null) ->
+    check drive, NonEmptyString
     return unless Meteor.isServer
     if spread_id
       Meteor.http.del "#{GDRIVE_HOST}/puzzle/#{spread_id}", (err, res) ->
@@ -314,8 +334,9 @@ spread_id_to_link = (id) ->
     (type, id) -> lookup[type]?(id)
 
   moveObject = (type, id, direction) ->
-    throw new Meteor.Error(400, "missing type") unless type
-    throw new Meteor.Error(400, "missing id") unless id
+    check type, NonEmptyString
+    check id, NonEmptyString
+    check direction, Match.Where (x) -> x=='up' or x=='down'
 
     adjSib = (type, id, dir, nonempty=true) ->
       sameLevel = true
@@ -394,6 +415,9 @@ spread_id_to_link = (id) ->
       newDriveFolder "rounds", r._id, r.name
       return r
     renameRound: (args) ->
+      check args, ObjectWith
+        id: NonEmptyString
+        name: NonEmptyString
       # get drive ID (racy)
       drive = Rounds.findOne(args.id)?.drive
       result = renameObject "rounds", args
@@ -401,6 +425,8 @@ spread_id_to_link = (id) ->
       renameDriveFolder drive, args.name if (result and drive)
       return result
     deleteRound: (args) ->
+      check args, ObjectWith
+        id: NonEmptyString
       rid = args.id
       # get drive ID (racy)
       old = Rounds.findOne(args.id)
@@ -429,6 +455,9 @@ spread_id_to_link = (id) ->
       return p
 
     renamePuzzle: (args) ->
+      check args, ObjectWith
+        id: NonEmptyString
+        name: NonEmptyString
       # get drive ID (racy)
       drive = Puzzles.findOne(args.id)?.drive
       result = renameObject "puzzles", args
@@ -437,6 +466,8 @@ spread_id_to_link = (id) ->
       return result
 
     deletePuzzle: (args) ->
+      check args, ObjectWith
+        id: NonEmptyString
       pid = args.id
       # get drive ID (racy)
       old = Puzzles.findOne(args.id)
@@ -477,8 +508,9 @@ spread_id_to_link = (id) ->
       return newMsg
 
     setPresence: (args) ->
-      throw new Meteor.Error(400, "missing nick") unless args.nick
-      throw new Meteor.Error(400, "missing room") unless args.room_name
+      check args, ObjectWith
+        nick: NonEmptyString
+        room_name: NonEmptyString
       return unless Meteor.isServer
       # we're going to do the db operation only on the server, so that we
       # can safely use mongo's 'upsert' functionality.  otherwise
@@ -516,7 +548,8 @@ spread_id_to_link = (id) ->
       return
 
     get: (type, id) ->
-      throw new Meteor.Error(400, "missing id") unless id
+      check type, NonEmptyString
+      check id, NonEmptyString
       return collection(type).findOne(id)
 
     getByName: (args) ->
@@ -528,9 +561,9 @@ spread_id_to_link = (id) ->
 
     setField: (type, object, fields, who) ->
       id = object._id or object
-      throw new Meteor.Error(400, "missing id") unless id
-      throw new Meteor.Error(400, "missing who") unless who
-      throw new Meteor.Error(400, "bad fields") unless typeof(fields)=='object'
+      check id, NonEmptyString
+      check who, NonEmptyString
+      check fields, Object
       now = UTCNow()
       # disallow modifications to the following fields; use other APIs for these
       for f in ['name','canon','created','created_by','solved','solved_by',
@@ -543,9 +576,9 @@ spread_id_to_link = (id) ->
 
     setTag: (type, object, name, value, who) ->
       id = object._id or object
-      throw new Meteor.Error(400, "missing object") unless id
-      throw new Meteor.Error(400, "missing name") unless name
-      throw new Meteor.Error(400, "missing who") unless who
+      check id, NonEmptyString
+      check name, NonEmptyString
+      check who, NonEmptyString
       now = UTCNow()
       canon = canonical(name)
       tags = collection(type).findOne(id).tags
@@ -568,9 +601,9 @@ spread_id_to_link = (id) ->
       return true
     deleteTag: (type, object, name, who) ->
       id = object._id or object
-      throw new Meteor.Error(400, "missing object") unless id
-      throw new Meteor.Error(400, "missing name") unless name
-      throw new Meteor.Error(400, "missing who") unless who
+      check id, NonEmptyString
+      check name, NonEmptyString
+      check who, NonEmptyString
       now = UTCNow()
       canon = canonical(name)
       tags = collection(type).findOne(id).tags
@@ -586,6 +619,7 @@ spread_id_to_link = (id) ->
     addRoundToGroup: (args) ->
       rid = args.round._id or args.round
       gid = args.group._id or args.group
+      check gid, NonEmptyString
       rg = RoundGroups.findOne(gid)
       throw new Meteor.Error(400, "bad group") unless rg
       # remove round from all other groups
@@ -609,6 +643,7 @@ spread_id_to_link = (id) ->
     addPuzzleToRound: (args) ->
       pid = args.puzzle._id or args.puzzle
       rid = args.round._id or args.round
+      check rid, NonEmptyString
       r = Rounds.findOne(rid)
       throw new Meteor.Error(400, "bad round") unless r
       # remove puzzle from all other rounds
@@ -633,12 +668,12 @@ spread_id_to_link = (id) ->
 
     getRoundForPuzzle: (puzzle) ->
       id = puzzle._id or puzzle
-      throw new Meteor.Error(400, "missing puzzle") unless id
+      check id, NonEmptyString
       return Rounds.findOne(puzzles: id)
 
     getGroupForRound: (round) ->
       id = round._id or round
-      throw new Meteor.Error(400, "missing round") unless id
+      check id, NonEmptyString
       return RoundGroups.findOne(rounds: id)
 
     moveUp: (args) -> moveObject(args.type, args.id, "up")
@@ -647,9 +682,10 @@ spread_id_to_link = (id) ->
 
     setAnswer: (args) ->
       id = args.puzzle._id or args.puzzle
-      throw new Meteor.Error(400, "missing puzzle") unless id
-      throw new Meteor.Error(400, "missing answer") unless args.answer
-      throw new Meteor.Error(400, "missing who") unless args.who
+      check id, NonEmptyString
+      check args, ObjectWith
+        answer: NonEmptyString
+        who: NonEmptyString
       now = UTCNow()
 
       # Only perform the update and oplog if the answer is changing
@@ -668,8 +704,9 @@ spread_id_to_link = (id) ->
 
     deleteAnswer: (args) ->
       id = args.puzzle._id or args.puzzle
-      throw new Meteor.Error(400, "missing puzzle") unless id
-      throw new Meteor.Error(400, "missing who") unless args.who
+      check id, NonEmptyString
+      check args, ObjectWith
+        who: NonEmptyString
       now = UTCNow()
       Puzzles.update id, $set:
         answer: null
