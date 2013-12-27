@@ -189,10 +189,10 @@ $(window).scroll (event) ->
   return unless Session.equals('currentPage', 'chat')
   # set to false, just in case older browser doesn't have scroll properties
   instachat.scrolledToBottom = false
-  [body, html] = [document.body, document.body?.parentElement]
-  return unless body?.scrollTop? and body?.scrollHeight?
+  [body, html] = [document.body, document.documentElement]
+  return unless html?.scrollTop? and html?.scrollHeight?
   return unless html?.clientHeight?
-  [scrollPos, scrollMax] = [body.scrollTop+html.clientHeight, body.scrollHeight]
+  [scrollPos, scrollMax] = [html.scrollTop+html.clientHeight, html.scrollHeight]
   atBottom = (scrollPos >= scrollMax)
   # firefox says that the HTML element is scrolling, not the body element...
   if html.scrollTopMax?
