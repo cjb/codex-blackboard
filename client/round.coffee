@@ -25,6 +25,7 @@ Template.round.rendered = ->
   id = Session.get('id')
   name = model.collection(type)?.findOne(id)?.name or id
   $("title").text("Round: "+name)
+  share.Splitter.vsize.set() unless share.Splitter.vsize.manualResized
 Template.round.destroyed = ->
   $('html').removeClass('fullHeight')
   share.chat.cleanupChat()

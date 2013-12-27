@@ -25,6 +25,7 @@ Template.puzzle.rendered = ->
   id = Session.get('id')
   name = model.collection(type)?.findOne(id)?.name or id
   $("title").text("Puzzle: "+name)
+  share.Splitter.vsize.set() unless share.Splitter.vsize.manualResized
 Template.puzzle.destroyed = ->
   $('html').removeClass('fullHeight')
   share.chat.cleanupChat()
