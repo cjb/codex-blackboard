@@ -14,10 +14,15 @@
 
 {{#with puzzle}}{{> blackboard_tags }}{{/with}}
 {{#if puzzle.answer}}
-  <dl class="dl-horizontal">
-    <dt>Answer</dt><dd class="answer">{{puzzle.answer}}</dd>
+  <dl class="dl-horizontal bb-correct-answer">
+    <dt>Answer:</dt><dd class="answer"><span>{{puzzle.answer}}</span> {{#isolate}}<span class="timestamp">{{pretty_ts puzzle.solved}}</span>{{/isolate}}</dd>
   </dl>
 {{/if}}
+<dl class="dl-horizontal bb-incorrect-answers">
+{{#each puzzle.incorrectAnswers}}
+  <dt>Incorrect answer:</dt><dd class="answer"><span>{{answer}}</span> {{#isolate}}<span class="timestamp">{{pretty_ts timestamp}}</span>{{/isolate}}</dd>
+{{/each}}
+</dl>
 
 {{#unless "true"}}
 <ul>

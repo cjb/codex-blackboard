@@ -87,6 +87,8 @@ if Meteor.isServer
 #   name: string
 #   canon: canonicalized version of name, for searching
 #   answer: string (field is null (not missing or undefined) if not solved)
+#   incorrectAnswers: [ { answer: "Wrong", who: "answer submitter",
+#                         timestamp: ... }, ... ]
 #   created: timestamp
 #   created_by: _id of Nick
 #   touched: timestamp
@@ -464,6 +466,7 @@ spread_id_to_link = (id) ->
     newPuzzle: (args) ->
       p = newObject "puzzles", args,
         answer: null
+        incorrectAnswers: []
         solved: null
         solved_by: null
         drive: args.drive or null
@@ -767,6 +770,25 @@ spread_id_to_link = (id) ->
         touched: now
         touched_by: canonical(args.who)
       oplog "Found an answer to", "puzzles", id, args.who
+      return true
+
+    addIncorrectAnswer: (args) ->
+      check args, ObjectWith
+        puzzle: IdOrObject
+        answer: NonEmptyString
+        who: NonEmptyString
+      id = args.puzzle._id or args.puzzle
+      now = UTCNow()
+
+      puzzle = Puzzles.findOne(id)
+      throw new Meteor.Error(400, "bad puzzle") unless puzzle
+      Puzzles.update id, $push:
+         incorrectAnswers:
+          answer: args.answer
+          timestamp: UTCNow()
+          who: args.who
+
+      oplog "Incorrect answer #{args.answer} for ", "puzzles", id, args.who
       return true
 
     deleteAnswer: (args) ->
