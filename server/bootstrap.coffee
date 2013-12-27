@@ -435,5 +435,5 @@ Meteor.startup ->
       Meteor.call "newMessage", chat
     # add some user ids
     for nick in SAMPLE_NICKS
-      Meteor.call "newNick", nick, (error, n) ->
+      Meteor.call "newNick", nick, (error, _) ->
         throw error if error

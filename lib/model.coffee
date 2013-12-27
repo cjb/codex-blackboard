@@ -65,9 +65,9 @@ if Meteor.isServer
   Meteor.setInterval ->
     round_start = 0
     RoundGroups.find({}, sort: ["created"]).forEach (rg) ->
-        if rg.round_start isnt round_start
-          RoundGroups.update rg._id, $set: round_start: round_start
-        round_start += rg.rounds.length
+      if rg.round_start isnt round_start
+        RoundGroups.update rg._id, $set: round_start: round_start
+      round_start += rg.rounds.length
   , 60*1000
 
 # Rounds are:
@@ -100,7 +100,7 @@ if Meteor.isServer
 #   drive: google drive url or id
 Puzzles = BBCollection.puzzles = new Meteor.Collection "puzzles"
 if Meteor.isServer
-   Puzzles._ensureIndex {canon: 1}, {unique:true, dropDups:true}
+  Puzzles._ensureIndex {canon: 1}, {unique:true, dropDups:true}
 
 # Nicks are:
 #   _id: mongodb id
@@ -118,7 +118,8 @@ if Meteor.isServer
 #   system: boolean (true for system messages, false for user messages)
 #   action: boolean (true for /me commands)
 #   to:   destination of pm (optional)
-#   room_name: "<type>/<id>", ie "puzzle/1", "round/1". "general/0" for main chat.
+#   room_name: "<type>/<id>", ie "puzzle/1", "round/1".
+#                             "general/0" for main chat.
 #   timestamp: timestamp
 Messages = BBCollection.messages = new Meteor.Collection "messages"
 if Meteor.isServer
@@ -235,7 +236,7 @@ spread_id_to_link = (id) ->
       touched_by: canonical(args.who)
       tags: canonicalTags(args.tags or [])
     for own key,value of (extra or Object.create(null))
-       object[key] = value
+      object[key] = value
     try
       object._id = collection(type).insert object
     catch error
@@ -289,7 +290,7 @@ spread_id_to_link = (id) ->
           spreadsheet: res.data.spread_id
         }
       else
-        console.log "Some other error creating folder: ", data
+        console.log "Some other error creating folder: ", res
   renameDriveFolder = (drive, new_name) ->
     return unless Meteor.isServer
     Meteor.http.call "MOVE", "#{GDRIVE_HOST}/puzzle/#{drive}/Codex: #{new_name}", (err, res) ->
@@ -316,32 +317,32 @@ spread_id_to_link = (id) ->
     throw new Meteor.Error(400, "missing id") unless id
 
     adjSib = (type, id, dir, nonempty=true) ->
-        sameLevel = true
-        if type is 'roundgroups'
-          parentType = parent = null
-          sibs = RoundGroups.find({}, sort: ['created']).map (rg)->rg._id
-        else
-          [parentType, parent] = parentObject(type, id)
-          sibs = parent[type]
-        pos = sibs.indexOf(id)
-        newPos = if dir is 'prev' then (pos-1) else (pos+1)
-        if 0 <= newPos < sibs.length
-          return [parentType, parent?._id, newPos, sibs[newPos], sameLevel]
-        # otherwise, need to go up a level.
-        upSibId = parent?._id
-        sameLevel = false
-        return [parentType, null, 0, null, sameLevel] unless upSibId
-        loop
-          [upType, upId, upPos, upSibId, _] = adjSib(parentType, upSibId, dir, true)
-          return [parentType, null, 0, null, sameLevel] unless upSibId # no more sibs
-          # check that this sibling has children (if nonempty is true)
-          prevSibs = collection(parentType).findOne(upSibId)[type]
-          newPos = if dir is 'prev' then (prevSibs.length - 1) else 0
-          if 0 <= newPos < prevSibs.length
-            return [parentType, upSibId, newPos, prevSibs[newPos], sameLevel]
-          if prevSibs.length==0 and not nonempty
-             return [parentType, upSibId, 0, null, sameLevel]
-          # crap, adjacent parent has no children, need *next* parent (loop)
+      sameLevel = true
+      if type is 'roundgroups'
+        parentType = parent = null
+        sibs = RoundGroups.find({}, sort: ['created']).map (rg)->rg._id
+      else
+        [parentType, parent] = parentObject(type, id)
+        sibs = parent[type]
+      pos = sibs.indexOf(id)
+      newPos = if dir is 'prev' then (pos-1) else (pos+1)
+      if 0 <= newPos < sibs.length
+        return [parentType, parent?._id, newPos, sibs[newPos], sameLevel]
+      # otherwise, need to go up a level.
+      upSibId = parent?._id
+      sameLevel = false
+      return [parentType, null, 0, null, sameLevel] unless upSibId
+      loop
+        [upType, upId, upPos, upSibId, _] = adjSib(parentType, upSibId, dir, true)
+        return [parentType, null, 0, null, sameLevel] unless upSibId # no more sibs
+        # check that this sibling has children (if nonempty is true)
+        prevSibs = collection(parentType).findOne(upSibId)[type]
+        newPos = if dir is 'prev' then (prevSibs.length - 1) else 0
+        if 0 <= newPos < prevSibs.length
+          return [parentType, upSibId, newPos, prevSibs[newPos], sameLevel]
+        if prevSibs.length==0 and not nonempty
+          return [parentType, upSibId, 0, null, sameLevel]
+        # crap, adjacent parent has no children, need *next* parent (loop)
 
     dir = if direction is 'up' then 'prev' else 'next'
     [parentType,newParent,newPos,adjId,sameLevel] = adjSib(type,id,dir,false)
@@ -459,7 +460,7 @@ spread_id_to_link = (id) ->
     renameNick: (args) ->
       renameObject "nicks", args, {suppressLog:true}
     deleteNick: (args) ->
-       deleteObject "nicks", args, {suppressLog:true}
+      deleteObject "nicks", args, {suppressLog:true}
 
     newMessage: (args)->
       newMsg =
@@ -514,7 +515,7 @@ spread_id_to_link = (id) ->
       return
 
     get: (type, id) ->
-      throw new Meteor.Error(400, "missing id") unless args.id
+      throw new Meteor.Error(400, "missing id") unless id
       return collection(type).findOne(id)
 
     getByName: (args) ->
@@ -527,7 +528,7 @@ spread_id_to_link = (id) ->
     setField: (type, object, fields, who) ->
       id = object._id or object
       throw new Meteor.Error(400, "missing id") unless id
-      throw new Meteor.Error(400, "missing who") unless args.who
+      throw new Meteor.Error(400, "missing who") unless who
       throw new Meteor.Error(400, "bad fields") unless typeof(fields)=='object'
       now = UTCNow()
       # disallow modifications to the following fields; use other APIs for these
@@ -594,9 +595,9 @@ spread_id_to_link = (id) ->
         rounds = (r for r in rg.rounds when r != rid)
         nrounds = rounds[..]
         if args.before
-           npos = rounds.indexOf(args.before)
+          npos = rounds.indexOf(args.before)
         else
-           npos = rounds.indexOf(args.after) + 1
+          npos = rounds.indexOf(args.after) + 1
         nrounds.splice(npos, 0, rid)
         # update the collection only if there wasn't a race
         RoundGroups.update {_id: gid, rounds: rounds}, $set: rounds: nrounds
@@ -617,11 +618,11 @@ spread_id_to_link = (id) ->
         puzzles = (p for p in r.puzzles when p != pid)
         npuzzles = puzzles[..]
         if puzzles.length == 0
-           npos = 0
+          npos = 0
         else if args.before
-           npos = puzzles.indexOf(args.before)
+          npos = puzzles.indexOf(args.before)
         else
-           npos = puzzles.indexOf(args.after) + 1
+          npos = puzzles.indexOf(args.after) + 1
         npuzzles.splice(npos, 0, pid)
         # update the collection only if there wasn't a race
         Rounds.update {_id: rid, puzzles: puzzles}, $set: puzzles: npuzzles

@@ -85,7 +85,7 @@ BlackboardRouter = Backbone.Router.extend
   urlFor: (type,id) ->
     "/#{type}/#{id}"
   chatUrlFor: (type, id, timestamp) ->
-    "/chat" + this.urlFor(type,id) + (if (+timestamp) then "/#{+timestamp}" else "")
+    "/chat#{this.urlFor(type,id)}" + (if (+timestamp) then "/#{+timestamp}" else "")
 
   goToRound: (round) ->
     this.navigate(this.urlFor("rounds",round._id), {trigger:true})

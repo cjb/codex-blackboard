@@ -57,7 +57,8 @@ Template.blackboard.roundgroups = ->
 Template.blackboard.rounds = ->
   r = ({
     round_num: 1+index+this.round_start
-    round: model.Rounds.findOne(id) or {_id: id, name: model.Names.findOne(id)?.name}
+    round: (model.Rounds.findOne(id) or \
+            {_id: id, name: model.Names.findOne(id)?.name})
     rX: "r#{1+index+this.round_start}"
     num_puzzles: (model.Rounds.findOne(id)?.puzzles or []).length
     num_solved: (p for p in (model.Rounds.findOne(id)?.puzzles or []) when \
@@ -71,8 +72,8 @@ Template.blackboard.created = ->
     $("#bb-sidebar").localScroll({ duration: 400, lazy: true })
     $("body").scrollspy(target: "#bb-sidebar", offset: (NAVBAR_HEIGHT + 10))
   this.find_bbedit = (event) ->
-     edit = $(event.currentTarget).closest('*[data-bbedit]').attr('data-bbedit')
-     return edit.split('/')
+    edit = $(event.currentTarget).closest('*[data-bbedit]').attr('data-bbedit')
+    return edit.split('/')
 Template.blackboard.rendered = ->
   this.afterFirstRender?()
   this.afterFirstRender = null
@@ -92,70 +93,70 @@ Template.blackboard.rendered = ->
   $('#bb-tables .bb-puzzle .puzzle-name > a').tooltip placement: 'left'
 Template.blackboard.events
   "click .bb-sort-order button": (event, template) ->
-     reverse = $(event.currentTarget).attr('data-sortReverse') is 'true'
-     Session.set 'sortReverse', reverse or undefined
+    reverse = $(event.currentTarget).attr('data-sortReverse') is 'true'
+    Session.set 'sortReverse', reverse or undefined
   "click .bb-add-round-group": (event, template) ->
-     alertify.prompt "Name of new round group:", (e,str) ->
-        return unless e # bail if cancelled
-        Meteor.call 'newRoundGroup', { name: str, who: Session.get('nick') }
+    alertify.prompt "Name of new round group:", (e,str) ->
+      return unless e # bail if cancelled
+      Meteor.call 'newRoundGroup', { name: str, who: Session.get('nick') }
   "click .bb-roundgroup-buttons .bb-add-round": (event, template) ->
-     [type, id, rest...] = template.find_bbedit(event)
-     who = Session.get('nick')
-     alertify.prompt "Name of new round:", (e,str) ->
-        return unless e # bail if cancelled
-        Meteor.call 'newRound', { name: str, who: who }, (error,r)->
-          throw error if error
-          Meteor.call 'addRoundToGroup', {round: r._id, group: id, who: who}
+    [type, id, rest...] = template.find_bbedit(event)
+    who = Session.get('nick')
+    alertify.prompt "Name of new round:", (e,str) ->
+      return unless e # bail if cancelled
+      Meteor.call 'newRound', { name: str, who: who }, (error,r)->
+        throw error if error
+        Meteor.call 'addRoundToGroup', {round: r._id, group: id, who: who}
   "click .bb-round-buttons .bb-add-puzzle": (event, template) ->
-     [type, id, rest...] = template.find_bbedit(event)
-     who = Session.get('nick')
-     alertify.prompt "Name of new puzzle:", (e,str) ->
-        return unless e # bail if cancelled
-        Meteor.call 'newPuzzle', { name: str, who: who }, (error,p)->
-          throw error if error
-          Meteor.call 'addPuzzleToRound', {puzzle: p._id, round: id, who: who}
+    [type, id, rest...] = template.find_bbedit(event)
+    who = Session.get('nick')
+    alertify.prompt "Name of new puzzle:", (e,str) ->
+      return unless e # bail if cancelled
+      Meteor.call 'newPuzzle', { name: str, who: who }, (error,p)->
+        throw error if error
+        Meteor.call 'addPuzzleToRound', {puzzle: p._id, round: id, who: who}
   "click .bb-add-tag": (event, template) ->
-     [type, id, rest...] = template.find_bbedit(event)
-     who = Session.get('nick')
-     alertify.prompt "Name of new tag:", (e,str) ->
-        return unless e # bail if cancelled
-        Meteor.call 'setTag', type, id, str, '', who
+    [type, id, rest...] = template.find_bbedit(event)
+    who = Session.get('nick')
+    alertify.prompt "Name of new tag:", (e,str) ->
+      return unless e # bail if cancelled
+      Meteor.call 'setTag', type, id, str, '', who
   "click .bb-move-up, click .bb-move-down": (event, template) ->
-     [type, id, rest...] = template.find_bbedit(event)
-     up = event.currentTarget.classList.contains('bb-move-up')
-     # flip direction if sort order is inverted
-     up = (!up) if (Session.get 'sortReverse') and type isnt 'puzzles'
-     method = if up then 'moveUp' else 'moveDown'
-     Meteor.call method, {type:type, id:id, who:Session.get('nick')}
+    [type, id, rest...] = template.find_bbedit(event)
+    up = event.currentTarget.classList.contains('bb-move-up')
+    # flip direction if sort order is inverted
+    up = (!up) if (Session.get 'sortReverse') and type isnt 'puzzles'
+    method = if up then 'moveUp' else 'moveDown'
+    Meteor.call method, {type:type, id:id, who:Session.get('nick')}
   "click .bb-canEdit .bb-delete-icon": (event, template) ->
-     event.stopPropagation() # keep .bb-editable from being processed!
-     [type, id, rest...] = template.find_bbedit(event)
-     message = "Are you sure you want to delete "
-     if (type is'tags') or (rest[0] is 'title')
-       message += "this #{model.pretty_collection(type)}?"
-     else
-       message += "the #{rest[0]} of this #{model.pretty_collection(type)}?"
-     share.confirmationDialog
-       ok_button: 'Yes, delete it'
-       no_button: 'No, cancel'
-       message: message
-       ok: ->
-         processBlackboardEdit[type]?(null, id, rest...) # process delete
+    event.stopPropagation() # keep .bb-editable from being processed!
+    [type, id, rest...] = template.find_bbedit(event)
+    message = "Are you sure you want to delete "
+    if (type is'tags') or (rest[0] is 'title')
+      message += "this #{model.pretty_collection(type)}?"
+    else
+      message += "the #{rest[0]} of this #{model.pretty_collection(type)}?"
+    share.confirmationDialog
+      ok_button: 'Yes, delete it'
+      no_button: 'No, cancel'
+      message: message
+      ok: ->
+        processBlackboardEdit[type]?(null, id, rest...) # process delete
   "click .bb-canEdit .bb-editable": (event, template) ->
-     # note that we rely on 'blur' on old field (which triggers ok or cancel)
-     # happening before 'click' on new field
-     Session.set 'editing', template.find_bbedit(event).join('/')
+    # note that we rely on 'blur' on old field (which triggers ok or cancel)
+    # happening before 'click' on new field
+    Session.set 'editing', template.find_bbedit(event).join('/')
 Template.blackboard.events okCancelEvents('.bb-editable input',
   ok: (text, evt) ->
-     # find the data-bbedit specification for this field
-     edit = $(evt.currentTarget).closest('*[data-bbedit]').attr('data-bbedit')
-     [type, id, rest...] = edit.split('/')
-     # strip leading/trailing whitespace from text (cancel if text is empty)
-     text = text.replace /^\s+|\s+$/, ''
-     processBlackboardEdit[type]?(text, id, rest...) if text
-     Session.set 'editing', undefined # done editing this
+    # find the data-bbedit specification for this field
+    edit = $(evt.currentTarget).closest('*[data-bbedit]').attr('data-bbedit')
+    [type, id, rest...] = edit.split('/')
+    # strip leading/trailing whitespace from text (cancel if text is empty)
+    text = text.replace /^\s+|\s+$/, ''
+    processBlackboardEdit[type]?(text, id, rest...) if text
+    Session.set 'editing', undefined # done editing this
   cancel: (evt) ->
-     Session.set 'editing', undefined # not editing anything anymore
+    Session.set 'editing', undefined # not editing anything anymore
 )
 processBlackboardEdit =
   tags: (text, id, canon, field) ->

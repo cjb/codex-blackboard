@@ -55,7 +55,7 @@ Handlebars.registerHelper 'gravatar', (args) ->
   args = keyword_or_positional 'id', args
   g = $.gravatar(args.id, args)
   # hacky cross-platform version of 'outerHTML'
-  html = $('<div>').append( g.eq(0).clone() ).html();
+  html = $('<div>').append( g.eq(0).clone() ).html()
   return new Handlebars.SafeString(html)
 
 # timestamps
@@ -124,7 +124,7 @@ Template.header_loginmute.rendered = ->
 Template.header_loginmute.preserve
   '.bb-buttonbar *[title]': (node) -> node.title
   '.bb-buttonbar *[data-original-title]': (node) ->
-     $(node).attr('data-original-title')
+    $(node).attr('data-original-title')
 Template.header_loginmute.events
   "click .bb-login": (event, template) ->
     event.preventDefault()
@@ -179,22 +179,22 @@ Template.header_breadcrumbs.drive = -> switch Session.get('type')
     model.collection(Session.get('type'))?.findOne(Session.get('id'))?.drive
 Template.header_breadcrumbs.events
   "click .bb-upload-file": (event, template) ->
-     folder = switch Session.get('type')
-       when 'general'
-         model.RINGHUNTERS_FOLDER
-       when 'rounds', 'puzzles'
-         model.collection(Session.get('type'))?.findOne(Session.get('id'))?.drive
-     return unless folder
-     uploadToDriveFolder folder, (docs) ->
-        message = "uploaded "+(for doc in docs
-          "<a href='#{doc.url}' target='_blank'><img src='#{doc.iconUrl}' />#{doc.name}</a> "
-        ).join(', ')
-        Meteor.call 'newMessage',
-          body: message
-          bodyIsHtml: true
-          nick: Session.get 'nick'
-          action: true
-          room_name: Session.get('type')+'/'+Session.get('id')
+    folder = switch Session.get('type')
+      when 'general'
+        model.RINGHUNTERS_FOLDER
+      when 'rounds', 'puzzles'
+        model.collection(Session.get('type'))?.findOne(Session.get('id'))?.drive
+    return unless folder
+    uploadToDriveFolder folder, (docs) ->
+      message = "uploaded "+(for doc in docs
+        "<a href='#{doc.url}' target='_blank'><img src='#{doc.iconUrl}' />#{doc.name}</a> "
+      ).join(', ')
+      Meteor.call 'newMessage',
+        body: message
+        bodyIsHtml: true
+        nick: Session.get 'nick'
+        action: true
+        room_name: Session.get('type')+'/'+Session.get('id')
 Template.header_breadcrumbs.rendered = ->
   # tool tips
   $(this.findAll('a.bb-drive-link[title]')).tooltip placement: 'bottom'
@@ -202,7 +202,7 @@ Template.header_breadcrumbs.rendered = ->
 Template.header_breadcrumbs.preserve
   'a.bb-drive-link[title]': (node) -> node.title
   'a.bb-drive-link[data-original-title]': (node) ->
-     $(node).attr('data-original-title')
+    $(node).attr('data-original-title')
 
 uploadToDriveFolder = share.uploadToDriveFolder = (folder, callback) ->
   uploadView = new google.picker.DocsUploadView()\
@@ -253,7 +253,9 @@ Template.header_nickmodal_contents.created = ->
     (n.name for n in model.Nicks.find({}).fetch())
   this.update = (query, options) =>
     # can we find an existing nick matching this?
-    n = if query then model.Nicks.findOne canon: model.canonical(query) else undefined
+    n = if query \
+        then model.Nicks.findOne canon: model.canonical(query) \
+        else undefined
     if (n or options?.force)
       realname = model.getTag n, 'Real Name'
       gravatar = model.getTag n, 'Gravatar'
@@ -267,9 +269,9 @@ Template.header_nickmodal_contents.created = ->
       classes: 'img-polaroid'
     container = $(this.find('.gravatar'))
     if container.find('img').length
-        container.find('img').attr('src', gravatar.attr('src'))
+      container.find('img').attr('src', gravatar.attr('src'))
     else
-        container.append(gravatar)
+      container.append(gravatar)
 Template.header_nickmodal_contents.rendered = ->
   this.afterFirstRender?()
   this.afterFirstRender = undefined
@@ -294,7 +296,7 @@ $("#nickPick").live "submit", ->
   $warning.html ""
   $warningGroup.removeClass('error')
   if not nick || nick.length > 20
-    $warning.html("Nickname must be between 1 and 20 characters long!");
+    $warning.html("Nickname must be between 1 and 20 characters long!")
     $warningGroup.addClass('error')
   else
     $.cookie "nick", nick, {expires: 365, path: '/'}
@@ -336,15 +338,15 @@ Template.header_confirmmodal.confirmModalVisible = ->
   !!(Session.get 'confirmModalVisible')
 Template.header_confirmmodal.preserve ['#confirmModal']
 Template.header_confirmmodal_contents.created = ->
-  this.afterFirstRender = =>
+  this.afterFirstRender = ->
     $('#confirmModal').modal show: true
 Template.header_confirmmodal_contents.rendered = ->
   this.afterFirstRender?()
   this.afterFirstRender = undefined
 Template.header_confirmmodal_contents.events
   "click .bb-confirm-ok": (event, template) ->
-     Template.header_confirmmodal_contents.cancel = false # do the thing!
-     $('#confirmModal').modal 'hide'
+    Template.header_confirmmodal_contents.cancel = false # do the thing!
+    $('#confirmModal').modal 'hide'
 
 confirmationDialog = share.confirmationDialog = (options) ->
   $('#confirmModal').one 'hide', ->
@@ -362,7 +364,8 @@ Template.header_lastupdates.lastupdates = ->
         {sort: [["timestamp","desc"]], limit: LIMIT}
   ologs = ologs.fetch()
   # now look through the entries and collect similar logs
-  # this way we can say "New puzzles: X, Y, and Z" instead of just "New Puzzle: Z"
+  # this way we can say "New puzzles: X, Y, and Z" instead of just
+  # "New Puzzle: Z"
   return '' unless ologs && ologs.length
   message = [ ologs[0] ]
   for ol in ologs[1..]
@@ -411,7 +414,7 @@ Template.header_lastchats.body = ->
 
 # subscribe when this template is in use/unsubscribe when it is destroyed
 Template.header_lastchats.created = ->
-  this.computation = Deps.autorun =>
+  this.computation = Deps.autorun ->
     # use autorun to ensure subscription changes if/when nick does
     nick = if settings.BB_DISABLE_PM then null else Session.get('nick')
     sub = Meteor.subscribe 'paged-messages', nick, 'general/0', Number.MAX_VALUE

@@ -81,7 +81,7 @@ Template.messages.created = ->
       onReady: -> instachat.ready = true
     Deps.onInvalidate invalidator
 Template.messages.destroyed = ->
-    this.computation.stop() # runs invalidation handler, too
+  this.computation.stop() # runs invalidation handler, too
 Template.messages.rendered = ->
   scrollMessagesView() if instachat.scrolledToBottom
 
@@ -240,9 +240,9 @@ Template.messages_input.submit = (message) ->
       args.to = args.nick
       args.action = true
       whos_here = \
-        model.Presence.find({room_name: args.room_name}, {sort:["nick"]}).fetch()
-      whos_here = whos_here.map (obj) ->
-        if obj.foreground then obj.nick else "(#{obj.nick})"
+        model.Presence.find({room_name: args.room_name}, {sort:["nick"]}) \
+        .fetch().map (obj) ->
+          if obj.foreground then obj.nick else "(#{obj.nick})"
       if whos_here.length == 0
         whos_here = "nobody"
       else if whos_here.length == 1
@@ -284,25 +284,25 @@ Template.messages_input.submit = (message) ->
   return
 Template.messages_input.events
   "keydown textarea": (event, template) ->
-     if event.which is 9 # tab
-       event.preventDefault() # prevent tabbing away from input field
-       whos_here = Template.chat_header.whos_here().fetch()
-       $message = $ event.currentTarget
-       message = $message.val()
-       if message
-         for nick in whos_here
-           if nick.nick.indexOf(message) is 0
-             $message.val nick.nick + ": "
-           else if "@#{nick.nick}".indexOf(message) is 0
-             $message.val "@" + nick.nick + " "
-
-     # implicit submit on enter (but not shift-enter or ctrl-enter)
-     return unless event.which is 13 and not (event.shiftKey or event.ctrlKey)
-     event.preventDefault() # prevent insertion of enter
-     $message = $ event.currentTarget
-     message = $message.val()
-     $message.val ""
-     Template.messages_input.submit message
+    # tab completion
+    if event.which is 9 # tab
+      event.preventDefault() # prevent tabbing away from input field
+      whos_here = Template.chat_header.whos_here().fetch()
+      $message = $ event.currentTarget
+      message = $message.val()
+      if message
+        for nick in whos_here
+          if nick.nick.indexOf(message) is 0
+            $message.val nick.nick + ": "
+          else if "@#{nick.nick}".indexOf(message) is 0
+            $message.val "@" + nick.nick + " "
+    # implicit submit on enter (but not shift-enter or ctrl-enter)
+    return unless event.which is 13 and not (event.shiftKey or event.ctrlKey)
+    event.preventDefault() # prevent insertion of enter
+    $message = $ event.currentTarget
+    message = $message.val()
+    $message.val ""
+    Template.messages_input.submit message
 
 
 # alert for unread messages
@@ -376,7 +376,8 @@ startupChat = ->
       uuid: settings.CLIENT_UUID # identify this tab
   instachat.keepalive()
   # send a keep alive every N minutes
-  instachat.keepaliveInterval = Meteor.setInterval instachat.keepalive, (model.PRESENCE_KEEPALIVE_MINUTES*60*1000)
+  instachat.keepaliveInterval = \
+    Meteor.setInterval instachat.keepalive, (model.PRESENCE_KEEPALIVE_MINUTES*60*1000)
 
 cleanupChat = ->
   if instachat.keepaliveInterval?
