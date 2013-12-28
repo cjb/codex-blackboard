@@ -3,6 +3,7 @@
 #
 # Commands:
 #   hubot: The answer to <puzzle> is <answer>
+#   hubot: Call in <answer> for <puzzle>
 #   hubot: Delete the answer to <puzzle>
 #   hubot: <puzzle> is a new puzzle in round <round>
 #   hubot: Delete puzzle <puzzle>
@@ -29,6 +30,26 @@ module.exports = (robot) ->
           puzzle: puzzle.object._id
           answer: msg.match[2]
           who: "codexbot"
+        ], (err, res) ->
+          if err or not res
+            console.log err, res
+
+  robot.respond /Call in (.*?) for (.*)$/i, (msg) ->
+    answer = msg.match[1]
+    name = msg.match[2]
+    robot.ddpclient.call "getByName", [
+      name: name
+      optional_type: "puzzles"
+    ], (err, puzzle) ->
+      if err or not puzzle
+        console.log err, puzzle
+        return
+      else
+        robot.ddpclient.call "newCallIn", [
+          puzzle: puzzle.object._id
+          answer: answer
+          who: "codexbot"
+          name: name + answer
         ], (err, res) ->
           if err or not res
             console.log err, res
