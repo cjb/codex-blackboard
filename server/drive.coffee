@@ -1,5 +1,4 @@
 # helper functions to perform Google Drive operations
-_when = Google.when # import
 
 # Credentials
 KEY = Meteor.settings.key or Assets.getBinary 'drive-key.pem.crypt'
@@ -23,33 +22,6 @@ drive = null
 rootFolder = null
 debug = {}
 
-# XXX turn this into a sync operation at startup using Meteor._wrapAsync
-unless /^-----BEGIN RSA PRIVATE KEY-----/.test(KEY)
-  console.warn "INVALID GOOGLE DRIVE KEY"
-else
-  jwt = new Google.apis.auth.JWT(EMAIL, null, KEY, SCOPES)
-  jwt.authorize (err,result) ->
-    if err
-      console.warn "Error trying to authorize Google Drive", err
-      return
-    jwt.credentials = result
-    (Google.exec Google.apis.discover('drive', 'v2')).then (client) ->
-      # Look up the root folder
-      Google.registerAuth jwt
-      drive = client.drive
-      ensureFolder ROOT_FOLDER_NAME
-    .then (resource) ->
-      console.log "Google Drive authorized and activated"
-      rootFolder = resource.id
-      # for debugging/development
-      debug.drive = drive
-      debug.jwt = jwt
-      debug.rootFolder = rootFolder
-    .otherwise (err) ->
-      console.warn "Error trying to retrieve drive API", err
-      drive = null
-    .done()
-
 quote = (str) ->
   "'" + str.replace(/([\'\\])/g, '\\$1') + "'"
 
@@ -60,27 +32,27 @@ checkAuth = (type) ->
 
 wrapCheck = (f, type) ->
   () ->
-    return _when.reject("noauth: #{type}") unless checkAuth type
+    return unless checkAuth type
     f.apply(this, arguments)
 
 ensureFolder = (name, parent) ->
   # check to see if the folder already exists
-  Google.exec(drive.children.list(
+  resp = Google.exec drive.children.list
     folderId: parent or 'root'
     q: "title=#{quote name}"
     maxResults: 1
-  )).then( (resp) ->
-    return resp.items[0] if resp.items.length > 0
+  if resp.items.length > 0
+    resource = resp.items[0]
+  else
     # create the folder
     resource =
       title: name
       mimeType: GDRIVE_FOLDER_MIME_TYPE
     resource.parents = [id: parent] if parent
-    Google.exec(drive.files.insert resource)
-  ).then( (resource) ->
-    # give the new folder the right permissions
-    ensurePermissions(resource.id).then () -> resource
-  )
+    resource = Google.exec drive.files.insert resource
+  # give the new folder the right permissions
+  ensurePermissions(resource.id)
+  resource
 
 samePerm = (p, pp) ->
   p.withLink is pp.withLink and \
@@ -104,100 +76,119 @@ ensurePermissions = (id) ->
     role: 'writer'
     type: 'anyone'
   ]
-  (Google.exec drive.permissions.list(fileId: id)).then (resp) ->
-    _when.all perms.map (p) ->
-      # does this permission already exist?
-      exists = resp.items.some (pp) -> samePerm(p, pp)
-      unless exists
-        return Google.exec drive.permissions.insert({fileId:id}, p)
-  .then () -> 'ok'
+  resp = Google.exec drive.permissions.list(fileId: id)
+  perms.forEach (p) ->
+    # does this permission already exist?
+    exists = resp.items.some (pp) -> samePerm(p, pp)
+    unless exists
+      Google.exec drive.permissions.insert({fileId:id}, p)
+  'ok'
 
 createPuzzle = (name) ->
-  (ensureFolder name, rootFolder).then (folder) ->
-    # create an empty spreadsheet
-    spreadsheet =
-      title: WORKSHEET_NAME name
-      mimeType: 'application/vnd.google-apps.spreadsheet'
-      parents: [id: folder.id]
-    Google.exec(drive.files.insert(spreadsheet)).then (spreadsheet) ->
-      ensurePermissions(spreadsheet.id).then () ->
-        id: folder.id
-        alternateLink: folder.alternateLink
-        spreadId: spreadsheet.id
+  folder = ensureFolder name, rootFolder
+  # create an empty spreadsheet
+  spreadsheet =
+    title: WORKSHEET_NAME name
+    mimeType: 'application/vnd.google-apps.spreadsheet'
+    parents: [id: folder.id]
+  spreadsheet = Google.exec drive.files.insert spreadsheet
+  ensurePermissions(spreadsheet.id)
+  return {
+    id: folder.id
+    alternateLink: folder.alternateLink
+    spreadId: spreadsheet.id
+  }
 
 findPuzzle = (name) ->
-  folder = null
-  (Google.exec drive.children.list
+  resp = Google.exec drive.children.list
     folderId: rootFolder
     q: "title=#{quote name} and mimeType=#{quote GDRIVE_FOLDER_MIME_TYPE}"
     maxResults: 1
-  ).then (resp) ->
-    folder = resp.items[0]
-    # look for spreadsheet
-    if folder? then Google.exec drive.children.list
-      folderId: folder.id
-      q: "title=#{quote WORKSHEET_NAME name}"
-      maxResults: 1
-  .then (resp) ->
-    id: folder?.id
-    spreadId: if resp? then resp.items[0]?.id
+  folder = resp.items[0]
+  return null unless folder?
+  # look for spreadsheet
+  resp = Google.exec drive.children.list
+    folderId: folder.id
+    q: "title=#{quote WORKSHEET_NAME name}"
+    maxResults: 1
+  return {
+    id: folder.id
+    spreadId: resp.items[0]?.id
+  }
 
-listPuzzles = () ->
+listPuzzles = ->
   results = []
-  getsome = (pageToken) ->
-    (Google.exec drive.children.list
+  resp = {}
+  loop
+    resp = Google.exec drive.children.list
       folderId: rootFolder
       q: "mimeType=#{quote GDRIVE_FOLDER_MIME_TYPE}"
       maxResults: MAX_RESULTS
-      pageToken: pageToken
-    ).then (resp) ->
-      Array.prototype.push.apply(results, resp.items)
-      if resp.nextPageToken?
-        getsome(resp.nextPageToken)
-  getsome().then () ->
-    results
+      pageToken: resp.nextPageToken
+    Array.prototype.push.apply(results, resp.items)
+    break unless resp.nextPageToken?
+  results
 
 renamePuzzle = (name, id, spreadId) ->
-  (Google.exec drive.files.patch({fileId: id}, {title: name})).then () ->
-    if spreadId?
-      Google.exec drive.files.patch(
+  Google.exec drive.files.patch({fileId: id}, {title: name})
+  if spreadId?
+    Google.exec drive.files.patch(
         {fileId: spreadId}, {title: WORKSHEET_NAME name}
-      )
-  .then () -> 'ok'
+    )
+  'ok'
 
 rmrfFolder = (id) ->
-  [numfolders,numfiles] = [0,0]
-  # delete subfolders
-  (Google.exec drive.children.list
-    folderId: id
-    q: "mimeType=#{quote GDRIVE_FOLDER_MIME_TYPE}"
-    maxResults: MAX_RESULTS
-  ).then (resp) ->
-    numfolders = resp.items.length
-    _when.all resp.items.map (item) ->
-      rmrfFolder item.id
-  .then () ->
-    # delete non-folder stuff
-    Google.exec drive.children.list
+  loop
+    # delete subfolders
+    resp = Google.exec drive.children.list
       folderId: id
-      q: "mimeType!=#{quote GDRIVE_FOLDER_MIME_TYPE}"
+      q: "mimeType=#{quote GDRIVE_FOLDER_MIME_TYPE}"
       maxResults: MAX_RESULTS
-  .then (resp) ->
+    numfolders = resp.items.length
+    resp.items.forEach (item) ->
+      rmrfFolder item.id
+    # delete non-folder stuff
+    resp = Google.exec drive.children.list
+        folderId: id
+        q: "mimeType!=#{quote GDRIVE_FOLDER_MIME_TYPE}"
+        maxResults: MAX_RESULTS
     numfiles = resp.items.length
-    _when.all resp.items.map (item) ->
+    resp.items.forEach (item) ->
       Google.exec drive.files.delete(fileId: item.id)
-  .then () ->
-    if numfiles is 0 and numfolders is 0
-      # folder empty; delete the folder and we're done
-      Google.exec drive.files.delete(fileId: id)
-    else
-      # check for more files/folders
-      rmrfFolder id
+    # are we done?
+    break if numfiles is 0 and numfolders is 0
+  # folder empty; delete the folder and we're done
+  Google.exec drive.files.delete(fileId: id)
+  'ok'
 
 deletePuzzle = (id) -> rmrfFolder(id)
 
 # purge `rootFolder` and everything in it
 purge = () -> rmrfFolder(rootFolder)
+
+# Intialize APIs and load rootFolder
+do ->
+  try
+    unless /^-----BEGIN RSA PRIVATE KEY-----/.test(KEY)
+      throw "INVALID GOOGLE DRIVE KEY OR PASSWORD"
+    jwt = new Google.apis.auth.JWT(EMAIL, null, KEY, SCOPES)
+    jwt.credentials = Google.authorize(jwt);
+    client = Google.exec Google.apis.discover('drive', 'v2')
+    # record the API and auth info
+    drive = client.drive
+    Google.registerAuth jwt
+    # Look up the root folder
+    resource = ensureFolder ROOT_FOLDER_NAME
+    console.log "Google Drive authorized and activated"
+    rootFolder = resource.id
+    # for debugging/development
+    debug.drive = drive
+    debug.jwt = jwt
+    debug.rootFolder = rootFolder
+  catch error
+    console.warn "Error trying to retrieve drive API:", error
+    console.warn "Google Drive integration disabled."
+    drive = null
 
 # exports
 share.drive =

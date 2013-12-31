@@ -1,42 +1,28 @@
 var googleapis = Npm.require('googleapis');
 var crypto = Npm.require('crypto');
-var when = Npm.require('when');
 
 var globalAuth;
 
 Google = {
   apis: googleapis,
-  when: when,
 
   registerAuth: function(auth) { globalAuth = auth; },
 
-  // Helper functions to execute a google api request, returning a promise.
-  exec: function(request, auth) {
+  // Helper functions to execute a google api request.
+  // Execution is synchronous if callback is omitted
+  exec: Meteor._wrapAsync(function(request, auth, callback) {
+    if (typeof(callback)==='undefined' && typeof(auth)==='function') {
+      callback = auth; auth = undefined; // shift args over
+    }
     auth = auth || globalAuth;
     if (auth) { request = request.withAuthClient(auth); }
-    var deferred = when.defer();
-    request.execute(function(err, result) {
-      if (err) { deferred.reject(err); }
-      else { deferred.resolve(result); }
-    });
-    return deferred.promise;
-  },
+    request.execute(callback);
+  }),
 
-  // Helper function to execute a google api request, using a fiber to
-  // make it appear synchronous.
-  execSync: function(request, auth) {
-    auth = auth || globalAuth;
-    if (auth) { request = request.withAuthClient(auth); }
-    return Meteor._wrapAsync(request.execute).call(request);
-  },
-
-  // Helper function to take an arbitrary promise and wait for it.
-  wait: function(promise) {
-    return Meteor._wrapAsync(function(callback) {
-      promise.done(function(result) { callback(null, result); },
-                   function(err) { callback(err); });
-    }).call();
-  },
+  // Helper function to execute google authorization, synchronously
+  authorize: Meteor._wrapAsync(function(auth, callback) {
+    auth.authorize(callback);
+  }),
 
   // Helper functions to encrypt/decrypt keys from Asset storage
 
