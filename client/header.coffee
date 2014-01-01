@@ -210,6 +210,7 @@ Template.header_breadcrumbs.preserve
     $(node).attr('data-original-title')
 
 uploadToDriveFolder = share.uploadToDriveFolder = (folder, callback) ->
+  return unless google?
   uploadView = new google.picker.DocsUploadView()\
     .setParent(folder)
   pickerCallback = (data) ->

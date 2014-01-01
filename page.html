@@ -5,7 +5,10 @@
   <link rel="apple-touch-icon" href="/img/codex_icon-128x128.png" />
   <title>Blackboard</title>
   <script type="text/javascript" src="https://www.google.com/jsapi"></script>
-  <script type="text/javascript">google.load('picker', '1');</script>
+  <script type="text/javascript">
+try { google.load('picker', '1'); }
+catch (e) { console.warn('Google Drive disabled', e); google = null; }
+  </script>
 </head>
 
 <body>
