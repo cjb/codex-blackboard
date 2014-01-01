@@ -23,6 +23,7 @@ SPREADSHEET_TEMPLATE = Assets.getBinary 'spreadsheet-template.xlsx'
 # fetch the API and authorize
 drive = null
 rootFolder = null
+ringhuntersFolder = null
 debug = {}
 
 quote = (str) ->
@@ -202,10 +203,12 @@ do ->
     resource = ensureFolder ROOT_FOLDER_NAME
     console.log "Google Drive authorized and activated"
     rootFolder = resource.id
+    # Create a special folder for uploads to ringhunters chat
+    resource = ensureFolder 'Ringhunters Uploads', rootFolder
+    ringhuntersFolder = resource.id
     # for debugging/development
     debug.drive = drive
     debug.jwt = jwt
-    debug.rootFolder = rootFolder
   catch error
     console.warn "Error trying to retrieve drive API:", error
     console.warn "Google Drive integration disabled."
@@ -224,3 +227,6 @@ share.drive =
   listPuzzles: wrapCheck listPuzzles, 'listPuzzles'
   findPuzzle: wrapCheck findPuzzle, 'findPuzzle'
   purge: wrapCheck purge, 'purge'
+  # exported constants
+  rootFolder: rootFolder
+  ringhuntersFolder: ringhuntersFolder

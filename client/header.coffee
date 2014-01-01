@@ -4,7 +4,11 @@ settings = share.settings # import
 
 # templates, event handlers, and subscriptions for the site-wide
 # header bar, including the login modals and general Handlebars helpers
-HUNT_YEAR = 2013 # used to make wiki links
+
+Meteor.startup ->
+  Meteor.call 'getRinghuntersFolder', (error, f) ->
+    unless error?
+      Session.set 'RINGHUNTERS_FOLDER', (f or undefined)
 
 keyword_or_positional = (name, args) ->
   return args.hash unless (not args?) or \
@@ -157,12 +161,12 @@ Template.header_loginmute.wikipage = ->
       puzzle_num = 1 + (round?.puzzles or []).indexOf(id)
       round_num = 1 + group?.round_start + \
         (group?.rounds or []).indexOf(round?._id)
-      "#{HUNT_YEAR}_R#{round_num}P#{puzzle_num}"
+      "#{settings.HUNT_YEAR}_R#{round_num}P#{puzzle_num}"
     when 'rounds'
       group = model.RoundGroups.findOne rounds: id
       round_num = 1 + group?.round_start + \
         (group?.rounds or []).indexOf(id)
-      "#{HUNT_YEAR}_R#{round_num}P0"
+      "#{settings.HUNT_YEAR}_R#{round_num}P0"
 
 ############## breadcrumbs #######################
 Template.header_breadcrumbs.round = ->
@@ -179,14 +183,14 @@ Template.header_breadcrumbs.type = -> Session.get('type')
 Template.header_breadcrumbs.id = -> Session.get('id')
 Template.header_breadcrumbs.drive = -> switch Session.get('type')
   when 'general'
-    model.RINGHUNTERS_FOLDER
+    Session.get 'RINGHUNTERS_FOLDER'
   when 'rounds', 'puzzles'
     model.collection(Session.get('type'))?.findOne(Session.get('id'))?.drive
 Template.header_breadcrumbs.events
   "click .bb-upload-file": (event, template) ->
     folder = switch Session.get('type')
       when 'general'
-        model.RINGHUNTERS_FOLDER
+        Session.get 'RINGHUNTERS_FOLDER'
       when 'rounds', 'puzzles'
         model.collection(Session.get('type'))?.findOne(Session.get('id'))?.drive
     return unless folder

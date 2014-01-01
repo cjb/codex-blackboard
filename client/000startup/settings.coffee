@@ -12,7 +12,10 @@ settings.BB_DISABLE_PM = true
 settings.CLIENT_UUID = Random.id()
 
 # used to create gravatars from nicks
-settings.DEFAULT_HOST = 'codexian.us'
+settings.DEFAULT_HOST = Meteor.settings?.public?.defaultHost or 'codexian.us'
 
 # used for wiki links
-settings.WIKI_HOST = 'http://wiki.codexian.us'
+settings.WIKI_HOST = Meteor.settings?.public?.wikiHost or 'http://wiki.codexian.us'
+
+# hunt year, used to make wiki links
+settings.HUNT_YEAR = Meteor.settings?.public?.huntYear or 2014
