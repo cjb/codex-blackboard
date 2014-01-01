@@ -151,24 +151,33 @@ renamePuzzle = (name, id, spreadId) ->
 
 rmrfFolder = (id) ->
   loop
-    # delete subfolders
-    resp = Google.exec drive.children.list
-      folderId: id
-      q: "mimeType=#{quote GDRIVE_FOLDER_MIME_TYPE}"
-      maxResults: MAX_RESULTS
-    numfolders = resp.items.length
-    resp.items.forEach (item) ->
-      rmrfFolder item.id
-    # delete non-folder stuff
-    resp = Google.exec drive.children.list
+    resp = {}
+    loop
+      # delete subfolders
+      resp = Google.exec drive.children.list
+        folderId: id
+        q: "mimeType=#{quote GDRIVE_FOLDER_MIME_TYPE}"
+        maxResults: MAX_RESULTS
+        pageToken: resp.nextPageToken
+      resp.items.forEach (item) ->
+        rmrfFolder item.id
+      break unless resp.nextPageToken?
+    loop
+      # delete non-folder stuff
+      resp = Google.exec drive.children.list
         folderId: id
         q: "mimeType!=#{quote GDRIVE_FOLDER_MIME_TYPE}"
         maxResults: MAX_RESULTS
-    numfiles = resp.items.length
-    resp.items.forEach (item) ->
-      Google.exec drive.files.delete(fileId: item.id)
-    # are we done?
-    break if numfiles is 0 and numfolders is 0
+        pageToken: resp.nextPageToken
+      resp.items.forEach (item) ->
+        Google.exec drive.files.delete(fileId: item.id)
+      break unless resp.nextPageToken?
+    # are we done? look for remaining items owned by us
+    resp = Google.exec drive.children.list
+      folderId: id
+      q: "#{quote EMAIL} in owners"
+      maxResults: 1
+    break if resp.items.length is 0
   # folder empty; delete the folder and we're done
   Google.exec drive.files.delete(fileId: id)
   'ok'
