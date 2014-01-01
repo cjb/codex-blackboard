@@ -5,12 +5,12 @@ Meteor app for coordating solving for our MIT Mystery Hunt team.  To run,
 first obtain the password for our google drive account.  Then:
 
     $ cd codex-blackboard
-    $ echo '{ "password":"<password here>" }' > settings.json
-    $ meteor --settings settings.json
+    $ echo '{ "password":"<password here>" }' > private/settings.json
+    $ meteor --settings private/settings.json
     <browse to localhost:3000>
 
 If you don't have the google drive password, you can just omit the
-`settings.json` file and the `--settings` option to meteor; the app
+`private/settings.json` file and the `--settings` option to meteor; the app
 will skip all the google drive integration steps.
 
 Your code is pushed live to the server as you make changes, so
@@ -19,7 +19,7 @@ database schema -- add new sample data, change how things are organized, etc.
 In those cases:
 
     $ meteor reset
-    $ meteor --settings settings.json
+    $ meteor --settings private/settings.json
 
 will wipe the old database and start afresh.
 
@@ -70,14 +70,14 @@ documentation is a bit sparse.  I suggest you read the docs for the
 `gapitoken` package which describes how to make a `.pem` private key
 file for the service account associated with this app.  In order to
 avoid publicly exposing the private key in github, we then encrypt
-this private key file with a password, stored in `settings.json` but
+this private key file with a password, stored in `private/settings.json` but
 *not* checked in.  The server-side `Google.encrypt` function (in
 `packages/google/google.js`) can be used to create a properly
 encrypted key if the credentials or password ever needs to change.
 
 For development, it is useful to have a scratch drive folder which is
 specific to your development install and can be wiped out and reset.
-Add a `folder` key to your `settings.json` file to name this scratch
+Add a `folder` key to your `private/settings.json` file to name this scratch
 folder.  For example:
     {"password":"<password here>","folder":"My Dev Test Folder"}
 
