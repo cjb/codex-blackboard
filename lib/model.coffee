@@ -715,13 +715,6 @@ spread_id_to_link = (id) ->
         touched_by: canonical(args.who)
       oplog "Deleted answer for", "puzzles", id, args.who
       return true
-
-    getChatLog: (type, id, from=0) ->
-      # get LIMIT entries of chat log corresponding to type/id, starting
-      # from (but not including) from timestamp, if nonzero
-      # this allows us to page back in time by passing in the timestamp of
-      # the earliest message from the previous call
-      unimplemented()
 )()
 
 UTCNow = ->
