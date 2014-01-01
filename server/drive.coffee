@@ -16,7 +16,9 @@ WORKSHEET_NAME = (name) -> "Worksheet: #{name}"
 # Constants
 GDRIVE_FOLDER_MIME_TYPE = 'application/vnd.google-apps.folder'
 GDRIVE_SPREADSHEET_MIME_TYPE = 'application/vnd.google-apps.spreadsheet'
+XLSX_MIME_TYPE = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
 MAX_RESULTS = 200
+SPREADSHEET_TEMPLATE = Assets.getBinary 'spreadsheet-template.xlsx'
 
 # fetch the API and authorize
 drive = null
@@ -94,12 +96,15 @@ createPuzzle = (name) ->
     maxResults: 1
   ).items[0]
   unless spreadsheet?
-    # create an empty spreadsheet
+    # create an new spreadsheet from our template
     spreadsheet =
       title: WORKSHEET_NAME name
-      mimeType: GDRIVE_SPREADSHEET_MIME_TYPE
+      mimeType: XLSX_MIME_TYPE
       parents: [id: folder.id]
-    spreadsheet = Google.exec drive.files.insert spreadsheet
+    spreadsheet = Google.exec(drive.files.insert(
+      convert: true
+      body: spreadsheet # this is only necessary due to bug in gapi, afaict
+    , spreadsheet).withMedia(XLSX_MIME_TYPE, SPREADSHEET_TEMPLATE))
   ensurePermissions(spreadsheet.id)
   return {
     id: folder.id
