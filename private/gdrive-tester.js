@@ -62,7 +62,7 @@ var Meteor = {
   }
 };
 (function() {
-  var filename = _private.TOP + "/settings.json";
+  var filename = _private.TOP + "/private/settings.json";
   Meteor.settings = JSON.parse(_private.fs.readFileSync(filename, 'utf8'));
 })();
 var EJSON = {
