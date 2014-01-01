@@ -6,9 +6,6 @@
 # client/server load.
 PRESENCE_KEEPALIVE_MINUTES = 2
 
-# Hard-coded URL for special folder used for Ringhunters chat.
-RINGHUNTERS_FOLDER = '0Bx954IXk0MK_bV9lQzZCMXpnLXM'
-
 # how many chats in a page?
 MESSAGE_PAGE = 150
 # how many oplogs in a page?
@@ -715,6 +712,11 @@ spread_id_to_link = (id) ->
         touched_by: canonical(args.who)
       oplog "Deleted answer for", "puzzles", id, args.who
       return true
+
+    getRinghuntersFolder: () ->
+      return unless Meteor.isServer
+      # Return special folder used for uploads to general Ringhunters chat
+      return share.drive.ringhuntersFolder
 )()
 
 UTCNow = ->
@@ -725,7 +727,6 @@ UTCNow = ->
 share.model =
   # constants
   PRESENCE_KEEPALIVE_MINUTES: PRESENCE_KEEPALIVE_MINUTES
-  RINGHUNTERS_FOLDER: RINGHUNTERS_FOLDER
   MESSAGE_PAGE: MESSAGE_PAGE
   OPLOG_PAGE: OPLOG_PAGE
   # collection types
