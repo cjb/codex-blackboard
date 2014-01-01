@@ -134,13 +134,18 @@ Template.header_loginmute.events
     share.chat.cleanupChat() if Session.equals('currentPage', 'chat')
     Session.set 'nick', undefined
     $.removeCookie 'nick', {path:'/'}
+    Session.set 'canEdit', undefined
+    Session.set 'editing', undefined
     if Session.equals('currentPage', 'chat')
       ensureNick -> # login again immediately
         share.chat.joinRoom Session.get('type'), Session.get('id')
   "click .bb-protect, click .bb-unprotect": (event, template) ->
-    canEdit = $(event.currentTarget).attr('data-canEdit') is 'true'
-    Session.set 'canEdit', canEdit or undefined
-    Session.set 'editing', undefined # abort current edit, whatever it is
+    target = event.currentTarget
+    ensureNick ->
+      canEdit = $(target).attr('data-canEdit') is 'true'
+      console.log 'here i am', canEdit
+      Session.set 'canEdit', canEdit or undefined
+      Session.set 'editing', undefined # abort current edit, whatever it is
 Template.header_loginmute.wikipage = ->
   return '' if Session.equals('currentPage', 'blackboard')
   [type, id] = [Session.get('type'), Session.get('id')]
