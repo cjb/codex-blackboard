@@ -15,6 +15,7 @@ WORKSHEET_NAME = (name) -> "Worksheet: #{name}"
 
 # Constants
 GDRIVE_FOLDER_MIME_TYPE = 'application/vnd.google-apps.folder'
+GDRIVE_SPREADSHEET_MIME_TYPE = 'application/vnd.google-apps.spreadsheet'
 MAX_RESULTS = 200
 
 # fetch the API and authorize
@@ -86,16 +87,22 @@ ensurePermissions = (id) ->
 
 createPuzzle = (name) ->
   folder = ensureFolder name, rootFolder
-  # create an empty spreadsheet
-  spreadsheet =
-    title: WORKSHEET_NAME name
-    mimeType: 'application/vnd.google-apps.spreadsheet'
-    parents: [id: folder.id]
-  spreadsheet = Google.exec drive.files.insert spreadsheet
+  # is the spreadsheet already there?
+  spreadsheet = (Google.exec drive.children.list
+    folderId: folder.id
+    q: "title=#{quote WORKSHEET_NAME name} and mimeType=#{quote GDRIVE_SPREADSHEET_MIME_TYPE}"
+    maxResults: 1
+  ).items[0]
+  unless spreadsheet?
+    # create an empty spreadsheet
+    spreadsheet =
+      title: WORKSHEET_NAME name
+      mimeType: GDRIVE_SPREADSHEET_MIME_TYPE
+      parents: [id: folder.id]
+    spreadsheet = Google.exec drive.files.insert spreadsheet
   ensurePermissions(spreadsheet.id)
   return {
     id: folder.id
-    alternateLink: folder.alternateLink
     spreadId: spreadsheet.id
   }
 
