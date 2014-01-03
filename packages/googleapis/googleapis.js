@@ -3,7 +3,7 @@ var crypto = Npm.require('crypto');
 
 var globalAuth;
 
-Google = {
+Gapi = {
   apis: googleapis,
 
   registerAuth: function(auth) { globalAuth = auth; },

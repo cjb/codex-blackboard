@@ -25,7 +25,7 @@ var _private = {};
 _private.TOP = __dirname + "/.."
 _private.NODE_MODULES_PATH = [
     _private.TOP + "/.meteor/local/build/programs/server/node_modules",
-    _private.TOP + "/packages/google/.build/npm/node_modules"
+    _private.TOP + "/packages/googleapis/.build/npm/node_modules"
 ];
 _private.fs = require('fs');
 
@@ -82,8 +82,8 @@ var Assets = {
 
 _private.Fiber(function() {
 // Load the Google module.
-var Google;
-_private.filename = _private.TOP + "/packages/google/google.js";
+var Gapi;
+_private.filename = _private.TOP + "/packages/googleapis/googleapis.js";
 _private.f = _private.fs.readFileSync(_private.filename, "utf8");
 _private.f = '(function() {' + _private.f + '})();';
 eval(_private.f);
@@ -98,7 +98,7 @@ eval(_private.f);
 
 // Start a coffee-script REPL, with each eval in its own Fiber
 _private.repl = Npm.require('coffee-script/lib/coffee-script/repl').start();
-_private.repl.context.Google = Google;
+_private.repl.context.Gapi = Gapi;
 _private.repl.context.share = share;
 
 _private.repl.context.Meteor = Meteor;

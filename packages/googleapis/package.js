@@ -1,5 +1,5 @@
 Package.describe({
-  summary: "Interface with Google Drive API from server"
+  summary: "Interface with Google APIs server-side"
 });
 
 // This module doesn't really require `coffee-script`, but we're going
@@ -9,9 +9,9 @@ Npm.depends({"googleapis": "0.4.7", "coffee-script":"1.6.3"});
 
 Package.on_use(function(api) {
   api.use(['ejson'], 'server');
-  api.export('Google', 'server');
+  api.export('Gapi', 'server');
   api.add_files([
-    'google.js'
+    'googleapis.js'
   ], 'server');
 });
 
