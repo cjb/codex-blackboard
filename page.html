@@ -43,6 +43,9 @@ catch (e) { console.warn('Google Drive disabled', e); google = null; }
   {{#if currentPageEquals "oplog"}}
     {{> oplog }}
   {{/if}}
+  {{#if currentPageEquals "facts"}}
+    {{> facts }}
+  {{/if}}
 
 <!-- add footer here? -->
 </template>

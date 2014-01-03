@@ -138,3 +138,6 @@ Meteor.publish 'all-names', ->
   # stop observing the various cursors when client unsubs
   self.onStop ->
     handles.map (h) -> h.stop()
+
+# Publish the 'facts' collection to all users
+Facts.setUserIdFilter -> true
