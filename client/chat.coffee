@@ -54,7 +54,7 @@ Template.messages.body = ->
     body = Handlebars._escape(body)
     body = body.replace(/\n|\r\n?/g, '<br/>')
     body = convertURLsToLinksAndImages(body, this.message._id)
-    body = highlightNick(body) unless this.message.system
+    body = highlightNick(body) if doesMentionNick(this.message)
   new Handlebars.SafeString(body)
 
 Template.messages.preserve
@@ -102,6 +102,26 @@ Template.chat_header.whos_here = ->
 
 # Utility functions
 
+regex_escape = (s) -> s.replace /[$-\/?[-^{|}]/g, '\\$&'
+
+doesMentionNick = (doc, raw_nick=(Session.get 'nick')) ->
+  return false unless raw_nick
+  return false unless doc.body?
+  return false if doc.system # system messages don't count as mentions
+  nick = model.canonical raw_nick
+  return false if nick is doc.nick # messages from yourself don't count
+  return true if doc.to is nick # PMs to you count
+  n = model.Nicks.findOne(canon: nick)
+  realname = if n then model.getTag(n, 'Real Name')
+  return false if doc.bodyIsHtml # XXX we could fix this
+  # case-insensitive match of canonical nick
+  (new RegExp (regex_escape model.canonical nick), "i").test(doc.body) or \
+    # case-sensitive match of non-canonicalized nick
+    doc.body.indexOf(raw_nick) >= 0 or \
+    # match against full name
+    (realname and (new RegExp (regex_escape realname), "i").test(doc.body))
+
+highlightNick = (html) -> "<span class=\"highlight-nick\">" + html + "</span>"
 
 convertURLsToLinksAndImages = (html, id) ->
   linkOrLinkedImage = (url, id) ->
@@ -112,13 +132,6 @@ convertURLsToLinksAndImages = (html, id) ->
   count = 0
   html.replace /(http(s?):\/\/[^ ]+)/g, (url) ->
     linkOrLinkedImage url, "#{id}-#{count++}"
-
-highlightNick = (html) ->
-  nickRE = new RegExp(Session.get("nick"))
-  if html.match(nickRE)
-    html = "<span class=\"highlight-nick\">" + html + "</span>"
-  else
-    html
 
 [isVisible, registerVisibilityChange] = (->
   hidden = "hidden"
@@ -301,11 +314,23 @@ Template.messages_input.events
       $message = $ event.currentTarget
       message = $message.val()
       if message
-        for nick in whos_here
-          if nick.nick.indexOf(message) is 0
-            $message.val nick.nick + ": "
-          else if "@#{nick.nick}".indexOf(message) is 0
-            $message.val "@" + nick.nick + " "
+        for present in whos_here
+          n = model.Nicks.findOne(canon: present.nick)
+          realname = if n then model.getTag(n, 'Real Name')
+          re = new RegExp "^#{message}", "i"
+          if re.test present.nick
+            $message.val "#{present.nick}: "
+          else if realname and re.test realname
+            $message.val "#{realname}: "
+          else if re.test "@#{present.nick}"
+            $message.val "@#{present.nick} "
+          else if realname and re.test "@#{realname}"
+            $message.val "@#{realname} "
+          else if re.test("/m #{present.nick}") or \
+                  re.test("/msg #{present.nick}") or \
+                  realname and (re.test("/m #{realname}") or \
+                                re.test("/msg #{realname}"))
+            $message.val "/msg #{present.nick} "
     # implicit submit on enter (but not shift-enter or ctrl-enter)
     return unless event.which is 13 and not (event.shiftKey or event.ctrlKey)
     event.preventDefault() # prevent insertion of enter
