@@ -164,16 +164,24 @@
             };
             if (_queue.length > 0) {
                 _running = true;
-                if (_lastBadge) {
-                    animation.run(_lastBadge.options, function() {
-                        animation.run(_queue[0].options, function() {
-                            finished();
-                        }, false);
-                    }, true);
-                } else {
+                var run = function() {
+                    // apply options for this animation
+                    ['type', 'animation', 'bgColor', 'textColor',
+                     'fontFamily', 'fontStyle'].forEach(function(a) {
+                        if (a in _queue[0].options) {
+                            _opt[a] = _queue[0].options[a];
+                        }
+                    });
                     animation.run(_queue[0].options, function() {
                         finished();
                     }, false);
+                };
+                if (_lastBadge) {
+                    animation.run(_lastBadge.options, function() {
+                        run();
+                    }, true);
+                } else {
+                    run();
                 }
             }
         };
@@ -183,11 +191,12 @@
          */
         var type = {};
         var options = function(opt) {
-            opt.n = Math.abs(opt.n);
+            opt.n = ((typeof opt.n)==='number') ? Math.abs(opt.n|0) : opt.n;
             opt.x = _w * opt.x;
             opt.y = _h * opt.y;
             opt.w = _w * opt.w;
             opt.h = _h * opt.h;
+            opt.len = ("" + opt.n).length;
             return opt;
         };
         /**
@@ -197,11 +206,11 @@
         type.circle = function(opt) {
             opt = options(opt);
             var more = false;
-            if (opt.n > 9 && opt.n < 100) {
+            if (opt.len === 2) {
                 opt.x = opt.x - opt.w * 0.4;
                 opt.w = opt.w * 1.4;
                 more = true;
-            } else if (opt.n >= 100) {
+            } else if (opt.len >= 3) {
                 opt.x = opt.x - opt.w * 0.65;
                 opt.w = opt.w * 1.65;
                 more = true;
@@ -231,7 +240,7 @@
             _context.stroke();
             _context.fillStyle = 'rgba(' + _opt.textColor.r + ',' + _opt.textColor.g + ',' + _opt.textColor.b + ',' + opt.o + ')';
             //_context.fillText((more) ? '9+' : opt.n, Math.floor(opt.x + opt.w / 2), Math.floor(opt.y + opt.h - opt.h * 0.15));
-            if (opt.n > 999) {
+            if ((typeof opt.n)==='number' && opt.n > 999) {
                 _context.fillText(((opt.n > 9999) ? 9 : Math.floor(opt.n / 1000) ) + 'k+', Math.floor(opt.x + opt.w / 2), Math.floor(opt.y + opt.h - opt.h * 0.2));
             } else {
                 _context.fillText(opt.n, Math.floor(opt.x + opt.w / 2), Math.floor(opt.y + opt.h - opt.h * 0.15));
@@ -245,11 +254,11 @@
         type.rectangle = function(opt) {
             opt = options(opt);
             var more = false;
-            if (opt.n > 9 && opt.n < 100) {
+            if (opt.len === 2) {
                 opt.x = opt.x - opt.w * 0.4;
                 opt.w = opt.w * 1.4;
                 more = true;
-            } else if (opt.n >= 100) {
+            } else if (opt.len >= 3) {
                 opt.x = opt.x - opt.w * 0.65;
                 opt.w = opt.w * 1.65;
                 more = true;
@@ -263,7 +272,7 @@
             _context.fillRect(opt.x, opt.y, opt.w, opt.h);
             _context.fillStyle = 'rgba(' + _opt.textColor.r + ',' + _opt.textColor.g + ',' + _opt.textColor.b + ',' + opt.o + ')';
             //_context.fillText((more) ? '9+' : opt.n, Math.floor(opt.x + opt.w / 2), Math.floor(opt.y + opt.h - opt.h * 0.15));
-            if (opt.n > 999) {
+            if ((typeof opt.n)==='number' && opt.len > 3) {
                 _context.fillText(((opt.n > 9999) ? 9 : Math.floor(opt.n / 1000) ) + 'k+', Math.floor(opt.x + opt.w / 2), Math.floor(opt.y + opt.h - opt.h * 0.2));
             } else {
                 _context.fillText(opt.n, Math.floor(opt.x + opt.w / 2), Math.floor(opt.y + opt.h - opt.h * 0.15));
@@ -274,19 +283,35 @@
         /**
          * Set badge
          */
-        var badge = function(number, animType) {
+        var badge = function(number, opts) {
+            opts = ((typeof opts)==='string' ? {animation:opts} : opts) || {};
             _readyCb = function() {
                 try {
-                    if (number > 0) {
-                        if (animation.types['' + animType]) {
-                            _opt.animation = animType;
-                        }
-                        _queue.push({
+                    if (typeof(number)==='number' ? (number > 0) : (number !== '')) {
+                        var q = {
                             type : 'badge',
                             options : {
                                 n : number
                             }
+                        };
+                        if ('animation' in opts &&
+                            animation.types['' + opts.animation]) {
+                            q.options.animation = '' + opts.animation;
+                        }
+                        if ('type' in opts && type['' + opts.type]) {
+                            q.options.type = '' + opts.type;
+                        }
+                        ['bgColor', 'textColor'].forEach(function(o) {
+                            if (o in opts) {
+                                q.options[o] = hexToRgb(opts[o]);
+                            }
                         });
+                        ['fontStyle', 'fontFamily'].forEach(function(o) {
+                            if (o in opts) {
+                                q.options[o] = opts[o];
+                            }
+                        });
+                        _queue.push(q);
                         if (_queue.length > 100) {
                             throw 'Too many badges requests in queue.';
                         }
@@ -428,7 +453,7 @@
             var getLink = function() {
                 var link = document.getElementsByTagName('head')[0].getElementsByTagName('link');
                 for (var l = link.length, i = (l - 1); i >= 0; i--) {
-                    if ((/icon/i).test(link[i].getAttribute('rel'))) {
+                    if ((/(^|\s)icon(\s|$)/i).test(link[i].getAttribute('rel'))) {
                         return link[i];
                     }
                 }
