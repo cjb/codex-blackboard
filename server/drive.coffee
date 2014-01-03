@@ -215,7 +215,7 @@ do ->
     debug.drive = drive
     debug.jwt = jwt
   catch error
-    console.warn "Error trying to retrieve drive API:", error
+    console.warn "Error trying to retrieve drive API:", error.__proto__
     console.warn "Google Drive integration disabled."
     drive = null
 
