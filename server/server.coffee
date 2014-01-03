@@ -18,6 +18,10 @@ Meteor.publish 'presence-for-room', (room_name) ->
     foreground_uuid: 0
     present: 0
 
+Meteor.publish 'lastread-for-nick', (nick) ->
+  nick = model.canonical(nick or '') or null
+  model.LastRead.find {nick: nick}
+
 # this is for the "that was easy" sound effect
 # everyone is subscribed to this all the time
 Meteor.publish 'last-answered-puzzle', ->

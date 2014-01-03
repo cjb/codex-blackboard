@@ -123,6 +123,15 @@ if Meteor.isServer
   Messages._ensureIndex {to:1, room_name:1, timestamp:-1}, {}
   Messages._ensureIndex {nick:1, room_name:1, timestamp:-1}, {}
 
+# Last read message
+#   nick: canonicalized string, as in Messages
+#   room_name: string, as in Messages
+#   timestamp: timestamp of last read message
+LastRead = BBCollection.lastread = new Meteor.Collection "lastread"
+if Meteor.isServer
+  LastRead._ensureIndex {nick:1, room_name:1}, {unique:true, dropDups:true}
+  LastRead._ensureIndex {nick:1}, {} # be safe
+
 # Chat room presence
 #   nick: canonicalized string, as in Messages
 #   room_name: string, as in Messages
@@ -134,6 +143,7 @@ Presence = BBCollection.presence = new Meteor.Collection "presence"
 if Meteor.isServer
   Presence._ensureIndex {nick: 1, room_name:1}, {unique:true, dropDups:true}
   Presence._ensureIndex {timestamp:-1}, {}
+  Presence._ensureIndex {present:1, room_name:1}, {}
   # ensure old entries are timed out after 2*PRESENCE_KEEPALIVE_MINUTES
   # some leeway here to account for client/server time drift
   Meteor.setInterval ->
@@ -496,7 +506,32 @@ spread_id_to_link = (id) ->
         room_name: args.room_name or "general/0"
         timestamp: UTCNow()
       newMsg._id = Messages.insert newMsg
+      # update the user's 'last read' message to include this one
+      # (doing it here allows us to use server timestamp on message)
+      unless args.suppressLastRead or newMsg.system or (not newMsg.nick)
+        Meteor.call 'updateLastRead',
+          nick: newMsg.nick
+          room_name: newMsg.room_name
+          timestamp: newMsg.timestamp
       return newMsg
+
+    updateLastRead: (args) ->
+      try
+        check args, ObjectWith
+          nick: NonEmptyString
+          room_name: NonEmptyString
+          timestamp: Number
+        LastRead.upsert
+          nick: canonical(args.nick)
+          room_name: args.room_name
+          timestamp: $lt: args.timestamp
+        , $set:
+          timestamp: args.timestamp
+      catch e
+        # ignore duplicate key errors; they are harmless and occur when we
+        # try to move the LastRead.timestamp backwards.
+        unless e.name is 'MongoError' and /^E11000 duplicate key/.test(e.err)
+          throw e
 
     setPresence: (args) ->
       check args, ObjectWith
@@ -738,6 +773,7 @@ share.model =
   Puzzles: Puzzles
   Nicks: Nicks
   Messages: Messages
+  LastRead: LastRead
   Presence: Presence
   # helper methods
   collection: collection
