@@ -59,10 +59,15 @@ ensureFolder = (name, parent) ->
   resource
 
 samePerm = (p, pp) ->
-  p.withLink is pp.withLink and \
+  (p.withLink or false) is (pp.withLink or false) and \
   p.role is pp.role and \
   p.type is pp.type and \
-  (unless p.type is 'anyone' then (p.value is pp.value) else true)
+  if p.type is 'anyone'
+    true
+  else if ('value' of p) and ('value' of pp)
+    (p.value is pp.value)
+  else # hack! google doesn't return the full email address in the permission
+    (p.type is 'user' and p.value is CODEX_ACCOUNT and pp.name is 'Zouche Nuttall')
 
 ensurePermissions = (id) ->
   # give permissions to both anyone with link and to the primary
