@@ -83,9 +83,10 @@ BlackboardRouter = Backbone.Router.extend
     $('#confirmModal').modal 'hide'
 
   urlFor: (type,id) ->
-    "/#{type}/#{id}"
+    Meteor._relativeToSiteRootUrl "/#{type}/#{id}"
   chatUrlFor: (type, id, timestamp) ->
-    "/chat#{this.urlFor(type,id)}" + (if (+timestamp) then "/#{+timestamp}" else "")
+    (Meteor._relativeToSiteRootUrl "/chat#{this.urlFor(type,id)}") + \
+    (if (+timestamp) then "/#{+timestamp}" else "")
 
   goToRound: (round) ->
     this.navigate(this.urlFor("rounds",round._id), {trigger:true})
