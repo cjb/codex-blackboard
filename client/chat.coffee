@@ -15,32 +15,53 @@ Session.setDefault 'timestamp', 0
 instachat = {}
 instachat["UTCOffset"] = new Date().getTimezoneOffset() * 60000
 instachat["alertWhenUnreadMessages"] = false
-instachat["messageAlertInterval"]    = undefined
-instachat["unreadMessages"]          = 0
 instachat["scrolledToBottom"]        = true
+
+# Favicon instance, used for notifications
+# (first add host to path)
+favicon = badge: (-> false), reset: (-> false)
+Meteor.startup ->
+  favicon = share.chat.favicon = new Favico
+    animation: 'slide'
+    fontFamily: 'Droid Sans Bold'
+    fontStyle: ''
 
 # Template Binding
 Template.messages.room_name = -> Session.get('room_name')
 Template.messages.timestamp = -> +Session.get('timestamp')
 Template.messages.messages  = ->
   timestamp = (+Session.get('timestamp')) or Number.MAX_VALUE
+  room_name = Session.get 'room_name'
+  nick = model.canonical(Session.get('nick') or '')
   messages = model.Messages.find
-    room_name: Session.get("room_name")
+    room_name: room_name
     timestamp: $lt: timestamp
   ,
     sort: [['timestamp',"desc"]]
     limit: model.MESSAGE_PAGE
   sameNick = do ->
     prevContext = null
-    (m) ->
+    f = (m) ->
       thisContext = m.nick + (if m.to then "/#{m.to}" else "")
       thisContext = null if m.system or m.action
       result = thisContext? and (thisContext == prevContext)
       prevContext = thisContext
       return result
+    f.reset = -> prevContext = null
+    f
+  lastread = model.LastRead.findOne(nick: nick, room_name: room_name)
+  isLastRead = do ->
+    sawLastRead = false
+    (m) ->
+      return false if sawLastRead or not lastread?
+      sawLastRead = (m.timestamp >= lastread.timestamp)
+      # don't smash together comments if one of them is the lastread
+      sameNick.reset() if sawLastRead
+      sawLastRead
   for m, i in messages.fetch().reverse()
     first: ("/chat/#{Session.get 'room_name'}/#{m.timestamp}" if i is 0)
     followup: sameNick(m)
+    lastRead: isLastRead(m)
     message: m
 
 Template.messages.email = ->
@@ -68,7 +89,6 @@ Template.messages.created = ->
       this.sub3?.stop?()
       this.sub1 = this.sub2 = this.sub3 = null
       instachat.ready = false
-      instachat.unreadMessages = 0
       hideMessageAlert()
     invalidator()
     room_name = Session.get 'room_name'
@@ -78,7 +98,7 @@ Template.messages.created = ->
     # re-enable private messages, but just in ringhunters (for codexbot)
     if settings.BB_DISABLE_PM and room_name is "general/0"
       nick = Session.get 'nick'
-    timestamp = (+Session.get('timestamp')) or Number.MAX_VALUE
+    timestamp = (+Session.get('timestamp'))
     ready = 0
     onReady = -> instachat.ready = true if (++ready) is 2
     if nick?
@@ -165,7 +185,9 @@ convertURLsToLinksAndImages = (html, id) ->
 )()
 
 registerVisibilityChange ->
+  return unless Session.equals('currentPage', 'chat')
   instachat.keepalive?()
+  updateLastRead() if isVisible()
 
 prettyRoomName = ->
   type = Session.get('type')
@@ -300,7 +322,7 @@ Template.messages_input.submit = (message) ->
         args.body = "tried to say nothing: #{message}" if missingMessage
         args.action = true
   instachat.scrolledToBottom = true
-  Meteor.call 'newMessage', args
+  Meteor.call 'newMessage', args # updates LastRead as a side-effect
   # make sure we're looking at the most recent messages
   if (+Session.get('timestamp'))
     share.Router.navigate "/chat/#{Session.get 'room_name'}", {trigger:true}
@@ -345,44 +367,24 @@ $("#messageInput").live "blur", ->
   instachat.alertWhenUnreadMessages = true
 
 $("#messageInput").live "focus", ->
+  updateLastRead() if instachat.ready # skip during initial load
   instachat.alertWhenUnreadMessages = false
   hideMessageAlert()
-  instachat.unreadMessages = 0
 
-showUnreadMessagesAlert = ->
-  return if instachat.messageAlertInterval
-  # we use window.setInterval here instead of Meteor.setInterval because
-  # this is run in a reactive context (from autorun) and Meteor
-  # will complain if you set intervals inside a reactive context because
-  # it doesn't know how to cancel them.  That's okay -- we're doing the
-  # cancellation ourself.  So use window.setInterval to go behind Meteor's back.
-  instachat.messageAlertInterval = window.setInterval ->
-    title = $("title")
-    name = "Chat: "+prettyRoomName()
-    if title.text() == name
-      msg = if instachat.unreadMessages == 1 then "message" else "messages"
-      title.text(instachat.unreadMessages + " new " + msg + " - " + name)
-    else
-      title.text(name)
-  , 1000
+updateLastRead = ->
+  timestamp = (+Session.get('timestamp')) or Number.MAX_VALUE
+  return unless timestamp is Number.MAX_VALUE # don't update if we're paged back
+  lastMessage = model.Messages.findOne
+    room_name: Session.get 'room_name'
+  ,
+    sort: [['timestamp','desc']]
+  return unless lastMessage
+  Meteor.call 'updateLastRead',
+    nick: Session.get 'nick'
+    room_name: Session.get 'room_name'
+    timestamp: lastMessage.timestamp
 
-hideMessageAlert = ->
-  return unless instachat.messageAlertInterval
-  window.clearInterval instachat.messageAlertInterval
-  instachat.messageAlertInterval = undefined
-  $("title").text("Chat: "+prettyRoomName())
-
-unreadMessage = (doc)->
-  return unless instachat.ready # don't ping until we're done loading messages
-  unless Session.equals('nick', doc["nick"]) || doc.system || Session.get "mute"
-    # only ping if message mentions you
-    if doc.body?.indexOf(Session.get('nick')) >= 0 and not doc.bodyIsHtml
-      instachat.unreadMessageSound.play()
-
-  if instachat.alertWhenUnreadMessages
-    instachat.unreadMessages += 1
-    showUnreadMessagesAlert()
-
+hideMessageAlert = -> updateNotice 0, 0
 
 Template.chat.created = ->
   this.afterFirstRender = ->
@@ -415,6 +417,7 @@ startupChat = ->
     Meteor.setInterval instachat.keepalive, (model.PRESENCE_KEEPALIVE_MINUTES*60*1000)
 
 cleanupChat = ->
+  favicon.reset()
   if instachat.keepaliveInterval?
     Meteor.clearInterval instachat.keepaliveInterval
     instachat.keepalive = instachat.keepaliveInterval = undefined
@@ -432,27 +435,71 @@ $(window).unload -> cleanupChat()
 
 # App startup
 Meteor.startup ->
-  instachat.unreadMessageSound = new Audio "/sound/Electro_-S_Bainbr-7955.wav"
+  instachat.messageMentionSound = new Audio "/sound/Electro_-S_Bainbr-7955.wav"
+
+updateNotice = do ->
+  [lastUnread, lastMention] = [0, 0]
+  (unread, mention) ->
+    if mention > lastMention and instachat.ready
+      instachat.messageMentionSound?.play?() unless Session.get "mute"
+    # update title and favicon
+    if mention > 0
+      favicon.badge mention, {bgColor: '#00f'} if mention != lastMention
+    else
+      favicon.badge unread, {bgColor: '#000'} if unread != lastUnread
+    ## XXX check instachat.ready and instachat.alertWhenUnreadMessages ?
+    [lastUnread, lastMention] = [unread, mention]
 
 Deps.autorun ->
   unless Session.equals("currentPage", "chat") and \
          (+Session.get('timestamp')) is 0
     hideMessageAlert()
     return
-  # the autorun magic *doesn't* tear down 'observe's
-  # live query handle when room_name or currentPage changes (but it should!)
-  # we need to handle that ourselves...
-  handle = model.Messages.find
-    room_name: Session.get("room_name")
+  nick = model.canonical(Session.get('nick') or '')
+  room_name = Session.get 'room_name'
+  return unless nick and room_name
+  Meteor.subscribe 'lastread-for-nick', nick
+  # watch the last read
+  lastread = model.LastRead.findOne(nick: nick, room_name: room_name)
+  return unless lastread
+  # watch the unread messages
+  total_unread = 0
+  total_mentions = 0
+  update = -> false # ignore initial updates
+  model.Messages.find
+    room_name: room_name
+    nick: $ne: nick
+    timestamp: $gt: lastread.timestamp
   .observe
     added: (item) ->
-      unreadMessage(item) unless item.system
-  Deps.onInvalidate -> handle.stop()
+      return if item.system
+      total_unread++
+      total_mentions++ if doesMentionNick item
+      update()
+    removed: (item) ->
+      return if item.system
+      total_unread--
+      total_mentions-- if doesMentionNick item
+      update()
+    changed: (newItem, oldItem) ->
+      unless oldItem.system
+        total_unread--
+        total_mentions-- if doesMentionNick oldItem
+      unless newItem.system
+        total_unread++
+        total_mentions++ if doesMentionNick newItem
+      update()
+  # after initial query is processed, handle updates
+  update = -> updateNotice total_unread, total_mentions
+  update()
 
 # exports
 share.chat =
+  favicon: favicon
   convertURLsToLinksAndImages: convertURLsToLinksAndImages
   startupChat: startupChat
   cleanupChat: cleanupChat
   hideMessageAlert: hideMessageAlert
   joinRoom: joinRoom
+  # for debugging
+  instachat: instachat
