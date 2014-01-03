@@ -67,12 +67,12 @@ posted, too.
 
 We use JWT for authenticating with google drive.  The official
 documentation is a bit sparse.  I suggest you read the docs for the
-`gapitoken` package which describes how to make a `.pem` private key
+[gapitoken] package which describes how to make a `.pem` private key
 file for the service account associated with this app.  In order to
 avoid publicly exposing the private key in github, we then encrypt
 this private key file with a password, stored in `private/settings.json` but
-*not* checked in.  The server-side `Google.encrypt` function (in
-`packages/google/google.js`) can be used to create a properly
+*not* checked in.  The server-side `Gapi.encrypt` function (in
+`packages/googleapis/googleapis.js`) can be used to create a properly
 encrypted key if the credentials or password ever needs to change.
 
 For development, it is useful to have a scratch drive folder which is
@@ -80,6 +80,8 @@ specific to your development install and can be wiped out and reset.
 Add a `folder` key to your `private/settings.json` file to name this scratch
 folder.  For example:
     {"password":"<password here>","folder":"My Dev Test Folder"}
+
+[gapitoken]: https://npmjs.org/package/gapitoken
 
 ## Goals, etc.
 
