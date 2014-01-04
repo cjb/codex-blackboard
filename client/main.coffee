@@ -54,6 +54,7 @@ BlackboardRouter = Backbone.Router.extend
     "oplogs/:timestamp": "OpLogPage"
     "facts/": "FactsPage"
     "facts": "FactsPage" # be kind to lazy typists
+    "loadtest/:which": "LoadTestPage"
 
   BlackboardPage: ->
     this.Page("blackboard", "general", "0")
@@ -77,6 +78,22 @@ BlackboardRouter = Backbone.Router.extend
 
   FactsPage: ->
     this.Page("facts", "general", "0")
+
+  LoadTestPage: (which) ->
+    # redirect to one of the 'real' pages, so that client has the
+    # proper subscriptions, etc; plus launch a background process
+    # to perform database mutations
+    cb = (args) =>
+      {page,type,id,timestamp} = args
+      url = switch page
+        when 'chat' then this.chatUrlFor type, id, timestamp
+        when 'oplogs' then this.urlFor 'oplogs', timestamp # bit of a hack
+        when 'blackboard' then Meteor._relativeToSiteRootUrl "/"
+        when 'facts' then this.urlFor 'facts', '' # bit of a hack
+        else this.urlFor type, id
+      this.navigate(url, {trigger:true})
+    r = share.loadtest.start which, cb
+    cb(r) if r? # immediately navigate if method is synchronous
 
   Page: (page, type, id) ->
     Session.set "currentPage", page
