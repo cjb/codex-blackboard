@@ -23,8 +23,8 @@ favicon = badge: (-> false), reset: (-> false)
 Meteor.startup ->
   favicon = share.chat.favicon = new Favico
     animation: 'slide'
-    fontFamily: 'Droid Sans Bold'
-    fontStyle: ''
+    fontFamily: 'Droid Sans'
+    fontStyle: '700'
 
 # Template Binding
 Template.messages.room_name = -> Session.get('room_name')
