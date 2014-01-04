@@ -2,4 +2,5 @@
 host=review.gerrithub.io
 #port=29418
 project=cjb/codex-blackboard
-defaultbranch=meteor-update
+#defaultbranch=meteor-update
+defaultbranch=master
