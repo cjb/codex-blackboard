@@ -250,10 +250,7 @@ spread_id_to_link = (id) ->
     Match.Where (o) ->
       return false if typeof(o) is not 'object'
       Object.keys(pattern).forEach (k) ->
-        console.log "checking #{k} #{pattern}"
-        console.log pattern
         check o[k], pattern[k]
-        console.log "success"
       true
 
   oplog = (message, type="", id="", who="") ->
@@ -517,47 +514,48 @@ spread_id_to_link = (id) ->
 
     newCallIn: (args) ->
       check args, ObjectWith
-        puzzle: Object
+        puzzle: IdOrObject
         answer: NonEmptyString
         who: NonEmptyString
-      newObject "callins", args,
-        puzzle: args.puzzle
+      id = args.puzzle._id or args.puzzle
+      newObject "callins", {name:canonical(args.answer), who:args.who},
+        puzzle: id
         answer: args.answer
         who: args.who
-      , {}, {suppressLog:true}
-      oplog "New answer #{args.answer} submitted for ", "puzzles", args.puzzle._id, args.who
+      , {suppressLog:true}
+      oplog "New answer #{args.answer} submitted for ", "puzzles", id, args.who
 
-    correctCallin: (args) ->
+    correctCallIn: (args) ->
       check args, ObjectWith
         id: NonEmptyString
         who: NonEmptyString
       callin = CallIns.findOne(args.id)
       throw new Meteor.Error(400, "bad callin") unless callin
       Meteor.call "setAnswer",
-        puzzle: callin.puzzle._id
+        puzzle: callin.puzzle
         answer: callin.answer
         who: args.who
       Meteor.call "cancelCallin", {id: callin._id}
 
-    incorrectCallin: (args) ->
+    incorrectCallIn: (args) ->
       check args, ObjectWith
         id: NonEmptyString
         who: NonEmptyString
       callin = CallIns.findOne(args.id)
       throw new Meteor.Error(400, "bad callin") unless callin
       Meteor.call "addIncorrectAnswer",
-        puzzle: callin.puzzle._id
+        puzzle: callin.puzzle
         answer: callin.answer
         who: args.who
       Meteor.call "cancelCallin", {id: callin._id}
 
-    cancelCallin: (args) ->
+    cancelCallIn: (args) ->
       check args, ObjectWith
         id: NonEmptyString
         who: NonEmptyString
       callin = CallIns.findOne(args.id)
       throw new Meteor.Error(400, "bad callin") unless callin
-      oplog "Canceled callin of #{callin.answer} for ", "puzzles", callin.puzzle._id, args.who
+      oplog "Canceled call-in of #{callin.answer} for ", "puzzles", callin.puzzle, args.who
       deleteObject "callins",
         id: args.id
         who: args.who
