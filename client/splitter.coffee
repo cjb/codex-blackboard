@@ -1,9 +1,11 @@
 # cscott's very simple splitter widget
+'use strict'
 
-Splitter =
+Splitter = share.Splitter =
   vsize:
+    manualResized: false
     get: () -> $('.bb-bottom-content').height()
-    set: (size) ->
+    set: (size, manual) ->
       if not size?
         # resize to let top content be fully visible
         SPLITTER_WIDGET_HEIGHT = 6 # pixels
@@ -15,10 +17,12 @@ Splitter =
           size = 300
       $('.bb-splitter').css 'padding-bottom', +size
       $('.bb-bottom-content').css 'height', +size
+      Splitter.vsize.manualResized = !!manual
       +size
   hsize:
+    manualResized: false
     get: () -> $('.bb-top-right-content').width()
-    set: (size) ->
+    set: (size, manual) ->
       SPLITTER_WIDGET_WIDTH = 6 # pixels
       if not size?
         # 200px wide chat
@@ -26,6 +30,7 @@ Splitter =
       $('.bb-top-content').css 'padding-right', +size + SPLITTER_WIDGET_WIDTH
       $('.bb-top-content > .bb-splitter-handle').css 'right', +size
       $('.bb-top-right-content').css 'width', +size
+      Splitter.hsize.manualResized = !!manual
       +size
   handleEvent: (event, template) ->
     if $(event.currentTarget).closest('.bb-top-content').length
@@ -39,7 +44,7 @@ Splitter =
     initialSize = Splitter.vsize.get()
     mouseMove = (event) ->
       newSize = initialSize - (event.pageY - initialPos)
-      Splitter.vsize.set newSize
+      Splitter.vsize.set newSize, 'manual'
     mouseUp = (event) ->
       pane.removeClass('active')
       $(document).unbind('mousemove', mouseMove).unbind('mouseup', mouseUp)
@@ -52,7 +57,7 @@ Splitter =
     initialSize = Splitter.hsize.get()
     mouseMove = (event) ->
       newSize = initialSize - (event.pageX - initialPos)
-      Splitter.hsize.set newSize
+      Splitter.hsize.set newSize, 'manual'
     mouseUp = (event) ->
       pane.removeClass('active')
       $(document).unbind('mousemove', mouseMove).unbind('mouseup', mouseUp)

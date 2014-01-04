@@ -1,16 +1,19 @@
-Meteor.publish 'all-roundgroups', -> RoundGroups.find()
-Meteor.publish 'all-rounds', -> Rounds.find()
-Meteor.publish 'all-puzzles', -> Puzzles.find()
-Meteor.publish 'all-nicks', -> Nicks.find()
+'use strict'
+model = share.model # import
+
+Meteor.publish 'all-roundsandpuzzles', -> [
+  model.RoundGroups.find(), model.Rounds.find(), model.Puzzles.find()
+]
+Meteor.publish 'all-nicks', -> model.Nicks.find()
 Meteor.publish 'all-presence', ->
   # strip out unnecessary fields from presence (esp timestamp) to avoid wasted
   # updates to clients
-  Presence.find {present: true}, fields:
+  model.Presence.find {present: true}, fields:
     timestamp: 0
     foreground_uuid: 0
     present: 0
 Meteor.publish 'presence-for-room', (room_name) ->
-  Presence.find {present: true, room_name: room_name}, fields:
+  model.Presence.find {present: true, room_name: room_name}, fields:
     timestamp: 0
     foreground_uuid: 0
     present: 0
@@ -20,99 +23,109 @@ Meteor.publish 'presence-for-room', (room_name) ->
 Meteor.publish 'last-answered-puzzle', ->
   collection = 'last-answer'
   self = this
-  uuid = Meteor.uuid()
+  uuid = Random.id()
+
   recent = null
-  started = false
+  initializing = true
+
   max = (doc) ->
     if doc.solved?
-      if (not recent?) or (doc.solved > recent)
-        recent = doc.solved
+      if (not recent?.puzzle) or (doc.solved > recent.solved)
+        recent = {solved:doc.solved, puzzle:doc._id}
         return true
     return false
+
   publishIfMax = (doc) ->
     return unless max(doc)
-    self.set collection, uuid, {solved:recent, puzzle:doc._id}
-    self.flush() if started
-  handle = Puzzles.find({
+    self.changed collection, uuid, recent \
+      unless initializing
+  publishNone = ->
+    recent = {solved: model.UTCNow()} # "no recent solved puzzle"
+    self.changed collection, uuid, recent \
+      unless initializing
+
+  handle = model.Puzzles.find({
     $and: [ {answer: $ne: null}, {answer: $exists: true} ]
   }).observe
-    added: (doc,idx) -> publishIfMax(doc)
-    changed: (doc, atIndex, oldDoc) -> publishIfMax(doc)
+    added: (doc) -> publishIfMax(doc)
+    changed: (doc, oldDoc) -> publishIfMax(doc)
+    removed: (doc) ->
+      publishNone() if doc._id is recent?.puzzle
+
   # observe only returns after initial added callbacks.
   # if we still don't have a 'recent' (possibly because no puzzles have
   # been answered), set it to current time
-  publishIfMax(solved:UTCNow()) unless recent?
+  publishNone() unless recent?
   # okay, mark the subscription as ready.
-  self.complete()
-  self.flush()
-  started = true
+  initializing = false
+  self.added collection, uuid, recent
+  self.ready()
+  # Stop observing the cursor when client unsubs.
+  # Stopping a subscription automatically takes care of sending the
+  # client any 'removed' messages
   self.onStop -> handle.stop()
 
 # limit site traffic by only pushing out changes relevant to a certain
 # roundgroup, round, or puzzle
-Meteor.publish 'puzzle-by-id', (id) -> Puzzles.find _id: id
-Meteor.publish 'round-by-id', (id) -> Rounds.find _id: id
-Meteor.publish 'round-for-puzzle', (id) -> Rounds.find puzzles: id
-Meteor.publish 'roundgroup-for-round', (id) -> RoundGroups.find rounds: id
+Meteor.publish 'puzzle-by-id', (id) -> model.Puzzles.find _id: id
+Meteor.publish 'round-by-id', (id) -> model.Rounds.find _id: id
+Meteor.publish 'round-for-puzzle', (id) -> model.Rounds.find puzzles: id
+Meteor.publish 'roundgroup-for-round', (id) -> model.RoundGroups.find rounds: id
 
-Meteor.publish 'my-nick', (nick) -> Nicks.find canon: canonical(nick)
+Meteor.publish 'my-nick', (nick) -> model.Nicks.find canon: model.canonical(nick)
 
 # only publish last page of messages
 Meteor.publish 'recent-messages', (nick, room_name) ->
-  nick = canonical(nick or '') or null
-  Messages.find {
+  nick = model.canonical(nick or '') or null
+  model.Messages.find {
     room_name: room_name
     $or: [ { nick: nick }, { to: $in: [null, nick] } ]
   },
     sort:[["timestamp","desc"]]
-    limit: MESSAGE_PAGE
+    limit: model.MESSAGE_PAGE
 
 # paged version: specify page boundary by timestamp, so we can display
 # 'more' messages by passing in the timestamp of the first message
 # on the current page we're looking at
 Meteor.publish 'paged-messages', (nick, room_name, timestamp) ->
-  nick = canonical(nick or '') or null
-  Messages.find {
+  nick = model.canonical(nick or '') or null
+  model.Messages.find {
     room_name: room_name
     timestamp: $lt: +timestamp
     $or: [ { nick: nick }, { to: $in: [null, nick] } ]
   },
      sort: [['timestamp','desc']]
-     limit: MESSAGE_PAGE
+     limit: model.MESSAGE_PAGE
 
 # same thing for operation log
 Meteor.publish 'recent-oplogs', ->
-  OpLogs.find {}, {sort: [["timestamp","desc"]], limit: 20}
+  model.OpLogs.find {}, {sort: [["timestamp","desc"]], limit: 20}
 
 Meteor.publish 'paged-oplogs', (timestamp) ->
-  OpLogs.find {timestamp: $lt: +timestamp},
+  model.OpLogs.find {timestamp: $lt: +timestamp},
      sort: [['timestamp','desc']]
-     limit: OPLOG_PAGE
+     limit: model.OPLOG_PAGE
 
 # synthetic 'all-names' collection which maps ids to type/name/canon
 Meteor.publish 'all-names', ->
   self = this
   handles = [ 'roundgroups', 'rounds', 'puzzles' ].map (type) ->
-    collection(type).find({}).observe
-      added: (doc, idx) ->
-        self.set 'names', doc._id,
+    model.collection(type).find({}).observe
+      added: (doc) ->
+        self.added 'names', doc._id,
           type: type
           name: doc.name
-          canon: canonical(doc.name)
-        self.flush()
-      removed: (doc,idx) ->
-        self.unset 'names', doc._id, ['_id','type','name','canon']
-        self.flush()
-      changed: (doc,idx,olddoc) ->
+          canon: model.canonical(doc.name)
+      removed: (doc) ->
+        self.removed 'names', doc._id
+      changed: (doc,olddoc) ->
         return unless doc.name isnt olddoc.name
-        self.set 'names', doc._id,
+        self.changed 'names', doc._id,
           name: doc.name
-          canon: canonical(doc.name)
-        self.flush()
+          canon: model.canonical(doc.name)
   # observe only returns after initial added callbacks have run.  So now
   # mark the subscription as ready
-  self.complete()
-  self.flush()
+  self.ready()
   # stop observing the various cursors when client unsubs
   self.onStop ->
     handles.map (h) -> h.stop()

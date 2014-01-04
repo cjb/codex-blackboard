@@ -1,16 +1,21 @@
+'use strict'
+model = share.model # import
+settings = share.settings # import
+
 Template.round.data = ->
   r = {}
-  round = r.round = Rounds.findOne Session.get("id")
-  group = r.group = RoundGroups.findOne rounds: round?._id
+  round = r.round = model.Rounds.findOne Session.get("id")
+  group = r.group = model.RoundGroups.findOne rounds: round?._id
   r.round_num = 1 + group?.round_start + \
                 (group?.rounds or []).indexOf(round?._id)
-  r.puzzles = ((Puzzles.findOne(p) or {_id:p}) for p in (round?.puzzles or []))
+  r.puzzles = ((model.Puzzles.findOne(p) or {_id:p}) \
+    for p in (round?.puzzles or []))
   return r
 Template.round.created = ->
   $('html').addClass('fullHeight')
-  startupChat()
+  share.chat.startupChat()
   this.afterFirstRender = ->
-    Splitter.vsize.set()
+    share.Splitter.vsize.set()
 Template.round.rendered = ->
   $('html').addClass('fullHeight')
   this.afterFirstRender?()
@@ -18,11 +23,12 @@ Template.round.rendered = ->
   # set page title
   type = Session.get('type')
   id = Session.get('id')
-  name = collection(type)?.findOne(id)?.name or id
+  name = model.collection(type)?.findOne(id)?.name or id
   $("title").text("Round: "+name)
+  share.Splitter.vsize.set() unless share.Splitter.vsize.manualResized
 Template.round.destroyed = ->
   $('html').removeClass('fullHeight')
-  cleanupChat()
+  share.chat.cleanupChat()
 
 Template.round.preserve
   "iframe[src]": (node) -> node.src
@@ -32,19 +38,19 @@ Template.round.events
     event.preventDefault()
     drive = this.round.drive
     return unless drive
-    uploadToDriveFolder drive, (docs) -> console.log docs
-  "mousedown .bb-splitter-handle": (e,t) -> Splitter.handleEvent(e, t)
+    share.uploadToDriveFolder drive, (docs) -> console.log docs
+  "mousedown .bb-splitter-handle": (e,t) -> share.Splitter.handleEvent(e, t)
 
 # presumably we also want to subscribe to the round's chat room
 # and presence information at some point.
-Meteor.autosubscribe ->
-  return if BB_SUB_ALL
+Deps.autorun ->
+  return if settings.BB_SUB_ALL
   return unless Session.equals("type", "rounds")
   round_id = Session.get('id')
   return unless round_id
   Meteor.subscribe 'round-by-id', round_id
   Meteor.subscribe 'roundgroup-for-round', round_id
-  r = Rounds.findOne round_id
+  r = model.Rounds.findOne round_id
   return unless r
   for p in r.puzzles
     Meteor.subscribe 'puzzle-by-id', p
@@ -52,8 +58,8 @@ Meteor.autosubscribe ->
 ## Helper function for linking puzzles in rounds to the hunt-running site
 updateHuntLinks = (round_prefix) ->
   # round prefix is something like "http://www.coinheist.com/indiana/"
-  Rounds.update Session.get("id"), $set: link: round_prefix
-  Rounds.findOne(Session.get("id")).puzzles \
-    .map((p) -> Puzzles.findOne p).filter((p) -> not p.link ) \
+  model.Rounds.update Session.get("id"), $set: link: round_prefix
+  model.Rounds.findOne(Session.get("id")).puzzles \
+    .map((p) -> model.Puzzles.findOne p).filter((p) -> not p.link ) \
     .forEach (p) ->
-      Puzzles.update p._id, $set: link: "#{round_prefix}#{p.canon}"
+      model.Puzzles.update p._id, $set: link: "#{round_prefix}#{p.canon}"

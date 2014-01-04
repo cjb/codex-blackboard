@@ -1,10 +1,14 @@
+'use strict'
+model = share.model # import
+settings = share.settings # import
+
 GENERAL_ROOM = 'Ringhunters'
 
-Session.set 'room_name', "general/0"
-Session.set 'nick'     , ($.cookie("nick") || "")
-Session.set 'mute'     , $.cookie("mute")
-Session.set 'type'     , 'general'
-Session.set 'id'       , '0'
+Session.setDefault 'room_name', "general/0"
+Session.setDefault 'nick'     , ($.cookie("nick") || "")
+Session.setDefault 'mute'     , $.cookie("mute")
+Session.setDefault 'type'     , 'general'
+Session.setDefault 'id'       , '0'
 
 # Globals
 instachat = {}
@@ -19,12 +23,12 @@ Template.messages.room_name = -> Session.get('room_name')
 Template.messages.timestamp = -> +Session.get('timestamp')
 Template.messages.messages  = ->
   timestamp = (+Session.get('timestamp')) or Number.MAX_VALUE
-  messages = Messages.find
+  messages = model.Messages.find
     room_name: Session.get("room_name")
     timestamp: $lt: timestamp
   ,
     sort: [['timestamp',"desc"]]
-    limit: MESSAGE_PAGE
+    limit: model.MESSAGE_PAGE
   sameNick = do ->
     prevContext = null
     (m) ->
@@ -39,9 +43,9 @@ Template.messages.messages  = ->
     message: m
 
 Template.messages.email = ->
-  cn = canonical(this.message.nick)
-  n = Nicks.findOne canon: cn
-  return getTag(n, 'Gravatar') or "#{cn}@#{DEFAULT_HOST}"
+  cn = model.canonical(this.message.nick)
+  n = model.Nicks.findOne canon: cn
+  return model.getTag(n, 'Gravatar') or "#{cn}@#{settings.DEFAULT_HOST}"
 
 Template.messages.body = ->
   body = this.message.body
@@ -56,29 +60,35 @@ Template.messages.preserve
   ".inline-image[id]": (node) -> node.id
 Template.messages.created = ->
   instachat.scrolledToBottom = true
-  this.run = Meteor.autorun =>
-    this.sub1?.stop?()
-    this.sub2?.stop?()
+  this.computation = Deps.autorun =>
+    invalidator = =>
+      this.sub1?.stop?()
+      this.sub2?.stop?()
+      this.sub1 = this.sub2 = null
+      instachat.ready = false
+      instachat.unreadMessages = 0
+      hideMessageAlert()
+    invalidator()
     room_name = Session.get 'room_name'
     return unless room_name
     this.sub1 = Meteor.subscribe 'presence-for-room', room_name
-    nick = (if BB_DISABLE_PM then null else Session.get 'nick') or null
+    nick = (if settings.BB_DISABLE_PM then null else Session.get 'nick') or null
     # re-enable private messages, but just in ringhunters (for codexbot)
-    if BB_DISABLE_PM and room_name is "general/0"
+    if settings.BB_DISABLE_PM and room_name is "general/0"
       nick = Session.get 'nick'
     timestamp = (+Session.get('timestamp')) or Number.MAX_VALUE
-    this.sub2 = Meteor.subscribe 'paged-messages', nick, room_name, timestamp
+    this.sub2 = Meteor.subscribe 'paged-messages', nick, room_name, timestamp,
+      onReady: -> instachat.ready = true
+    Deps.onInvalidate invalidator
 Template.messages.destroyed = ->
-    this.sub1?.stop?()
-    this.sub2?.stop?()
-    this.run.stop()
+  this.computation.stop() # runs invalidation handler, too
 Template.messages.rendered = ->
   scrollMessagesView() if instachat.scrolledToBottom
 
 Template.chat_header.room_name = -> prettyRoomName()
 Template.chat_header.whos_here = ->
   roomName = Session.get('type') + '/' + Session.get('id')
-  return Presence.find {room_name: roomName}, {sort:["nick"]}
+  return model.Presence.find {room_name: roomName}, {sort:["nick"]}
 
 # Utility functions
 
@@ -138,14 +148,14 @@ prettyRoomName = ->
   type = Session.get('type')
   id = Session.get('id')
   name = if type is "general" then GENERAL_ROOM else \
-    Names.findOne(id)?.name
+    model.Names.findOne(id)?.name
   return (name or "unknown")
 
 joinRoom = (type, id) ->
   roomName = type + '/' + id
   # xxx: could record the room name in a set here.
   Session.set "room_name", roomName
-  Router.goToChat(type, id, Session.get('timestamp'))
+  share.Router.goToChat(type, id, Session.get('timestamp'))
   scrollMessagesView()
   $("#messageInput").select()
   startupChat()
@@ -179,10 +189,10 @@ $(window).scroll (event) ->
   return unless Session.equals('currentPage', 'chat')
   # set to false, just in case older browser doesn't have scroll properties
   instachat.scrolledToBottom = false
-  [body, html] = [document.body, document.body?.parentElement]
-  return unless body?.scrollTop? and body?.scrollHeight?
+  [body, html] = [document.body, document.documentElement]
+  return unless html?.scrollTop? and html?.scrollHeight?
   return unless html?.clientHeight?
-  [scrollPos, scrollMax] = [body.scrollTop+html.clientHeight, body.scrollHeight]
+  [scrollPos, scrollMax] = [html.scrollTop+html.clientHeight, html.scrollHeight]
   atBottom = (scrollPos >= scrollMax)
   # firefox says that the HTML element is scrolling, not the body element...
   if html.scrollTopMax?
@@ -196,11 +206,11 @@ $("#joinRoom").live "submit", ->
     # reset to old room name
     $("#roomName").val prettyRoomName()
   # is this the general room?
-  else if canonical(roomName) is canonical(GENERAL_ROOM)
+  else if model.canonical(roomName) is model.canonical(GENERAL_ROOM)
     joinRoom "general", "0"
   else
     # try to find room as a group, round, or puzzle name
-    n = Names.findOne canon: canonical(roomName)
+    n = model.Names.findOne canon: model.canonical(roomName)
     if n
       joinRoom n.type, n._id
     else
@@ -230,9 +240,9 @@ Template.messages_input.submit = (message) ->
       args.to = args.nick
       args.action = true
       whos_here = \
-        Presence.find({room_name: args.room_name}, {sort:["nick"]}).fetch()
-      whos_here = whos_here.map (obj) ->
-        if obj.foreground then obj.nick else "(#{obj.nick})"
+        model.Presence.find({room_name: args.room_name}, {sort:["nick"]}) \
+        .fetch().map (obj) ->
+          if obj.foreground then obj.nick else "(#{obj.nick})"
       if whos_here.length == 0
         whos_here = "nobody"
       else if whos_here.length == 1
@@ -252,7 +262,7 @@ Template.messages_input.submit = (message) ->
       [to, rest] = rest.split(/\s+([^]*)/, 2)
       missingMessage = (not rest)
       while rest
-        n = Nicks.findOne canon: canonical(to)
+        n = model.Nicks.findOne canon: model.canonical(to)
         break if n
         [extra, rest] = rest.split(/\s+([^]*)/, 2)
         to += ' ' + extra
@@ -270,17 +280,29 @@ Template.messages_input.submit = (message) ->
   Meteor.call 'newMessage', args
   # make sure we're looking at the most recent messages
   if (+Session.get('timestamp'))
-    Router.navigate "/chat/#{Session.get 'room_name'}", {trigger:true}
+    share.Router.navigate "/chat/#{Session.get 'room_name'}", {trigger:true}
   return
 Template.messages_input.events
   "keydown textarea": (event, template) ->
-     # implicit submit on enter (but not shift-enter or ctrl-enter)
-     return unless event.which is 13 and not (event.shiftKey or event.ctrlKey)
-     event.preventDefault() # prevent insertion of enter
-     $message = $ event.currentTarget
-     message = $message.val()
-     $message.val ""
-     Template.messages_input.submit message
+    # tab completion
+    if event.which is 9 # tab
+      event.preventDefault() # prevent tabbing away from input field
+      whos_here = Template.chat_header.whos_here().fetch()
+      $message = $ event.currentTarget
+      message = $message.val()
+      if message
+        for nick in whos_here
+          if nick.nick.indexOf(message) is 0
+            $message.val nick.nick + ": "
+          else if "@#{nick.nick}".indexOf(message) is 0
+            $message.val "@" + nick.nick + " "
+    # implicit submit on enter (but not shift-enter or ctrl-enter)
+    return unless event.which is 13 and not (event.shiftKey or event.ctrlKey)
+    event.preventDefault() # prevent insertion of enter
+    $message = $ event.currentTarget
+    message = $message.val()
+    $message.val ""
+    Template.messages_input.submit message
 
 
 # alert for unread messages
@@ -295,10 +317,10 @@ $("#messageInput").live "focus", ->
 showUnreadMessagesAlert = ->
   return if instachat.messageAlertInterval
   # we use window.setInterval here instead of Meteor.setInterval because
-  # this is run in a reactive context (from autosubscribe) and Meteor
+  # this is run in a reactive context (from autorun) and Meteor
   # will complain if you set intervals inside a reactive context because
-  # it doesn't know how to cancel them.  That's okay -- we're doing that
-  # ourself.  So use window.setInterval to go behind Meteor's back.
+  # it doesn't know how to cancel them.  That's okay -- we're doing the
+  # cancellation ourself.  So use window.setInterval to go behind Meteor's back.
   instachat.messageAlertInterval = window.setInterval ->
     title = $("title")
     name = "Chat: "+prettyRoomName()
@@ -316,6 +338,7 @@ hideMessageAlert = ->
   $("title").text("Chat: "+prettyRoomName())
 
 unreadMessage = (doc)->
+  return unless instachat.ready # don't ping until we're done loading messages
   unless Session.equals('nick', doc["nick"]) || doc.system || Session.get "mute"
     # only ping if message mentions you
     if doc.body?.indexOf(Session.get('nick')) >= 0 and not doc.bodyIsHtml
@@ -330,7 +353,7 @@ Template.chat.created = ->
   this.afterFirstRender = ->
     # created callback means that we've switched to chat, but
     # can't call ensureNick until after firstRender
-    ensureNick ->
+    share.ensureNick ->
       type = Session.get('type')
       id = Session.get('id')
       joinRoom type, id
@@ -345,22 +368,23 @@ startupChat = ->
   return if instachat.keepaliveInterval?
   instachat.keepalive = ->
     return unless Session.get('nick')
-    Meteor.call "setPresence"
+    Meteor.call "setPresence",
       nick: Session.get('nick')
       room_name: Session.get "room_name"
       present: true
       foreground: isVisible() # foreground/background tab status
-      uuid: CLIENT_UUID # identify this tab
+      uuid: settings.CLIENT_UUID # identify this tab
   instachat.keepalive()
   # send a keep alive every N minutes
-  instachat.keepaliveInterval = Meteor.setInterval instachat.keepalive, (PRESENCE_KEEPALIVE_MINUTES*60*1000)
+  instachat.keepaliveInterval = \
+    Meteor.setInterval instachat.keepalive, (model.PRESENCE_KEEPALIVE_MINUTES*60*1000)
 
 cleanupChat = ->
   if instachat.keepaliveInterval?
     Meteor.clearInterval instachat.keepaliveInterval
     instachat.keepalive = instachat.keepaliveInterval = undefined
   if Session.get('nick') and false # causes bouncing. just let it time out.
-    Meteor.call "setPresence"
+    Meteor.call "setPresence",
       nick: Session.get('nick')
       room_name: Session.get "room_name"
       present: false
@@ -375,17 +399,25 @@ $(window).unload -> cleanupChat()
 Meteor.startup ->
   instachat.unreadMessageSound = new Audio "/sound/Electro_-S_Bainbr-7955.wav"
 
-Meteor.autorun ->
+Deps.autorun ->
   unless Session.equals("currentPage", "chat") and \
          (+Session.get('timestamp')) is 0
     hideMessageAlert()
     return
-  # the autosubscribe magic *doesn't* tear down 'observe's
-  # live query handle when room_name or currentPage changes
+  # the autorun magic *doesn't* tear down 'observe's
+  # live query handle when room_name or currentPage changes (but it should!)
   # we need to handle that ourselves...
-  handle = Messages.find
+  handle = model.Messages.find
     room_name: Session.get("room_name")
   .observe
     added: (item) ->
       unreadMessage(item) unless item.system
-  Meteor.deps.Context.current.onInvalidate -> handle.stop()
+  Deps.onInvalidate -> handle.stop()
+
+# exports
+share.chat =
+  convertURLsToLinksAndImages: convertURLsToLinksAndImages
+  startupChat: startupChat
+  cleanupChat: cleanupChat
+  hideMessageAlert: hideMessageAlert
+  joinRoom: joinRoom

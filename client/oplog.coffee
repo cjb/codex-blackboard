@@ -1,8 +1,11 @@
+'use strict'
+model = share.model
+
 Template.oplog.oplogs = ->
   timestamp = (+Session.get('timestamp')) or Number.MAX_VALUE
-  ops = OpLogs.find {timestamp: $lt: +timestamp},
+  ops = model.OpLogs.find {timestamp: $lt: +timestamp},
     sort: [["timestamp","desc"]]
-    limit: OPLOG_PAGE
+    limit: model.OPLOG_PAGE
   for oplog, i in ops.fetch().reverse()
     first: (i is 0)
     oplog: oplog
@@ -16,7 +19,7 @@ Template.oplog.rendered = ->
   this.afterFirstRender?()
   this.afterFirstRender = undefined
 
-Meteor.autosubscribe ->
+Deps.autorun ->
   return unless Session.equals("currentPage", "oplog")
   timestamp = +Session.get('timestamp')
   Meteor.subscribe 'paged-oplogs', (+timestamp) or Number.MAX_VALUE

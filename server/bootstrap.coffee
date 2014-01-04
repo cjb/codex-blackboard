@@ -1,4 +1,10 @@
+'use strict'
+model = share.model
+
 # if the database is empty on server start, create some sample data.
+# (useful during development; disable this before hunt)
+POPULATE_DB_WHEN_RESET = true
+
 SAMPLE_DATA = [
   name: "Mega man"
   rounds: [
@@ -395,7 +401,7 @@ SAMPLE_NICKS = [
 ]
 
 Meteor.startup ->
-  if 0 # RoundGroups.find().count() is 0
+  if POPULATE_DB_WHEN_RESET and model.RoundGroups.find().count() is 0
     # note that Meteor.call is async... this causes some slight issues...
     WHO='cscott'
     extend = (a,b) ->
@@ -430,5 +436,5 @@ Meteor.startup ->
       Meteor.call "newMessage", chat
     # add some user ids
     for nick in SAMPLE_NICKS
-      Meteor.call "newNick", nick, (error, n) ->
+      Meteor.call "newNick", nick, (error, _) ->
         throw error if error

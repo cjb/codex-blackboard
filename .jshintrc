@@ -1,0 +1,32 @@
+{
+	"predef": [
+		"Meteor", "Random", "$", "jQuery", "Deps", "Template", "Session",
+		"document", "Backbone", "google", "alertify", "Audio",
+		"Handlebars", "window"
+	],
+
+	"bitwise": true,
+	//"curly": true,
+	//"eqeqeq": true,
+	"immed": true,
+	"latedef": true,
+	//"newcap": true,
+	"noarg": true,
+	"noempty": true,
+	"nonew": true,
+	"regexp": false,
+	"undef": true,
+	"strict": false,
+	"trailing": true,
+	//"unused":true,
+  "eqnull":true,
+
+	"smarttabs": true,
+	"multistr": true,
+
+	"node": true,
+
+	"nomen": false,
+	"loopfunc": true
+	//"onevar": true
+}

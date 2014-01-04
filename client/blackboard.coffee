@@ -1,10 +1,13 @@
+'use strict'
+model = share.model # import
+settings = share.settings # import
+
 NAVBAR_HEIGHT = 73 # keep in sync with @navbar-height in blackboard.less
 SOUND_THRESHOLD_MS = 30*1000 # 30 seconds
 
 blackboard = {} # store page global state
 
 Meteor.startup ->
-  blackboard.initialPageLoad = UTCNow()
   blackboard.newAnswerSound = new Audio "sound/that_was_easy.wav"
   # set up a persistent query so we can play the sound whenever we get a new
   # answer
@@ -13,8 +16,9 @@ Meteor.startup ->
   # page the user is currently on.  This is "fun".  Trust us...
   Meteor.subscribe 'last-answered-puzzle'
   # ignore added; that's just the startup state.  Watch 'changed'
-  LastAnswer.find({}).observe
-    changed: (doc, atIndex, oldDoc) ->
+  model.LastAnswer.find({}).observe
+    changed: (doc, oldDoc) ->
+      return unless doc.puzzle? # 'no recent puzzle was solved'
       return if doc.puzzle is oldDoc.puzzle # answer changed, not really new
       console.log 'that was easy', doc, oldDoc
       unless Session.get 'mute'
@@ -48,16 +52,17 @@ Template.blackboard.sortReverse = -> Session.get 'sortReverse'
 ############## groups, rounds, and puzzles ####################
 Template.blackboard.roundgroups = ->
   dir = if Session.get 'sortReverse' then 'desc' else 'asc'
-  RoundGroups.find {}, sort: [["created", dir]]
+  model.RoundGroups.find {}, sort: [["created", dir]]
 # the following is a map() instead of a direct find() to preserve order
 Template.blackboard.rounds = ->
   r = ({
     round_num: 1+index+this.round_start
-    round: Rounds.findOne(id) or { _id: id, name: Names.findOne(id)?.name }
+    round: (model.Rounds.findOne(id) or \
+            {_id: id, name: model.Names.findOne(id)?.name})
     rX: "r#{1+index+this.round_start}"
-    num_puzzles: (Rounds.findOne(id)?.puzzles or []).length
-    num_solved: (p for p in (Rounds.findOne(id)?.puzzles or []) when \
-                 Puzzles.findOne(p)?.answer).length
+    num_puzzles: (model.Rounds.findOne(id)?.puzzles or []).length
+    num_solved: (p for p in (model.Rounds.findOne(id)?.puzzles or []) when \
+                 model.Puzzles.findOne(p)?.answer).length
    } for id, index in this.rounds)
    r.reverse() if Session.get 'sortReverse'
    return r
@@ -67,8 +72,8 @@ Template.blackboard.created = ->
     $("#bb-sidebar").localScroll({ duration: 400, lazy: true })
     $("body").scrollspy(target: "#bb-sidebar", offset: (NAVBAR_HEIGHT + 10))
   this.find_bbedit = (event) ->
-     edit = $(event.currentTarget).closest('*[data-bbedit]').attr('data-bbedit')
-     return edit.split('/')
+    edit = $(event.currentTarget).closest('*[data-bbedit]').attr('data-bbedit')
+    return edit.split('/')
 Template.blackboard.rendered = ->
   this.afterFirstRender?()
   this.afterFirstRender = null
@@ -88,70 +93,70 @@ Template.blackboard.rendered = ->
   $('#bb-tables .bb-puzzle .puzzle-name > a').tooltip placement: 'left'
 Template.blackboard.events
   "click .bb-sort-order button": (event, template) ->
-     reverse = $(event.currentTarget).attr('data-sortReverse') is 'true'
-     Session.set 'sortReverse', reverse or undefined
+    reverse = $(event.currentTarget).attr('data-sortReverse') is 'true'
+    Session.set 'sortReverse', reverse or undefined
   "click .bb-add-round-group": (event, template) ->
-     alertify.prompt "Name of new round group:", (e,str) ->
-        return unless e # bail if cancelled
-        Meteor.call 'newRoundGroup', { name: str, who: Session.get('nick') }
+    alertify.prompt "Name of new round group:", (e,str) ->
+      return unless e # bail if cancelled
+      Meteor.call 'newRoundGroup', { name: str, who: Session.get('nick') }
   "click .bb-roundgroup-buttons .bb-add-round": (event, template) ->
-     [type, id, rest...] = template.find_bbedit(event)
-     who = Session.get('nick')
-     alertify.prompt "Name of new round:", (e,str) ->
-        return unless e # bail if cancelled
-        Meteor.call 'newRound', { name: str, who: who }, (error,r)->
-          throw error if error
-          Meteor.call 'addRoundToGroup', {round: r._id, group: id, who: who}
+    [type, id, rest...] = template.find_bbedit(event)
+    who = Session.get('nick')
+    alertify.prompt "Name of new round:", (e,str) ->
+      return unless e # bail if cancelled
+      Meteor.call 'newRound', { name: str, who: who }, (error,r)->
+        throw error if error
+        Meteor.call 'addRoundToGroup', {round: r._id, group: id, who: who}
   "click .bb-round-buttons .bb-add-puzzle": (event, template) ->
-     [type, id, rest...] = template.find_bbedit(event)
-     who = Session.get('nick')
-     alertify.prompt "Name of new puzzle:", (e,str) ->
-        return unless e # bail if cancelled
-        Meteor.call 'newPuzzle', { name: str, who: who }, (error,p)->
-          throw error if error
-          Meteor.call 'addPuzzleToRound', {puzzle: p._id, round: id, who: who}
+    [type, id, rest...] = template.find_bbedit(event)
+    who = Session.get('nick')
+    alertify.prompt "Name of new puzzle:", (e,str) ->
+      return unless e # bail if cancelled
+      Meteor.call 'newPuzzle', { name: str, who: who }, (error,p)->
+        throw error if error
+        Meteor.call 'addPuzzleToRound', {puzzle: p._id, round: id, who: who}
   "click .bb-add-tag": (event, template) ->
-     [type, id, rest...] = template.find_bbedit(event)
-     who = Session.get('nick')
-     alertify.prompt "Name of new tag:", (e,str) ->
-        return unless e # bail if cancelled
-        Meteor.call 'setTag', type, id, str, '', who
+    [type, id, rest...] = template.find_bbedit(event)
+    who = Session.get('nick')
+    alertify.prompt "Name of new tag:", (e,str) ->
+      return unless e # bail if cancelled
+      Meteor.call 'setTag', type, id, str, '', who
   "click .bb-move-up, click .bb-move-down": (event, template) ->
-     [type, id, rest...] = template.find_bbedit(event)
-     up = event.currentTarget.classList.contains('bb-move-up')
-     # flip direction if sort order is inverted
-     up = (!up) if (Session.get 'sortReverse') and type isnt 'puzzles'
-     method = if up then 'moveUp' else 'moveDown'
-     Meteor.call method, {type:type, id:id, who:Session.get('nick')}
+    [type, id, rest...] = template.find_bbedit(event)
+    up = event.currentTarget.classList.contains('bb-move-up')
+    # flip direction if sort order is inverted
+    up = (!up) if (Session.get 'sortReverse') and type isnt 'puzzles'
+    method = if up then 'moveUp' else 'moveDown'
+    Meteor.call method, {type:type, id:id, who:Session.get('nick')}
   "click .bb-canEdit .bb-delete-icon": (event, template) ->
-     event.stopPropagation() # keep .bb-editable from being processed!
-     [type, id, rest...] = template.find_bbedit(event)
-     message = "Are you sure you want to delete "
-     if (type is'tags') or (rest[0] is 'title')
-       message += "this #{pretty_collection(type)}?"
-     else
-       message += "the #{rest[0]} of this #{pretty_collection(type)}?"
-     confirmationDialog
-       ok_button: 'Yes, delete it'
-       no_button: 'No, cancel'
-       message: message
-       ok: ->
-         processBlackboardEdit[type]?(null, id, rest...) # process delete
+    event.stopPropagation() # keep .bb-editable from being processed!
+    [type, id, rest...] = template.find_bbedit(event)
+    message = "Are you sure you want to delete "
+    if (type is'tags') or (rest[0] is 'title')
+      message += "this #{model.pretty_collection(type)}?"
+    else
+      message += "the #{rest[0]} of this #{model.pretty_collection(type)}?"
+    share.confirmationDialog
+      ok_button: 'Yes, delete it'
+      no_button: 'No, cancel'
+      message: message
+      ok: ->
+        processBlackboardEdit[type]?(null, id, rest...) # process delete
   "click .bb-canEdit .bb-editable": (event, template) ->
-     # note that we rely on 'blur' on old field (which triggers ok or cancel)
-     # happening before 'click' on new field
-     Session.set 'editing', template.find_bbedit(event).join('/')
+    # note that we rely on 'blur' on old field (which triggers ok or cancel)
+    # happening before 'click' on new field
+    Session.set 'editing', template.find_bbedit(event).join('/')
 Template.blackboard.events okCancelEvents('.bb-editable input',
   ok: (text, evt) ->
-     # find the data-bbedit specification for this field
-     edit = $(evt.currentTarget).closest('*[data-bbedit]').attr('data-bbedit')
-     [type, id, rest...] = edit.split('/')
-     # strip leading/trailing whitespace from text (cancel if text is empty)
-     text = text.replace /^\s+|\s+$/, ''
-     processBlackboardEdit[type]?(text, id, rest...) if text
-     Session.set 'editing', undefined # done editing this
+    # find the data-bbedit specification for this field
+    edit = $(evt.currentTarget).closest('*[data-bbedit]').attr('data-bbedit')
+    [type, id, rest...] = edit.split('/')
+    # strip leading/trailing whitespace from text (cancel if text is empty)
+    text = text.replace /^\s+|\s+$/, ''
+    processBlackboardEdit[type]?(text, id, rest...) if text
+    Session.set 'editing', undefined # done editing this
   cancel: (evt) ->
-     Session.set 'editing', undefined # not editing anything anymore
+    Session.set 'editing', undefined # not editing anything anymore
 )
 processBlackboardEdit =
   tags: (text, id, canon, field) ->
@@ -186,24 +191,24 @@ processBlackboardEdit =
       Meteor.call 'setAnswer', {puzzle:id, answer:text, who:who}
   tags_name: (text, id, canon) ->
     who = Session.get('nick')
-    n = Names.findOne(id)
+    n = model.Names.findOne(id)
     if text is null # delete tag
       return Meteor.call 'deleteTag', n.type, id, canon, who
-    tags = collection(n.type).findOne(id).tags
+    tags = model.collection(n.type).findOne(id).tags
     t = (tag for tag in tags when tag.canon is canon)[0]
     Meteor.call 'setTag', n.type, id, text, t.value, who, (error,result) ->
-      if (t.canon isnt canonical(text)) and (not error)
+      if (t.canon isnt model.canonical(text)) and (not error)
         Meteor.call 'deleteTag', n.type, id, t.name, who
   tags_value: (text, id, canon) ->
-    n = Names.findOne(id)
-    tags = collection(n.type).findOne(id).tags
+    n = model.Names.findOne(id)
+    tags = model.collection(n.type).findOne(id).tags
     t = (tag for tag in tags when tag.canon is canon)[0]
     # special case for 'status' tag, which might not previously exist
     for special in ['Status', 'Meta Answer']
-      if (not t) and canon is canonical(special)
+      if (not t) and canon is model.canonical(special)
         t =
           name: special
-          canon: canonical(special)
+          canon: model.canonical(special)
           value: ''
     # set tag (overwriting previous value)
     Meteor.call 'setTag', n.type, id, t.name, text, Session.get('nick')
@@ -214,20 +219,20 @@ Template.blackboard_round.puzzles = ->
   ({
     round_num: this.round_num
     puzzle_num: 1 + index
-    puzzle: Puzzles.findOne(id) or { _id: id }
+    puzzle: model.Puzzles.findOne(id) or { _id: id }
     rXpY: "r#{this.round_num}p#{1+index}"
    } for id, index in this.round.puzzles)
 Template.blackboard_round.tag = (name) ->
-  return (getTag this.round, name) or ''
+  return (model.getTag this.round, name) or ''
 Template.blackboard_round.whos_working = ->
-  return Presence.find
+  return model.Presence.find
     room_name: ("rounds/"+this.round?._id)
   , sort: ["nick"]
 
 Template.blackboard_puzzle.tag = (name) ->
-  return (getTag this.puzzle, name) or ''
+  return (model.getTag this.puzzle, name) or ''
 Template.blackboard_puzzle.whos_working = ->
-  return Presence.find
+  return model.Presence.find
     room_name: ("puzzles/"+this.puzzle?._id)
   , sort: ["nick"]
 
@@ -240,17 +245,15 @@ Template.blackboard_puzzle_tags.tags = (id) ->
 Template.blackboard_tags.tags = Template.blackboard_puzzle_tags.tags
 
 # Subscribe to all group, round, and puzzle information
-Meteor.autosubscribe ->
+Deps.autorun ->
   return unless Session.equals("currentPage", "blackboard")
   Meteor.subscribe 'all-presence'
-  return if BB_SUB_ALL
-  Meteor.subscribe 'all-roundgroups'
-  Meteor.subscribe 'all-rounds'
-  Meteor.subscribe 'all-puzzles'
+  return if settings.BB_SUB_ALL
+  Meteor.subscribe 'all-roundsandpuzzles'
 
 # Update 'currentTime' every minute or so to allow pretty_ts to magically
 # update
 Meteor.startup ->
   Meteor.setInterval ->
-    Session.set "currentTime", UTCNow()
+    Session.set "currentTime", model.UTCNow()
   , 60*1000
