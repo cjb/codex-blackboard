@@ -3,7 +3,7 @@ model = share.model
 
 # if the database is empty on server start, create some sample data.
 # (useful during development; disable this before hunt)
-POPULATE_DB_WHEN_RESET = true
+POPULATE_DB_WHEN_RESET = if Meteor.settings.production then false else true
 
 SAMPLE_DATA = [
   name: "Mega man"
