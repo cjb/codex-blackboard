@@ -221,15 +221,24 @@ spread_id_to_link = (id) ->
   unimplemented = -> throw new Meteor.Error(500, "Unimplemented")
 
   canonicalTags = (tags) ->
+    check tags, [ObjectWith(name:NonEmptyString,value:Match.Any)]
     ({name:tag.name,canon:canonical(tag.name),value:tag.value} for tag in tags)
 
   NonEmptyString = Match.Where (x) ->
     check x, String
     return x.length > 0
+  # a key of BBCollection
+  ValidType = Match.Where (x) ->
+    check x, NonEmptyString
+    Object::hasOwnProperty.call(BBCollection, x)
+  # either an id, or an object containing an id
+  IdOrObject = Match.OneOf NonEmptyString, Match.Where (o) ->
+    typeof o is 'object' and ((check o._id, NonEmptyString) or true)
   # This is like Match.ObjectIncluding, but we don't require `o` to be
   # a plain object
   ObjectWith = (pattern) ->
     Match.Where (o) ->
+      return false if typeof(o) is not 'object'
       Object.keys(pattern).forEach (k) ->
         check o[k], pattern[k]
       true
@@ -403,8 +412,13 @@ spread_id_to_link = (id) ->
     renameRoundGroup: (args) ->
       renameObject "roundgroups", args
     deleteRoundGroup: (args) ->
-      # XXX disallow deletion unless roundgroup.rounds is empty?
+      check args, ObjectWith
+        id: NonEmptyString
+        who: NonEmptyString
+      # disallow deletion unless roundgroup.rounds is empty
       # XXX or else move rounds to some other group(s)
+      rg = RoundGroups.findOne(args.id)
+      return false unless rg? and rg?.rounds?.length is 0
       deleteObject "roundgroups", args
 
     newRound: (args) ->
@@ -417,6 +431,7 @@ spread_id_to_link = (id) ->
       check args, ObjectWith
         id: NonEmptyString
         name: NonEmptyString
+        who: NonEmptyString
       # get drive ID (racy)
       r = Rounds.findOne(args.id)
       drive = r?.drive
@@ -428,18 +443,20 @@ spread_id_to_link = (id) ->
     deleteRound: (args) ->
       check args, ObjectWith
         id: NonEmptyString
+        who: NonEmptyString
       rid = args.id
+      old = Rounds.findOne(rid)
+      # disallow deletion unless round.puzzles is empty
+      # XXX or else move puzzles to some other round(s)
+      return false unless old? and old?.puzzles?.length is 0
       # get drive ID (racy)
-      old = Rounds.findOne(args.id)
       drive = old?.drive
       spreadsheet = old?.spreadsheet
-      # XXX disallow deletion unless round.puzzles is empty?
-      # XXX or else move puzzles to some other round(s)
       # remove round itself
       r = deleteObject "rounds", args
       # remove from all roundgroups
       RoundGroups.update { rounds: rid },{ $pull: rounds: rid },{ multi: true }
-      # delete google drive folder
+      # delete google drive folder and all contents, recursively
       deleteDriveFolder drive, spreadsheet if drive?
       # XXX: delete chat room logs?
       return r
@@ -458,6 +475,7 @@ spread_id_to_link = (id) ->
       check args, ObjectWith
         id: NonEmptyString
         name: NonEmptyString
+        who: NonEmptyString
       # get drive ID (racy)
       p = Puzzles.findOne(args.id)
       drive = p?.drive
@@ -469,6 +487,7 @@ spread_id_to_link = (id) ->
     deletePuzzle: (args) ->
       check args, ObjectWith
         id: NonEmptyString
+        who: NonEmptyString
       pid = args.id
       # get drive ID (racy)
       old = Puzzles.findOne(args.id)
@@ -484,11 +503,13 @@ spread_id_to_link = (id) ->
       return r
 
     newNick: (args) ->
+      check args, ObjectWith
+        name: NonEmptyString
       # a bit of a stretch but let's reuse the object type
       newObject "nicks",
         name: args.name
         who: args.name
-        tags: args.tags
+        tags: canonicalTags(args.tags or [])
       , {}, {suppressLog:true}
     renameNick: (args) ->
       renameObject "nicks", args, {suppressLog:true}
@@ -496,6 +517,7 @@ spread_id_to_link = (id) ->
       deleteObject "nicks", args, {suppressLog:true}
 
     newMessage: (args)->
+      check args, Object
       newMsg =
         body: args.body or ""
         bodyIsHtml: args.bodyIsHtml or false
@@ -516,11 +538,11 @@ spread_id_to_link = (id) ->
       return newMsg
 
     updateLastRead: (args) ->
+      check args, ObjectWith
+        nick: NonEmptyString
+        room_name: NonEmptyString
+        timestamp: Number
       try
-        check args, ObjectWith
-          nick: NonEmptyString
-          room_name: NonEmptyString
-          timestamp: Number
         LastRead.upsert
           nick: canonical(args.nick)
           room_name: args.room_name
@@ -530,8 +552,9 @@ spread_id_to_link = (id) ->
       catch e
         # ignore duplicate key errors; they are harmless and occur when we
         # try to move the LastRead.timestamp backwards.
-        unless e.name is 'MongoError' and /^E11000 duplicate key/.test(e.err)
-          throw e
+        if Meteor.isServer and e?.name is 'MongoError' and e?.code==11000
+          return false
+        throw e
 
     setPresence: (args) ->
       check args, ObjectWith
@@ -580,6 +603,9 @@ spread_id_to_link = (id) ->
       return collection(type).findOne(id)
 
     getByName: (args) ->
+      check args, ObjectWith
+        name: NonEmptyString
+        optional_type: Match.Optional(NonEmptyString)
       for type in ['roundgroups','rounds','puzzles','nicks']
         continue if args.optional_type and args.optional_type isnt type
         o = collection(type).findOne canon: canonical(args.name)
@@ -587,10 +613,11 @@ spread_id_to_link = (id) ->
       return null # no match found
 
     setField: (type, object, fields, who) ->
-      id = object._id or object
-      check id, NonEmptyString
-      check who, NonEmptyString
+      check type, ValidType
+      check object, IdOrObject
       check fields, Object
+      check who, NonEmptyString
+      id = object._id or object
       now = UTCNow()
       # disallow modifications to the following fields; use other APIs for these
       for f in ['name','canon','created','created_by','solved','solved_by',
@@ -602,10 +629,12 @@ spread_id_to_link = (id) ->
       return true
 
     setTag: (type, object, name, value, who) ->
-      id = object._id or object
-      check id, NonEmptyString
+      check type, ValidType
+      check object, IdOrObject
       check name, NonEmptyString
       check who, NonEmptyString
+      check value, Match.Any
+      id = object._id or object
       now = UTCNow()
       canon = canonical(name)
       loop
@@ -629,10 +658,11 @@ spread_id_to_link = (id) ->
         break unless Meteor.isServer and numchanged is 0
       return true
     deleteTag: (type, object, name, who) ->
-      id = object._id or object
-      check id, NonEmptyString
+      check type, ValidType
+      check object, IdOrObject
       check name, NonEmptyString
       check who, NonEmptyString
+      id = object._id or object
       now = UTCNow()
       canon = canonical(name)
       loop
@@ -648,9 +678,11 @@ spread_id_to_link = (id) ->
       return true
 
     addRoundToGroup: (args) ->
+      check args, ObjectWith
+        round: IdOrObject
+        group: IdOrObject
       rid = args.round._id or args.round
       gid = args.group._id or args.group
-      check gid, NonEmptyString
       rg = RoundGroups.findOne(gid)
       throw new Meteor.Error(400, "bad group") unless rg
       # remove round from all other groups
@@ -672,6 +704,9 @@ spread_id_to_link = (id) ->
       return true
 
     addPuzzleToRound: (args) ->
+      check args, ObjectWith
+        puzzle: IdOrObject
+        round: IdOrObject
       pid = args.puzzle._id or args.puzzle
       rid = args.round._id or args.round
       check rid, NonEmptyString
@@ -698,13 +733,14 @@ spread_id_to_link = (id) ->
       return true
 
     getRoundForPuzzle: (puzzle) ->
+      check puzzle, IdOrObject
       id = puzzle._id or puzzle
       check id, NonEmptyString
       return Rounds.findOne(puzzles: id)
 
     getGroupForRound: (round) ->
+      check round, IdOrObject
       id = round._id or round
-      check id, NonEmptyString
       return RoundGroups.findOne(rounds: id)
 
     moveUp: (args) -> moveObject(args.type, args.id, "up")
@@ -712,11 +748,11 @@ spread_id_to_link = (id) ->
     moveDown: (args) -> moveObject(args.type, args.id, "down")
 
     setAnswer: (args) ->
-      id = args.puzzle._id or args.puzzle
-      check id, NonEmptyString
       check args, ObjectWith
+        puzzle: IdOrObject
         answer: NonEmptyString
         who: NonEmptyString
+      id = args.puzzle._id or args.puzzle
       now = UTCNow()
 
       # Only perform the update and oplog if the answer is changing
@@ -734,10 +770,10 @@ spread_id_to_link = (id) ->
       return true
 
     deleteAnswer: (args) ->
-      id = args.puzzle._id or args.puzzle
-      check id, NonEmptyString
       check args, ObjectWith
+        puzzle: IdOrObject
         who: NonEmptyString
+      id = args.puzzle._id or args.puzzle
       now = UTCNow()
       Puzzles.update id, $set:
         answer: null
@@ -748,7 +784,7 @@ spread_id_to_link = (id) ->
       oplog "Deleted answer for", "puzzles", id, args.who
       return true
 
-    getRinghuntersFolder: () ->
+    getRinghuntersFolder: ->
       return unless Meteor.isServer
       # Return special folder used for uploads to general Ringhunters chat
       return share.drive.ringhuntersFolder
