@@ -55,8 +55,7 @@ BlackboardRouter = Backbone.Router.extend
     "chat/:type/:id/:timestamp": "ChatPage"
     "oplogs/:timestamp": "OpLogPage"
     "callins": "CallInPage"
-    "facts/": "FactsPage"
-    "facts": "FactsPage" # be kind to lazy typists
+    "facts": "FactsPage"
     "loadtest/:which": "LoadTestPage"
 
   BlackboardPage: ->

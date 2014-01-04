@@ -40,6 +40,8 @@
   {{/if}}
   {{#if currentPageEquals "oplog"}}
   <li class="active"><a><i class="icon-time icon-white"></i> Operation Logs</a></li>
+  {{else}}{{#if currentPageEquals "facts"}}
+  <li class="active"><a><i class="icon-wrench icon-white"></i> Server Facts</a></li>
   {{else}}
   {{#if currentPageEquals "callins"}}
   <li class="active"><a><i class="icon-check icon-white"></i> Answer Queue</a></li>
@@ -50,7 +52,7 @@
     {{#if typeEquals "puzzles"}}Puzzle{{/if}}
     {{#if typeEquals "general"}}General{{/if}}
     chat</a></li>
-  {{/if}}
+  {{/if}}{{/if}}
 </ul>
   {{#if currentPageEquals "chat"}}
     {{> chat_header }}
