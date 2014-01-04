@@ -15,17 +15,17 @@ Template.callins.rendered = ->
 
 Template.callins.events
   "click .bb-callin-correct": (event, template) ->
-     Meteor.call 'correctCallin',
+     Meteor.call 'correctCallIn',
        id: template.get_callin_id(event)
        who: Session.get('nick')
 
   "click .bb-callin-incorrect": (event, template) ->
-     Meteor.call 'incorrectCallin',
+     Meteor.call 'incorrectCallIn',
        id: template.get_callin_id(event)
        who: Session.get('nick')
 
   "click .bb-callin-cancel": (event, template) ->
-     Meteor.call 'cancelCallin',
+     Meteor.call 'cancelCallIn',
        id: template.get_callin_id(event)
        who: Session.get('nick')
 
