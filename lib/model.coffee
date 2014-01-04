@@ -474,6 +474,7 @@ spread_id_to_link = (id) ->
     newPuzzle: (args) ->
       p = newObject "puzzles", args,
         answer: null
+        incorrectAnswers: []
         solved: null
         solved_by: null
         drive: args.drive or null
@@ -829,20 +830,22 @@ spread_id_to_link = (id) ->
       return true
 
     addIncorrectAnswer: (args) ->
-      id = args.puzzle._id or args.puzzle
-      check id, NonEmptyString
       check args, ObjectWith
+        puzzle: IdOrObject
         answer: NonEmptyString
         who: NonEmptyString
+      id = args.puzzle._id or args.puzzle
       now = UTCNow()
 
       puzzle = Puzzles.findOne(id)
-      incorrectAnswers = puzzle.incorrectAnswers or []
-      incorrectAnswers.push({answer: args.answer, timestamp: UTCNow(), who: args.who})
-      Puzzles.update id, $set:
-         incorrectAnswers: incorrectAnswers
+      throw new Meteor.Error(400, "bad puzzle") unless puzzle
+      Puzzles.update id, $push:
+         incorrectAnswers:
+          answer: args.answer
+          timestamp: UTCNow()
+          who: args.who
 
-      oplog "Incorrect answer #{args.answer} for ", "puzzles", puzzle._id, args.who
+      oplog "Incorrect answer #{args.answer} for ", "puzzles", id, args.who
       return true
 
     deleteAnswer: (args) ->
