@@ -47,9 +47,9 @@ LastAnswer = BBCollection.last_answer = \
 #   name: string
 #   canon: canonicalized version of name, for searching
 #   created: timestamp (sort key)
-#   created_by: _id of Nick
+#   created_by: canon of Nick
 #   touched: timestamp -- records edits to tag, order, group, etc.
-#   touched_by: _id of Nick with last touch
+#   touched_by: canon of Nick with last touch
 #   tags: [ { name: "Status", canon: "status", value: "stuck" }, ... ]
 #   rounds: [ array of round _ids, in order ]
 #   (next fields is a bit racy, oh well)
@@ -72,9 +72,9 @@ if Meteor.isServer
 #   name: string
 #   canon: canonicalized version of name, for searching
 #   created: timestamp
-#   created_by: _id of Nick
+#   created_by: canon of Nick
 #   touched: timestamp -- records edits to tag, order, group, etc.
-#   touched_by: _id of Nick with last touch
+#   touched_by: canon of Nick with last touch
 #   tags: [ { name: "Status", canon: "status", value: "stuck" }, ... ]
 #   puzzles: [ array of puzzle _ids, in order ]
 #   drive: google drive url or id
@@ -90,9 +90,9 @@ if Meteor.isServer
 #   incorrectAnswers: [ { answer: "Wrong", who: "answer submitter",
 #                         timestamp: ... }, ... ]
 #   created: timestamp
-#   created_by: _id of Nick
+#   created_by: canon of Nick
 #   touched: timestamp
-#   touched_by: _id of Nick with last touch
+#   touched_by: canon of Nick with last touch
 #   solved:  timestamp
 #   solved_by:  timestamp of Nick who confirmed the answer
 #   tags: [ { name: "Status", canon: "status", value: "stuck" }, ... ]
@@ -106,7 +106,7 @@ if Meteor.isServer
 #   puzzle: _id of Puzzle
 #   answer: string (proposed answer to call in)
 #   created: timestamp
-#   created_by: _id of Nick
+#   created_by: canon of Nick
 CallIns = BBCollection.callins = new Meteor.Collection "callins"
 if Meteor.isServer
    CallIns._ensureIndex {created: 1}, {}
