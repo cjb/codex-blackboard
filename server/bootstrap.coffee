@@ -402,7 +402,9 @@ SAMPLE_NICKS = [
 
 Meteor.startup ->
   if POPULATE_DB_WHEN_RESET and model.RoundGroups.find().count() is 0
-    # note that Meteor.call is async... this causes some slight issues...
+    # Meteor.call is sync on server!
+    console.log 'Populating initial puzzle database...'
+    console.log '(use production:true in settings.json to disable this)'
     WHO='cscott'
     extend = (a,b) ->
       r = Object.create(null)
@@ -412,29 +414,29 @@ Meteor.startup ->
         r[key] = value
       return r
     for roundgroup in SAMPLE_DATA
-      Meteor.call "newRoundGroup", extend(roundgroup,{who:WHO,rounds:null}), (error, rg) ->
-        throw error if error
-        for round in roundgroup.rounds
-          Meteor.call "newRound", extend(round,{who:WHO,puzzles:null}), (error, r) ->
-            throw error if error
-            Meteor.call "addRoundToGroup", {round:r, group:rg, who:WHO}
-            for chat in (round.chats or [])
-              chat.room_name = "round/" + r._id
-              Meteor.call "newMessage", chat
-            for puzzle in round.puzzles
-              Meteor.call "newPuzzle", extend(puzzle,{who:WHO}), (error, p) ->
-                throw error if error
-                Meteor.call "addPuzzleToRound", {puzzle:p, round:r, who:WHO}
-                if puzzle.answer
-                  Meteor.call "setAnswer", {puzzle:p._id, answer:puzzle.answer, who:WHO}
-                for chat in (puzzle.chats or [])
-                  chat.room_name = "puzzle/" + p._id
-                  Meteor.call "newMessage", chat
+      console.log ' Round Group:', roundgroup.name
+      rg = Meteor.call "newRoundGroup", extend(roundgroup,{who:WHO,rounds:null})
+      for round in roundgroup.rounds
+        console.log '  Round:', round.name
+        r = Meteor.call "newRound", extend(round,{who:WHO,puzzles:null})
+        Meteor.call "addRoundToGroup", {round:r, group:rg, who:WHO}
+        for chat in (round.chats or [])
+          chat.room_name = "rounds/" + r._id
+          Meteor.call "newMessage", chat
+        for puzzle in round.puzzles
+          console.log '   Puzzle:', puzzle.name
+          p = Meteor.call "newPuzzle", extend(puzzle,{who:WHO})
+          Meteor.call "addPuzzleToRound", {puzzle:p, round:r, who:WHO}
+          if puzzle.answer
+            Meteor.call "setAnswer", {puzzle:p._id, answer:puzzle.answer, who:WHO}
+          for chat in (puzzle.chats or [])
+            chat.room_name = "puzzles/" + p._id
+            Meteor.call "newMessage", chat
     # add some general chats
     for chat in SAMPLE_CHATS
       chat.room_name = "general/0"
       Meteor.call "newMessage", chat
     # add some user ids
     for nick in SAMPLE_NICKS
-      Meteor.call "newNick", nick, (error, _) ->
-        throw error if error
+      Meteor.call "newNick", nick
+    console.log 'Done populating initial database.'
