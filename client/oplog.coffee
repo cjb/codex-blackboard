@@ -3,9 +3,9 @@ model = share.model
 
 Template.oplog.oplogs = ->
   timestamp = (+Session.get('timestamp')) or Number.MAX_VALUE
-  ops = model.OpLogs.find {timestamp: $lt: +timestamp},
+  ops = model.Messages.find {room_name: 'oplog/0', timestamp: $lt: +timestamp},
     sort: [["timestamp","desc"]]
-    limit: model.OPLOG_PAGE
+    limit: model.MESSAGE_PAGE
   for oplog, i in ops.fetch().reverse()
     first: (i is 0)
     oplog: oplog
@@ -21,5 +21,5 @@ Template.oplog.rendered = ->
 
 Deps.autorun ->
   return unless Session.equals("currentPage", "oplog")
-  timestamp = +Session.get('timestamp')
-  Meteor.subscribe 'paged-oplogs', (+timestamp) or Number.MAX_VALUE
+  timestamp = Session.get('timestamp')
+  Meteor.subscribe 'paged-messages', 'oplog/0', ((+timestamp) or 0)

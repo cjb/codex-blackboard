@@ -8,7 +8,7 @@
   {{/if}}
   <div class="bb-oplog">
     <span class="timestamp">{{pretty_ts oplog.timestamp}}</span>
-    {{oplog.message}}
+    {{oplog.body}}
     {{link oplog.id}}
     {{#if oplog.nick}} (<strong title="{{nickOrName oplog.nick}}">{{oplog.nick}}</strong>){{/if}}
   </div>

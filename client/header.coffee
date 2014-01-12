@@ -370,7 +370,7 @@ confirmationDialog = share.confirmationDialog = (options) ->
 ############## operation log in header ####################
 Template.header_lastupdates.lastupdates = ->
   LIMIT = 10
-  ologs = model.OpLogs.find {}, \
+  ologs = model.Messages.find {room_name: "oplog/0"}, \
         {sort: [["timestamp","desc"]], limit: LIMIT}
   ologs = ologs.fetch()
   # now look through the entries and collect similar logs
@@ -379,7 +379,7 @@ Template.header_lastupdates.lastupdates = ->
   return '' unless ologs && ologs.length
   message = [ ologs[0] ]
   for ol in ologs[1..]
-    if ol.message is message[0].message and ol.type is message[0].type
+    if ol.body is message[0].body and ol.type is message[0].type
       message.push ol
     else
       break
@@ -392,14 +392,14 @@ Template.header_lastupdates.lastupdates = ->
     ((seen[o.id]=o) for o in array when not (o.id of seen))
   return {
     timestamp: message[0].timestamp
-    message: message[0].message + type
+    message: message[0].body + type
     nick: message[0].nick
     objects: uniq({type:m.type,id:m.id} for m in message)
   }
 
 # subscribe when this template is in use/unsubscribe when it is destroyed
 Template.header_lastupdates.created = ->
-  this.sub = Meteor.subscribe 'paged-oplogs', 0
+  this.sub = Meteor.subscribe 'paged-messages', 'oplog/0', 0
 Template.header_lastupdates.destroyed = ->
   this.sub.stop()
 # add tooltip to 'more' links, and preserve then so they doesn't leak

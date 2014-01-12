@@ -108,13 +108,6 @@ Meteor.publish 'paged-messages-nick', (nick, room_name, timestamp) ->
      sort: [['timestamp','desc']]
      limit: model.MESSAGE_PAGE
 
-# same idea, for operation log
-Meteor.publish 'paged-oplogs', (timestamp) ->
-  timestamp = (+timestamp) or Number.MAX_VALUE
-  model.OpLogs.find {timestamp: $lt: +timestamp},
-     sort: [['timestamp','desc']]
-     limit: model.OPLOG_PAGE
-
 Meteor.publish 'callins', ->
   model.CallIns.find {},
     sort: [["created","asc"]]

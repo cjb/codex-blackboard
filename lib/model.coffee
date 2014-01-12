@@ -8,22 +8,8 @@ PRESENCE_KEEPALIVE_MINUTES = 2
 
 # how many chats in a page?
 MESSAGE_PAGE = 150
-# how many oplogs in a page?
-OPLOG_PAGE = 150
 
 BBCollection = Object.create(null) # create new object w/o any inherited cruft
-
-# OpLogs are:
-#   _id: mongodb id
-#   timestamp: timestamp
-#   message: string -- human-readable description of what was done
-#   nick: canonicalized string -- who did it, if known
-#   type: string
-#   id: string -- type/id give a mongodb reference to the object modified
-#                 so we can hyperlink to it.
-OpLogs = BBCollection.oplogs = new Meteor.Collection "oplogs"
-if Meteor.isServer
-  OpLogs._ensureIndex {timestamp:-1}, {}
 
 # Names is a synthetic collection created by the server which indexes
 # the names and ids of RoundGroups, Rounds, and Puzzles:
@@ -127,10 +113,19 @@ if Meteor.isServer
 #   nick: canonicalized string (may match some Nicks.canon ... or not)
 #   system: boolean (true for system messages, false for user messages)
 #   action: boolean (true for /me commands)
+#   oplog:  boolean (true for semi-automatic operation log message)
 #   to:   destination of pm (optional)
 #   room_name: "<type>/<id>", ie "puzzle/1", "round/1".
 #                             "general/0" for main chat.
+#                             "oplog/0" for the operation log.
 #   timestamp: timestamp
+#
+# Messages which are part of the operation log have `nick`, `message`,
+# and `timestamp` set to describe what was done, when, and by who.
+# They have `system=false`, `action=true`, `oplog=true`, `to=null`,
+# and `room_name="oplog/0"`.  They also have two additional fields,
+# `type` and `id`, which give a mongodb reference to the object
+# modified so we can hyperlink to it.
 Messages = BBCollection.messages = new Meteor.Collection "messages"
 if Meteor.isServer
   Messages._ensureIndex {to:1, room_name:1, timestamp:-1}, {}
@@ -174,6 +169,7 @@ if Meteor.isServer
       n = Nicks.findOne canon: canonical(presence.nick)
       name = getTag(n, 'Real Name') or presence.nick
       #console.log "#{name} entered #{presence.room_name}"
+      return if presence.room_name is 'oplog/0'
       Messages.insert
         system: true
         nick: ''
@@ -186,6 +182,7 @@ if Meteor.isServer
       n = Nicks.findOne canon: canonical(presence.nick)
       name = getTag(n, 'Real Name') or presence.nick
       #console.log "#{name} left #{presence.room_name}"
+      return if presence.room_name is 'oplog/0'
       Messages.insert
         system: true
         nick: ''
@@ -257,12 +254,17 @@ spread_id_to_link = (id) ->
       true
 
   oplog = (message, type="", id="", who="") ->
-    OpLogs.insert
+    Messages.insert
+      room_name: 'oplog/0'
+      nick: canonical(who)
       timestamp: UTCNow()
-      message: message
+      body: message
       type:type
       id:id
-      nick: canonical(who)
+      oplog: true
+      action: true
+      system: false
+      to: null
 
   newObject = (type, args, extra, options={}) ->
     check args, ObjectWith
@@ -896,10 +898,8 @@ share.model =
   # constants
   PRESENCE_KEEPALIVE_MINUTES: PRESENCE_KEEPALIVE_MINUTES
   MESSAGE_PAGE: MESSAGE_PAGE
-  OPLOG_PAGE: OPLOG_PAGE
   # collection types
   CallIns: CallIns
-  OpLogs: OpLogs
   Names: Names
   LastAnswer: LastAnswer
   RoundGroups: RoundGroups
