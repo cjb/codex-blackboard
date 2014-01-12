@@ -49,7 +49,7 @@ Meteor.publish 'last-answered-puzzle', ->
       unless initializing
 
   handle = model.Puzzles.find({
-    $and: [ {answer: $ne: null}, {answer: $exists: true} ]
+    answer: { $exists: true, $ne: null }
   }).observe
     added: (doc) -> publishIfMax(doc)
     changed: (doc, oldDoc) -> publishIfMax(doc)
