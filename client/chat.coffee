@@ -263,7 +263,7 @@ scrollMessagesView = ->
   instachat.scrolledToBottom = true
 
 # Event Handlers
-$("button.mute").live "click", ->
+$(document).on 'click', 'button.mute', ->
   if Session.get "mute"
     $.removeCookie "mute", {path:'/'}
   else
@@ -272,7 +272,7 @@ $("button.mute").live "click", ->
   Session.set "mute", $.cookie "mute"
 
 # ensure that we stay stuck to bottom even after images load
-$('.bb-message-body .inline-image').live 'load mouseenter', (event) ->
+$(document).on 'load mouseenter', '.bb-message-body .inline-image', (event) ->
   scrollMessagesView() if instachat.scrolledToBottom
 
 # unstick from bottom if the user manually scrolls
@@ -291,7 +291,7 @@ $(window).scroll (event) ->
   instachat.scrolledToBottom = atBottom
 
 # Form Interceptors
-$("#joinRoom").live "submit", ->
+$(document).on 'submit', '#joinRoom', ->
   roomName = $("#roomName").val()
   if not roomName
     # reset to old room name
@@ -409,10 +409,10 @@ Template.messages_input.events
 
 
 # alert for unread messages
-$("#messageInput").live "blur", ->
+$(document).on 'blur', '#messageInput', ->
   instachat.alertWhenUnreadMessages = true
 
-$("#messageInput").live "focus", ->
+$(document).on 'focus', '#messageInput', ->
   updateLastRead() if instachat.ready # skip during initial load
   instachat.alertWhenUnreadMessages = false
   hideMessageAlert()

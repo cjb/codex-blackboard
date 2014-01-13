@@ -31,7 +31,7 @@ Handlebars.registerHelper 'link', (args) ->
   link += '</a>'
   return new Handlebars.SafeString(link)
 
-$('a.puzzles-link, a.rounds-link, a.chat-link, a.home-link, a.oplogs-link').live 'click', (event) ->
+$(document).on 'click', 'a.puzzles-link, a.rounds-link, a.chat-link, a.home-link, a.oplogs-link', (event) ->
   return unless event.button is 0 # check right-click
   return if event.ctrlKey or event.shiftKey or event.altKey # check alt/ctrl/shift clicks
   event.preventDefault()
@@ -300,7 +300,7 @@ Template.header_nickmodal_contents.events
   "input #nickEmail": (event, template) ->
     template.updateGravatar()
 
-$("#nickPick").live "submit", ->
+$(document).on 'submit', '#nickPick', ->
   $warningGroup = $(this).find '#nickInputGroup'
   $warning = $(this).find "#nickInputGroup .help-inline"
   nick = $("#nickInput").val().replace(/^\s+|\s+$/g,"") #trim
