@@ -10,6 +10,7 @@ Template.round.data = ->
                 (group?.rounds or []).indexOf(round?._id)
   r.puzzles = ((model.Puzzles.findOne(p) or {_id:p}) \
     for p in (round?.puzzles or []))
+  r.hunt_year = settings.HUNT_YEAR
   return r
 Template.round.created = ->
   $('html').addClass('fullHeight')
