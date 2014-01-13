@@ -10,6 +10,7 @@ Session.setDefault 'mute'     , $.cookie("mute")
 Session.setDefault 'type'     , 'general'
 Session.setDefault 'id'       , '0'
 Session.setDefault 'timestamp', 0
+Session.setDefault 'chatReady', false
 
 # Chat/pagination helpers!
 
@@ -63,6 +64,7 @@ Meteor.startup ->
 # Template Binding
 Template.messages.room_name = -> Session.get('room_name')
 Template.messages.timestamp = -> +Session.get('timestamp')
+Template.messages.ready = -> Session.equals('chatReady', true)
 Template.messages.prevTimestamp = ->
   p = pageForTimestamp Session.get('room_name'), +Session.get('timestamp')
   return unless p?.from
@@ -125,6 +127,7 @@ Template.messages.created = ->
   this.computation = Deps.autorun =>
     invalidator = =>
       instachat.ready = false
+      Session.set 'chatReady', false
       hideMessageAlert()
     invalidator()
     room_name = Session.get 'room_name'
@@ -141,7 +144,10 @@ Template.messages.created = ->
       Meteor.subscribe 'page-by-id', p.next
     # load messages for this page
     ready = 0
-    onReady = -> instachat.ready = true if (++ready) is 2
+    onReady = ->
+      if (++ready) is 2
+        instachat.ready = true
+        Session.set 'chatReady', true
     if nick?
       Meteor.subscribe 'messages-in-range-nick', nick, p.room_name, p.from, p.to,
         onReady: onReady
