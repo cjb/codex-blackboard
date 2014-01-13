@@ -56,14 +56,12 @@
 <div class="bb-message-system">
    <div class="pull-right timestamp">{{pretty_ts message.timestamp}}</div>
      {{body}}
-   </div>
 </div>
       {{else}}{{#if message.action}}
 <div class="bb-message-action">
    <div class="pull-right timestamp">{{pretty_ts message.timestamp}}</div>
      <i class="icon-hand-right"></i>
      {{nickOrName message.nick}} {{body}}
-   </div>
 </div>
       {{else}}
 <div class="media{{#if message.to}} bb-message-pm{{/if}}{{#if followup}} bb-message-followup{{/if}}">

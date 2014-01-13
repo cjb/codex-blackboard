@@ -243,7 +243,7 @@
           <i class="icon-tags"></i>
           <i class="icon-plus"></i>
         </button>
-        <button class="btn btn-link bb-move-down"><i class="icon-arrow-down"></i></a>
+        <button class="btn btn-link bb-move-down"><i class="icon-arrow-down"></i></button>
         <button class="btn btn-link bb-move-up"><i class="icon-arrow-up"></i></button>
         </div>
       {{/if}}
@@ -342,8 +342,7 @@
 </template>
 
 <template name="blackboard_puzzle_tags">
-  <table class="bb-tag-table"><tbody>{{!
-    }}{{#each tags _id}}
+  <table class="bb-tag-table"><tbody>{{#each tags _id}}
         <tr>
           <td class="bb-editable"
               data-bbedit="tags/{{id}}/{{canon}}/name">
@@ -376,6 +375,5 @@
             {{/if}}
           </td>
         </tr>
-      {{/each}}{{!
-  }}</tbody></table>
+      {{/each}}</tbody></table>
 </template>
