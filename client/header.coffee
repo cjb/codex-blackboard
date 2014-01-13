@@ -20,6 +20,7 @@ keyword_or_positional = (name, args) ->
 # link various types of objects
 Handlebars.registerHelper 'link', (args) ->
   args = keyword_or_positional 'id', args
+  return "" unless args.id
   n = model.Names.findOne(args.id)
   return args.id.slice(0,8) unless n
   return (args.text or n.name) if args.editing
@@ -399,9 +400,12 @@ Template.header_lastupdates.lastupdates = ->
 
 # subscribe when this template is in use/unsubscribe when it is destroyed
 Template.header_lastupdates.created = ->
-  this.sub = Meteor.subscribe 'paged-messages', 'oplog/0', 0
+  this.computation = Deps.autorun ->
+    p = share.chat.pageForTimestamp 'oplog/0', 0, 'subscribe'
+    return unless p? # wait until page info is loaded
+    Meteor.subscribe 'messages-in-range', p.room_name, p.from, p.to
 Template.header_lastupdates.destroyed = ->
-  this.sub.stop()
+  this.computation.stop()
 # add tooltip to 'more' links, and preserve then so they doesn't leak
 do ->
   for t in ['header_lastupdates', 'header_lastchats']
@@ -425,10 +429,12 @@ Template.header_lastchats.body = ->
 # subscribe when this template is in use/unsubscribe when it is destroyed
 Template.header_lastchats.created = ->
   this.computation = Deps.autorun ->
+    p = share.chat.pageForTimestamp 'general/0', 0, 'subscribe'
+    return unless p? # wait until page info is loaded
     # use autorun to ensure subscription changes if/when nick does
-    nick = if settings.BB_DISABLE_PM then null else Session.get('nick')
-    sub1 = Meteor.subscribe 'paged-messages-nick', nick, 'general/0', 0
-    sub2 = Meteor.subscribe 'paged-messages', 'general/0', 0
-    Deps.onInvalidate -> ( sub1.stop() ; sub2.stop() )
+    nick = Session.get 'nick'
+    if nick? and not settings.BB_DISABLE_PM
+      Meteor.subscribe 'messages-in-range-nick', nick, p.room_name, p.from, p.to
+    Meteor.subscribe 'messages-in-range', p.room_name, p.from, p.to
 Template.header_lastchats.destroyed = ->
   this.computation.stop()

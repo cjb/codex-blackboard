@@ -44,6 +44,7 @@ Meteor.subscribe 'all-nicks'
 # we might subscribe to all-roundsandpuzzles, too.
 if settings.BB_SUB_ALL
   Meteor.subscribe 'all-roundsandpuzzles'
+# we also always subscribe to the last-pages feed; see chat.coffee
 
 # Router
 BlackboardRouter = Backbone.Router.extend

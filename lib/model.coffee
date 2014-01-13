@@ -7,7 +7,10 @@
 PRESENCE_KEEPALIVE_MINUTES = 2
 
 # how many chats in a page?
-MESSAGE_PAGE = 150
+MESSAGE_PAGE = 100
+
+# this is used to yield "zero results" in collections which index by timestamp
+NOT_A_TIMESTAMP = -9999
 
 BBCollection = Object.create(null) # create new object w/o any inherited cruft
 
@@ -131,7 +134,58 @@ if Meteor.isServer
   Messages._ensureIndex {to:1, room_name:1, timestamp:-1}, {}
   Messages._ensureIndex {nick:1, room_name:1, timestamp:-1}, {}
 
-# Last read message
+# Pages -- paging metadata for Messages collection
+#   from: timestamp (first page has from==0)
+#   to: timestamp
+#   room_name: corresponds to room_name in Messages collection.
+#   prev: id of previous page for this room_name, or null
+#   next: id of next page for this room_name, or null
+# Messages with from <= timestamp < to are included in a specific page.
+Pages = BBCollection.pages = new Meteor.Collection "pages"
+if Meteor.isServer
+  # used in the server observe code below
+  Pages._ensureIndex {room_name:1, to:-1}, {unique:true}
+  # used in the publish method
+  Pages._ensureIndex {next: 1, room_name:1}, {}
+  # watch messages collection and create pages as necessary
+  do ->
+    unpaged = Object.create(null)
+    Messages.find({}, sort:[['timestamp','asc']]).observe
+      added: (msg) ->
+        room_name = msg.room_name
+        # don't count pms (so we don't end up with a blank 'page')
+        return if msg.to
+        # add to (conservative) count of unpaged messages
+        # (this message might already be in a page, but we'll catch that below)
+        unpaged[room_name] = (unpaged[room_name] or 0) + 1
+        return if unpaged[room_name] < MESSAGE_PAGE
+        # recompute page parameters before adding a new page
+        # (be safe in case we had out-of-order observations)
+        # find highest existing page
+        p = Pages.findOne({room_name: room_name}, {sort:[['to','desc']]})\
+          or { _id: null, room_name: room_name, from: -1, to: 0 }
+        # count the number of unpaged messages
+        m = Messages.find(\
+          {room_name: room_name, to: null, timestamp: $gte: p.to}, \
+          {sort:[['timestamp','asc']], limit: MESSAGE_PAGE}).fetch()
+        if m.length < MESSAGE_PAGE
+          # false alarm: reset unpaged message count and continue
+          unpaged[room_name] = m.length
+          return
+        # ok, let's make a new page.  this will include at least all the
+        # messages in m, possibly more (if there are additional messages
+        # added with timestamp == m[m.length-1].timestamp)
+        pid = Pages.insert
+          room_name: room_name
+          from: p.to
+          to: 1 + m[m.length-1].timestamp
+          prev: p._id
+          next: null
+        if p._id?
+          Pages.update p._id, $set: next: pid
+        unpaged[room_name] = 0
+
+# Last read message for a user in a particular chat room
 #   nick: canonicalized string, as in Messages
 #   room_name: string, as in Messages
 #   timestamp: timestamp of last read message
@@ -173,6 +227,7 @@ if Meteor.isServer
       Messages.insert
         system: true
         nick: ''
+        to: null
         body: "#{name} joined the room."
         room_name: presence.room_name
         timestamp: UTCNow()
@@ -186,6 +241,7 @@ if Meteor.isServer
       Messages.insert
         system: true
         nick: ''
+        to: null
         body: "#{name} left the room."
         room_name: presence.room_name
         timestamp: UTCNow()
@@ -898,6 +954,7 @@ share.model =
   # constants
   PRESENCE_KEEPALIVE_MINUTES: PRESENCE_KEEPALIVE_MINUTES
   MESSAGE_PAGE: MESSAGE_PAGE
+  NOT_A_TIMESTAMP: NOT_A_TIMESTAMP
   # collection types
   CallIns: CallIns
   Names: Names
@@ -907,6 +964,7 @@ share.model =
   Puzzles: Puzzles
   Nicks: Nicks
   Messages: Messages
+  Pages: Pages
   LastRead: LastRead
   Presence: Presence
   # helper methods

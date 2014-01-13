@@ -1,16 +1,18 @@
 <template name="oplog">
 <div class="row-fluid bb-puzzleround">
-{{#each oplogs}}
-  {{#if first}}
+  {{#if prevTimestamp}}
   <p align="center">
-  <a href="/oplogs/{{oplog.timestamp}}">See earlier logs</a>
+  <a href="{{prevTimestamp}}" class="oplogs-link">See earlier logs</a>
   </p>
-  {{/if}}
+  {{else}}{{#if timestamp}}
+  <p align="center">Start of operation log.</p>
+  {{/if}}{{/if}}
+{{#each oplogs}}
   <div class="bb-oplog">
-    <span class="timestamp">{{pretty_ts oplog.timestamp}}</span>
-    {{oplog.body}}
-    {{link oplog.id}}
-    {{#if oplog.nick}} (<strong title="{{nickOrName oplog.nick}}">{{oplog.nick}}</strong>){{/if}}
+    <span class="timestamp">{{pretty_ts this.timestamp}}</span>
+    {{body}}
+    {{link id}}
+    {{#if nick}} (<strong title="{{nickOrName nick}}">{{nick}}</strong>){{/if}}
   </div>
 {{else}}
   <p align="center">
@@ -20,7 +22,10 @@
 
   <p align="center">
   {{#if timestamp}}
-  <a href="/oplogs/0">See most recent logs</a>
+  {{#if nextTimestamp}}
+  <a href="{{nextTimestamp}}" class="oplogs-link">See next page of logs</a>;
+  {{/if}}
+  <a href="/oplogs/0" class="oplogs-link">See most recent logs</a>
   {{else}}
   End of log.
   {{/if}}
