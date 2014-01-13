@@ -7,7 +7,7 @@
 <div class="bb-top-content">{{! start top of splitter }}
 
 <div class="bb-top-left-content">{{! start top left splitter }}
-  <table class="table">{{! tables for layout, oh my }}
+  <table class="table"><tbody>{{! tables for layout, oh my }}
     <tr><td>
 
 <h1>Round <small>{{round.name}}
@@ -19,15 +19,15 @@
 
     </td><td>
 
-<table class="bb-round-answers table table-bordered table-condensed">
+<table class="bb-round-answers table table-bordered table-condensed"><tbody>
   <tr><th>Puzzle in round</th><th>Answer</th></tr>
   {{#each puzzles}}
   <tr><td>{{link _id}}</td><td class="answer">{{#if answer}}{{answer}}{{/if}}</td></tr>
   {{/each}}
-</table>
+</tbody></table>
 
    </td></tr>
- </table>
+</tbody></table>
 </div>
 
 <div class="bb-splitter-handle"></div>

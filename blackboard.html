@@ -106,7 +106,7 @@
   </h3>
 
   {{#if hasPuzzles}}
-  <table class="table table-bordered table-condensed bb-puzzle">
+  <table class="table table-bordered table-condensed bb-puzzle"><tbody>
     <tr>
       <th class="puzzle-name">Name</th>
       <th class="puzzle-answer">Solution</th>
@@ -184,7 +184,7 @@
     {{#each puzzles}}
       {{> blackboard_puzzle}}
     {{/each}}
-  </table>
+  </tbody></table>
   {{else}}
   <p><i>No puzzles in this round yet.</i></p>
   {{/if}}
