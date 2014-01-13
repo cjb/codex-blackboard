@@ -1,6 +1,15 @@
 'use strict'
 model = share.model # import
 
+# hack! log subscriptions so we can see what's going on server-side
+Meteor.publish = ((publish) ->
+  (name, func) ->
+    func2 = ->
+      console.log 'client subscribed to', name, arguments
+      func.apply(this, arguments)
+    publish.call(Meteor, name, func2)
+)(Meteor.publish) if false # disable by default
+
 Meteor.publish 'all-roundsandpuzzles', -> [
   model.RoundGroups.find(), model.Rounds.find(), model.Puzzles.find()
 ]
@@ -48,6 +57,8 @@ Meteor.publish 'last-answered-puzzle', ->
     self.changed collection, uuid, recent \
       unless initializing
 
+  # XXX this observe polls on 0.7.0.1
+  # (but not on the meteor oplog-with-operators branch)
   handle = model.Puzzles.find({
     answer: { $exists: true, $ne: null }
   }).observe
@@ -91,6 +102,8 @@ Meteor.publish 'page-by-timestamp', (room_name, timestamp) ->
 # range, which is a bit of an issue.  Once limit is supported in oplog
 # we could probably add a limit here to be a little safer.
 Meteor.publish 'messages-in-range', (room_name, from, to=0) ->
+  # XXX this observe polls on 0.7.0.1
+  # (but not on the meteor oplog-with-operators branch)
   cond = $gte: +from, $lt: +to
   delete cond.$lt if cond.$lt is 0
   model.Messages.find
