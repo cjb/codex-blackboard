@@ -5,7 +5,7 @@
   {{#isolate}}
   <div id="bb-sidebar" class="span2">
     <ul class="nav nav-list bb-sidenav span2">
-      <li><a class="bb-wiki" href="{{#wiki}}{{/wiki}}"
+      <li><a class="bb-wiki" href="{{wiki title=""}}"
              target="_blank">Codex Wiki</a></li>
       <li class="divider"></li>
       {{#each roundgroups}}
@@ -331,7 +331,7 @@
           {{value}}
         {{else}}
           {{#if value}}
-            {{#linkify}}{{value}}{{/linkify}}
+            {{linkify value}}
           {{else}}
             &nbsp; {{! make sure right-hand side stays in place! }}
           {{/if}}
@@ -370,7 +370,7 @@
                    title="Change the value of this tag"></i>
                 {{value}}
               {{else}}
-                {{#linkify}}{{value}}{{/linkify}}
+                {{linkify value}}
               {{/if}}
             {{/if}}
           </td>

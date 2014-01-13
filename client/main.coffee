@@ -27,13 +27,15 @@ Handlebars.registerHelper 'editing', (args..., options) ->
   return false unless (Session.get 'nick') and (Session.get 'canEdit')
   return Session.equals 'editing', args.join('/')
 
+Handlebars.registerHelper 'wikiRP', (options) ->
+  [r,p] = [options.hash?.r, options.hash?.p]
+  "#{settings.WIKI_HOST}/index.php?title=#{settings.HUNT_YEAR}_R#{r}P#{p}"
 Handlebars.registerHelper 'wiki', (options) ->
-  contents = options.fn(this)
-  return settings.WIKI_HOST unless contents
-  "#{settings.WIKI_HOST}/index.php?title=#{contents}"
+  title = options.hash?.title
+  return settings.WIKI_HOST unless title
+  "#{settings.WIKI_HOST}/index.php?title=#{title}"
 
-Handlebars.registerHelper 'linkify', (options) ->
-  contents = options.fn(this)
+Handlebars.registerHelper 'linkify', (contents) ->
   contents = chat.convertURLsToLinksAndImages(Handlebars._escape(contents))
   return new Handlebars.SafeString(contents)
 
