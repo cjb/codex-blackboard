@@ -123,5 +123,10 @@ x chat archive page
 x oplog archive page
 --------------------
 - Add browser-policy package
-- Add autoupdate package
-- Add facts package
+x Add autoupdate package
+x Add facts package
+---
+move followup field to object or CSS
+x move last read marker to a session variable, then use Session.equals
+  to insert it at the right spot?
+  - use model query to ensure timestamp exactly matches a message?

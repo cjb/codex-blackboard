@@ -656,11 +656,12 @@ spread_id_to_link = (id) ->
       # (doing it here allows us to use server timestamp on message)
       # artificially delay lastRead during simulation on the client;
       # this helps prevent flicker.
-      unless args.suppressLastRead or newMsg.system or (not newMsg.nick)
+      unless (this.isSimulation or args.suppressLastRead or
+              newMsg.system or (not newMsg.nick))
         Meteor.call 'updateLastRead',
           nick: newMsg.nick
           room_name: newMsg.room_name
-          timestamp: newMsg.timestamp + (if this.isSimulation then 1000 else 0)
+          timestamp: newMsg.timestamp
       return newMsg
 
     updateLastRead: (args) ->

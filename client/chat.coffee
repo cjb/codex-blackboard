@@ -65,6 +65,7 @@ Meteor.startup ->
 Template.messages.room_name = -> Session.get('room_name')
 Template.messages.timestamp = -> +Session.get('timestamp')
 Template.messages.ready = -> Session.equals('chatReady', true)
+Template.messages.isLastRead = (ts) -> Session.equals('lastread', +ts)
 Template.messages.prevTimestamp = ->
   p = pageForTimestamp Session.get('room_name'), +Session.get('timestamp')
   return unless p?.from
@@ -80,30 +81,25 @@ Template.messages.messages  = ->
   room_name = Session.get 'room_name'
   nick = model.canonical(Session.get('nick') or '')
   p = pageForTimestamp room_name, +Session.get('timestamp')
+  if false # set to true for a PERFORMANCE HACK (but no followup formatting)
+    return messagesForPage p,
+      sort: [['timestamp','asc']]
+      transform: (m) ->
+        _id: m._id
+        followup: false
+        message: m
   messages = messagesForPage p,
     sort: [['timestamp','asc']]
   sameNick = do ->
     prevContext = null
-    f = (m) ->
+    (m) ->
       thisContext = m.nick + (if m.to then "/#{m.to}" else "")
       thisContext = null if m.system or m.action
       result = thisContext? and (thisContext == prevContext)
       prevContext = thisContext
       return result
-    f.reset = -> prevContext = null
-    f
-  lastread = model.LastRead.findOne(nick: nick, room_name: room_name)
-  isLastRead = do ->
-    sawLastRead = false
-    (m) ->
-      return false if sawLastRead or not lastread?
-      sawLastRead = (m.timestamp >= lastread.timestamp)
-      # don't smash together comments if one of them is the lastread
-      sameNick.reset() if sawLastRead
-      sawLastRead
   for m, i in messages.fetch()
     followup: sameNick(m)
-    lastRead: isLastRead(m)
     message: m
 
 Template.messages.email = ->
@@ -497,18 +493,21 @@ updateNotice = do ->
     [lastUnread, lastMention] = [unread, mention]
 
 Deps.autorun ->
-  unless Session.equals("currentPage", "chat") and \
-         (+Session.get('timestamp')) is 0
-    hideMessageAlert()
-    return
+  pageWithChat = /^(chat|puzzle|round)$/.test Session.get('currentPage')
   nick = model.canonical(Session.get('nick') or '')
   room_name = Session.get 'room_name'
-  return unless nick and room_name
+  unless pageWithChat and nick and room_name
+    Session.set 'lastread', undefined
+    return hideMessageAlert()
+  # watch the last read and update the session (even if we're paged back)
   Meteor.subscribe 'lastread-for-nick', nick
-  # watch the last read
   lastread = model.LastRead.findOne(nick: nick, room_name: room_name)
-  return unless lastread
-  # watch the unread messages
+  unless lastread
+    Session.set 'lastread', undefined
+    return hideMessageAlert()
+  Session.set 'lastread', lastread.timestamp
+  # watch the unread messages (unless we're paged back)
+  return hideMessageAlert() unless (+Session.get('timestamp')) is 0
   total_unread = 0
   total_mentions = 0
   update = -> false # ignore initial updates
