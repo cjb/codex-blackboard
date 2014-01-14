@@ -81,7 +81,8 @@ Template.messages.messages  = ->
   room_name = Session.get 'room_name'
   nick = model.canonical(Session.get('nick') or '')
   p = pageForTimestamp room_name, +Session.get('timestamp')
-  if false # set to true for a PERFORMANCE HACK (but no followup formatting)
+  unless settings.SLOW_CHAT_FOLLOWUPS
+    # no follow up formatting, but blazing fast client rendering!
     return messagesForPage p,
       sort: [['timestamp','asc']]
       transform: (m) ->
