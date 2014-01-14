@@ -5,7 +5,7 @@
   {{#isolate}}
   <div id="bb-sidebar" class="span2">
     <ul class="nav nav-list bb-sidenav span2">
-      <li><a class="bb-wiki" href="{{#wiki}}{{/wiki}}"
+      <li><a class="bb-wiki" href="{{wiki title=""}}"
              target="_blank">Codex Wiki</a></li>
       <li class="divider"></li>
       {{#each roundgroups}}
@@ -106,7 +106,7 @@
   </h3>
 
   {{#if hasPuzzles}}
-  <table class="table table-bordered table-condensed bb-puzzle">
+  <table class="table table-bordered table-condensed bb-puzzle"><tbody>
     <tr>
       <th class="puzzle-name">Name</th>
       <th class="puzzle-answer">Solution</th>
@@ -184,7 +184,7 @@
     {{#each puzzles}}
       {{> blackboard_puzzle}}
     {{/each}}
-  </table>
+  </tbody></table>
   {{else}}
   <p><i>No puzzles in this round yet.</i></p>
   {{/if}}
@@ -243,7 +243,7 @@
           <i class="icon-tags"></i>
           <i class="icon-plus"></i>
         </button>
-        <button class="btn btn-link bb-move-down"><i class="icon-arrow-down"></i></a>
+        <button class="btn btn-link bb-move-down"><i class="icon-arrow-down"></i></button>
         <button class="btn btn-link bb-move-up"><i class="icon-arrow-up"></i></button>
         </div>
       {{/if}}
@@ -331,7 +331,7 @@
           {{value}}
         {{else}}
           {{#if value}}
-            {{#linkify}}{{value}}{{/linkify}}
+            {{linkify value}}
           {{else}}
             &nbsp; {{! make sure right-hand side stays in place! }}
           {{/if}}
@@ -342,8 +342,7 @@
 </template>
 
 <template name="blackboard_puzzle_tags">
-  <table class="bb-tag-table"><tbody>{{!
-    }}{{#each tags _id}}
+  <table class="bb-tag-table"><tbody>{{#each tags _id}}
         <tr>
           <td class="bb-editable"
               data-bbedit="tags/{{id}}/{{canon}}/name">
@@ -371,11 +370,10 @@
                    title="Change the value of this tag"></i>
                 {{value}}
               {{else}}
-                {{#linkify}}{{value}}{{/linkify}}
+                {{linkify value}}
               {{/if}}
             {{/if}}
           </td>
         </tr>
-      {{/each}}{{!
-  }}</tbody></table>
+      {{/each}}</tbody></table>
 </template>

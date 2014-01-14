@@ -182,8 +182,9 @@ start = (which, cb) ->
   unless tasks[which]
     n = Random.fraction() * totalProb
     which = (name for name of tasks when \
-      tasks[name].p.start <= p and p < tasks[name].p.end)[0]
+      tasks[name].p.start <= n and n < tasks[name].p.end)[0]
   # ok, execute the task
+  console.log 'Starting loadtest:', tasks[which].name
   tasks[which].func(cb)
 
 # exports

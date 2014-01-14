@@ -10,6 +10,41 @@ Session.setDefault 'mute'     , $.cookie("mute")
 Session.setDefault 'type'     , 'general'
 Session.setDefault 'id'       , '0'
 Session.setDefault 'timestamp', 0
+Session.setDefault 'chatReady', false
+
+# Chat/pagination helpers!
+
+# subscribe to last-page feed all the time
+lastPageSub = Meteor.subscribe 'last-pages'
+
+# helper method, using the `ready` signal from lastPageSub
+# returns `null` iff subscriptions are not ready.
+pageForTimestamp = (room_name, timestamp=0, subscribe=false) ->
+  timestamp = +timestamp
+  if timestamp is 0
+    return null unless lastPageSub.ready()
+    p = model.Pages.findOne(room_name:room_name, next:null)
+    return {
+      _id: p?._id
+      room_name: room_name
+      from: p?.from or 0
+      to: 0 # means "and everything else" for message-in-range subscription
+    }
+  else
+    if subscribe and Deps.active # make sure we unsubscribe if necessary!
+      Meteor.subscribe 'page-by-timestamp', room_name, timestamp
+    model.Pages.findOne(room_name:room_name, to:timestamp)
+
+# helper method to filter messages to match a given page object
+messagesForPage = (p, opts={}) ->
+  unless p? # return empty cursor unless p is non-null
+    return model.Messages.find(timestamp:model.NOT_A_TIMESTAMP)
+  cond = $gte: +p.from, $lt: +p.to
+  delete cond.$lt if cond.$lt is 0
+  model.Messages.find
+    room_name: p.room_name
+    timestamp: cond
+  , opts
 
 # Globals
 instachat = {}
@@ -29,39 +64,42 @@ Meteor.startup ->
 # Template Binding
 Template.messages.room_name = -> Session.get('room_name')
 Template.messages.timestamp = -> +Session.get('timestamp')
+Template.messages.ready = -> Session.equals('chatReady', true)
+Template.messages.isLastRead = (ts) -> Session.equals('lastread', +ts)
+Template.messages.prevTimestamp = ->
+  p = pageForTimestamp Session.get('room_name'), +Session.get('timestamp')
+  return unless p?.from
+  "/chat/#{p.room_name}/#{p.from}"
+Template.messages.nextTimestamp = ->
+  p = pageForTimestamp Session.get('room_name'), +Session.get('timestamp')
+  return unless p?.next?
+  p = model.Pages.findOne(p.next)
+  return unless p?
+  "/chat/#{p.room_name}/#{p.to}"
+
 Template.messages.messages  = ->
-  timestamp = (+Session.get('timestamp')) or Number.MAX_VALUE
   room_name = Session.get 'room_name'
   nick = model.canonical(Session.get('nick') or '')
-  messages = model.Messages.find
-    room_name: room_name
-    timestamp: $lt: timestamp
-  ,
-    sort: [['timestamp',"desc"]]
-    limit: model.MESSAGE_PAGE
+  p = pageForTimestamp room_name, +Session.get('timestamp')
+  if false # set to true for a PERFORMANCE HACK (but no followup formatting)
+    return messagesForPage p,
+      sort: [['timestamp','asc']]
+      transform: (m) ->
+        _id: m._id
+        followup: false
+        message: m
+  messages = messagesForPage p,
+    sort: [['timestamp','asc']]
   sameNick = do ->
     prevContext = null
-    f = (m) ->
+    (m) ->
       thisContext = m.nick + (if m.to then "/#{m.to}" else "")
       thisContext = null if m.system or m.action
       result = thisContext? and (thisContext == prevContext)
       prevContext = thisContext
       return result
-    f.reset = -> prevContext = null
-    f
-  lastread = model.LastRead.findOne(nick: nick, room_name: room_name)
-  isLastRead = do ->
-    sawLastRead = false
-    (m) ->
-      return false if sawLastRead or not lastread?
-      sawLastRead = (m.timestamp >= lastread.timestamp)
-      # don't smash together comments if one of them is the lastread
-      sameNick.reset() if sawLastRead
-      sawLastRead
-  for m, i in messages.fetch().reverse()
-    first: ("/chat/#{Session.get 'room_name'}/#{m.timestamp}" if i is 0)
+  for m, i in messages.fetch()
     followup: sameNick(m)
-    lastRead: isLastRead(m)
     message: m
 
 Template.messages.email = ->
@@ -84,30 +122,34 @@ Template.messages.created = ->
   instachat.scrolledToBottom = true
   this.computation = Deps.autorun =>
     invalidator = =>
-      this.sub1?.stop?()
-      this.sub2?.stop?()
-      this.sub3?.stop?()
-      this.sub1 = this.sub2 = this.sub3 = null
       instachat.ready = false
+      Session.set 'chatReady', false
       hideMessageAlert()
     invalidator()
     room_name = Session.get 'room_name'
     return unless room_name
-    this.sub1 = Meteor.subscribe 'presence-for-room', room_name
+    Meteor.subscribe 'presence-for-room', room_name
     nick = (if settings.BB_DISABLE_PM then null else Session.get 'nick') or null
     # re-enable private messages, but just in ringhunters (for codexbot)
     if settings.BB_DISABLE_PM and room_name is "general/0"
       nick = Session.get 'nick'
     timestamp = (+Session.get('timestamp'))
+    p = pageForTimestamp room_name, timestamp, 'subscribe'
+    return unless p? # wait until page information is loaded
+    if p.next? # subscribe to the 'next' page
+      Meteor.subscribe 'page-by-id', p.next
+    # load messages for this page
     ready = 0
-    onReady = -> instachat.ready = true if (++ready) is 2
+    onReady = ->
+      if (++ready) is 2
+        instachat.ready = true
+        Session.set 'chatReady', true
     if nick?
-      this.sub2 = \
-        Meteor.subscribe 'paged-messages-nick', nick, room_name, timestamp,
-          onReady: onReady
+      Meteor.subscribe 'messages-in-range-nick', nick, p.room_name, p.from, p.to,
+        onReady: onReady
     else
       onReady()
-    this.sub3 = Meteor.subscribe 'paged-messages', room_name, timestamp,
+    Meteor.subscribe 'messages-in-range', p.room_name, p.from, p.to,
       onReady: onReady
     Deps.onInvalidate invalidator
 Template.messages.destroyed = ->
@@ -217,7 +259,7 @@ scrollMessagesView = ->
   instachat.scrolledToBottom = true
 
 # Event Handlers
-$("button.mute").live "click", ->
+$(document).on 'click', 'button.mute', ->
   if Session.get "mute"
     $.removeCookie "mute", {path:'/'}
   else
@@ -226,7 +268,7 @@ $("button.mute").live "click", ->
   Session.set "mute", $.cookie "mute"
 
 # ensure that we stay stuck to bottom even after images load
-$('.bb-message-body .inline-image').live 'load mouseenter', (event) ->
+$(document).on 'load mouseenter', '.bb-message-body .inline-image', (event) ->
   scrollMessagesView() if instachat.scrolledToBottom
 
 # unstick from bottom if the user manually scrolls
@@ -245,7 +287,7 @@ $(window).scroll (event) ->
   instachat.scrolledToBottom = atBottom
 
 # Form Interceptors
-$("#joinRoom").live "submit", ->
+$(document).on 'submit', '#joinRoom', ->
   roomName = $("#roomName").val()
   if not roomName
     # reset to old room name
@@ -363,10 +405,10 @@ Template.messages_input.events
 
 
 # alert for unread messages
-$("#messageInput").live "blur", ->
+$(document).on 'blur', '#messageInput', ->
   instachat.alertWhenUnreadMessages = true
 
-$("#messageInput").live "focus", ->
+$(document).on 'focus', '#messageInput', ->
   updateLastRead() if instachat.ready # skip during initial load
   instachat.alertWhenUnreadMessages = false
   hideMessageAlert()
@@ -451,18 +493,21 @@ updateNotice = do ->
     [lastUnread, lastMention] = [unread, mention]
 
 Deps.autorun ->
-  unless Session.equals("currentPage", "chat") and \
-         (+Session.get('timestamp')) is 0
-    hideMessageAlert()
-    return
+  pageWithChat = /^(chat|puzzle|round)$/.test Session.get('currentPage')
   nick = model.canonical(Session.get('nick') or '')
   room_name = Session.get 'room_name'
-  return unless nick and room_name
+  unless pageWithChat and nick and room_name
+    Session.set 'lastread', undefined
+    return hideMessageAlert()
+  # watch the last read and update the session (even if we're paged back)
   Meteor.subscribe 'lastread-for-nick', nick
-  # watch the last read
   lastread = model.LastRead.findOne(nick: nick, room_name: room_name)
-  return unless lastread
-  # watch the unread messages
+  unless lastread
+    Session.set 'lastread', undefined
+    return hideMessageAlert()
+  Session.set 'lastread', lastread.timestamp
+  # watch the unread messages (unless we're paged back)
+  return hideMessageAlert() unless (+Session.get('timestamp')) is 0
   total_unread = 0
   total_mentions = 0
   update = -> false # ignore initial updates
@@ -501,5 +546,8 @@ share.chat =
   cleanupChat: cleanupChat
   hideMessageAlert: hideMessageAlert
   joinRoom: joinRoom
+  # pagination helpers
+  pageForTimestamp: pageForTimestamp
+  messagesForPage: messagesForPage
   # for debugging
   instachat: instachat

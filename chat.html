@@ -44,24 +44,24 @@
 
 <template name="messages">
   <div id="messages" class="row-fluid bb-chat-messages">
+    {{#if ready}}{{#if prevTimestamp}}
+      <p align="center">
+        <a href="{{prevTimestamp}}" class="chat-link">See earlier messages</a>
+      </p>
+    {{else}}{{#if timestamp}}
+      <p align="center">Start of chat log.</p>
+    {{/if}}{{/if}}{{/if}}
     {{#each messages}}
-      {{#if first}}
-        <p align="center">
-          <a href="{{first}}" class="chat-link">See earlier messages</a>
-        </p>
-      {{/if}}
       {{#if message.system}}
 <div class="bb-message-system">
    <div class="pull-right timestamp">{{pretty_ts message.timestamp}}</div>
      {{body}}
-   </div>
 </div>
       {{else}}{{#if message.action}}
 <div class="bb-message-action">
    <div class="pull-right timestamp">{{pretty_ts message.timestamp}}</div>
      <i class="icon-hand-right"></i>
      {{nickOrName message.nick}} {{body}}
-   </div>
 </div>
       {{else}}
 <div class="media{{#if message.to}} bb-message-pm{{/if}}{{#if followup}} bb-message-followup{{/if}}">
@@ -77,19 +77,26 @@
   </div>
 </div>
       {{/if}}{{/if}}
-      {{#if lastRead}}
+      {{#if isLastRead message.timestamp}}
 <div class="bb-message-last-read">read</div>
       {{/if}}
     {{else}}
       <p align="center">
+{{#if ready}}
 No chat messages{{#if timestamp}} before {{pretty_ts timestamp}}{{/if}}.
+{{else}}
+...loading messages...
+{{/if}}
       </p>
     {{/each}}
 
-    {{#if timestamp}}
+    {{#if timestamp}}{{#if ready}}
       <p align="center">
-      <a href="/chat/{{room_name}}" class="chat-link">See more recent logs</a>
+      {{#if nextTimestamp}}
+      <a href="{{nextTimestamp}}" class="chat-link">See next page of logs</a>;
+      {{/if}}
+      <a href="/chat/{{room_name}}" class="chat-link">See most recent logs</a>
       </p>
-    {{/if}}
+    {{/if}}{{/if}}
   </div>
 </template>

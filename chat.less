@@ -13,11 +13,7 @@
   @chat-arrow-size: 6px;
   @chat-arrow-height: 15px;
   @gravatar-size: 48px;
-  .media {
-    position: relative; /* establish context for arrow placement */
-    margin-bottom: 6px;
-    .timestamp.pull-right { margin-bottom: 0; }
-    &.bb-message-followup {
+  .media + .media.bb-message-followup {
       margin-top: -9px;
       &:before, &:after {
         visibility: hidden;
@@ -36,7 +32,11 @@
                 border-top-right-radius: 0;
         .media-heading { display: none; }
       }
-    }
+  }
+  .media {
+    position: relative; /* establish context for arrow placement */
+    margin-bottom: 6px;
+    .timestamp.pull-right { margin-bottom: 0; }
     &, &:first-child { margin-top: 6px; }
     &:before, &:after {
       content:"";

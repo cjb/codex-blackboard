@@ -1,6 +1,15 @@
 'use strict'
 model = share.model # import
 
+# hack! log subscriptions so we can see what's going on server-side
+Meteor.publish = ((publish) ->
+  (name, func) ->
+    func2 = ->
+      console.log 'client subscribed to', name, arguments
+      func.apply(this, arguments)
+    publish.call(Meteor, name, func2)
+)(Meteor.publish) if false # disable by default
+
 Meteor.publish 'all-roundsandpuzzles', -> [
   model.RoundGroups.find(), model.Rounds.find(), model.Puzzles.find()
 ]
@@ -48,8 +57,10 @@ Meteor.publish 'last-answered-puzzle', ->
     self.changed collection, uuid, recent \
       unless initializing
 
+  # XXX this observe polls on 0.7.0.1
+  # (but not on the meteor oplog-with-operators branch)
   handle = model.Puzzles.find({
-    $and: [ {answer: $ne: null}, {answer: $exists: true} ]
+    answer: { $exists: true, $ne: null }
   }).observe
     added: (doc) -> publishIfMax(doc)
     changed: (doc, oldDoc) -> publishIfMax(doc)
@@ -79,41 +90,38 @@ Meteor.publish 'roundgroup-for-round', (id) -> model.RoundGroups.find rounds: id
 Meteor.publish 'my-nick', (nick) -> model.Nicks.find canon: model.canonical(nick)
 
 # get recent messages
-# paged version: specify page boundary by timestamp, so we can display
-# 'more' messages by passing in the timestamp of the first message
-# on the current page we're looking at
-Meteor.publish 'paged-messages', (room_name, timestamp) ->
-  timestamp = (+timestamp) or Number.MAX_VALUE
-  model.Messages.find {
-    room_name: room_name
-    timestamp: $lt: +timestamp
-    to: null # no pms
-  },
-     sort: [['timestamp','desc']]
-     limit: model.MESSAGE_PAGE
-# same thing, but nick-specific.  Note that between paged-messages and
-# paged-messages-nick we'll almost certainly get more than MESSAGE_PAGE
-# messages -- but that's ok.  We'll do a limit on the client-side; it's
-# worth it because we can share the big query and paged-messages-nick
-# should be small/light-weight.
-Meteor.publish 'paged-messages-nick', (nick, room_name, timestamp) ->
-  timestamp = (+timestamp) or Number.MAX_VALUE
-  nick = model.canonical(nick or '') or null
-  return (model.Messages.find {}, {limit:0}) unless nick?
-  model.Messages.find {
-    room_name: room_name
-    timestamp: $lt: +timestamp
-    $or: [ { nick: nick }, { to: nick } ]
-  },
-     sort: [['timestamp','desc']]
-     limit: model.MESSAGE_PAGE
 
-# same idea, for operation log
-Meteor.publish 'paged-oplogs', (timestamp) ->
-  timestamp = (+timestamp) or Number.MAX_VALUE
-  model.OpLogs.find {timestamp: $lt: +timestamp},
-     sort: [['timestamp','desc']]
-     limit: model.OPLOG_PAGE
+# the last Page object for every room_name.
+Meteor.publish 'last-pages', -> model.Pages.find(next: null)
+# a specific page object
+Meteor.publish 'page-by-id', (id) -> model.Pages.find _id: id
+Meteor.publish 'page-by-timestamp', (room_name, timestamp) ->
+  model.Pages.find room_name: room_name, to: timestamp
+
+# paged messages.  client is responsible for giving a reasonable
+# range, which is a bit of an issue.  Once limit is supported in oplog
+# we could probably add a limit here to be a little safer.
+Meteor.publish 'messages-in-range', (room_name, from, to=0) ->
+  # XXX this observe polls on 0.7.0.1
+  # (but not on the meteor oplog-with-operators branch)
+  cond = $gte: +from, $lt: +to
+  delete cond.$lt if cond.$lt is 0
+  model.Messages.find
+    room_name: room_name
+    timestamp: cond
+    to: null # no pms
+
+# same thing, but nick-specific.  This allows us to share the big query;
+# paged-messages-nick should be small/light-weight.
+Meteor.publish 'messages-in-range-nick', (nick, room_name, from, to=0) ->
+  nick = model.canonical(nick or '') or null
+  cond = $gte: +from, $lt: +to
+  delete cond.$lt if cond.$lt is 0
+  cond = model.NOT_A_TIMESTAMP unless nick? # force 0 results
+  model.Messages.find
+    room_name: room_name
+    timestamp: cond
+    $or: [ { nick: nick }, { to: nick } ]
 
 Meteor.publish 'callins', ->
   model.CallIns.find {},

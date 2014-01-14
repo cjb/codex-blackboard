@@ -2,7 +2,7 @@
 <div class="row-fluid bb-puzzleround">
   <h2>Answer call-in queue</h2>
   <div class="span8">
-    <table class="table">
+    <table class="table"><tbody>
       <tr>
         <th>Puzzle</th>
         <th>Answer</th>
@@ -17,7 +17,7 @@
         No answers in the call-in queue.
       </td></tr>
       {{/each}}
-    </table>
+    </tbody></table>
   </div>
 </div>
 </template>
@@ -30,9 +30,9 @@
             <td>{{#with lastAttempt puzzle}}{{pretty_ts timestamp}} <small>({{pretty_ts timestamp=timestamp style="brief duration"}})</small>{{else}}-{{/with}}</td>
             {{#if sessionNick}}
             <td class="btn-group">
-              <button class="btn btn-success bb-callin-correct">Correct</a>
-              <button class="btn btn-danger bb-callin-incorrect">Incorrect</a>
-              <button class="btn btn-warning bb-callin-cancel">Cancel</a>
+              <button class="btn btn-success bb-callin-correct">Correct</button>
+              <button class="btn btn-danger bb-callin-incorrect">Incorrect</button>
+              <button class="btn btn-warning bb-callin-cancel">Cancel</button>
             </td>
             {{else}}
             <td class="text-warning">Log in to resolve answers in queue.</td>

@@ -20,6 +20,7 @@ keyword_or_positional = (name, args) ->
 # link various types of objects
 Handlebars.registerHelper 'link', (args) ->
   args = keyword_or_positional 'id', args
+  return "" unless args.id
   n = model.Names.findOne(args.id)
   return args.id.slice(0,8) unless n
   return (args.text or n.name) if args.editing
@@ -30,7 +31,7 @@ Handlebars.registerHelper 'link', (args) ->
   link += '</a>'
   return new Handlebars.SafeString(link)
 
-$('a.puzzles-link, a.rounds-link, a.chat-link, a.home-link, a.oplogs-link').live 'click', (event) ->
+$(document).on 'click', 'a.puzzles-link, a.rounds-link, a.chat-link, a.home-link, a.oplogs-link', (event) ->
   return unless event.button is 0 # check right-click
   return if event.ctrlKey or event.shiftKey or event.altKey # check alt/ctrl/shift clicks
   event.preventDefault()
@@ -299,7 +300,7 @@ Template.header_nickmodal_contents.events
   "input #nickEmail": (event, template) ->
     template.updateGravatar()
 
-$("#nickPick").live "submit", ->
+$(document).on 'submit', '#nickPick', ->
   $warningGroup = $(this).find '#nickInputGroup'
   $warning = $(this).find "#nickInputGroup .help-inline"
   nick = $("#nickInput").val().replace(/^\s+|\s+$/g,"") #trim
@@ -370,7 +371,7 @@ confirmationDialog = share.confirmationDialog = (options) ->
 ############## operation log in header ####################
 Template.header_lastupdates.lastupdates = ->
   LIMIT = 10
-  ologs = model.OpLogs.find {}, \
+  ologs = model.Messages.find {room_name: "oplog/0"}, \
         {sort: [["timestamp","desc"]], limit: LIMIT}
   ologs = ologs.fetch()
   # now look through the entries and collect similar logs
@@ -379,7 +380,7 @@ Template.header_lastupdates.lastupdates = ->
   return '' unless ologs && ologs.length
   message = [ ologs[0] ]
   for ol in ologs[1..]
-    if ol.message is message[0].message and ol.type is message[0].type
+    if ol.body is message[0].body and ol.type is message[0].type
       message.push ol
     else
       break
@@ -392,16 +393,19 @@ Template.header_lastupdates.lastupdates = ->
     ((seen[o.id]=o) for o in array when not (o.id of seen))
   return {
     timestamp: message[0].timestamp
-    message: message[0].message + type
+    message: message[0].body + type
     nick: message[0].nick
     objects: uniq({type:m.type,id:m.id} for m in message)
   }
 
 # subscribe when this template is in use/unsubscribe when it is destroyed
 Template.header_lastupdates.created = ->
-  this.sub = Meteor.subscribe 'paged-oplogs', 0
+  this.computation = Deps.autorun ->
+    p = share.chat.pageForTimestamp 'oplog/0', 0, 'subscribe'
+    return unless p? # wait until page info is loaded
+    Meteor.subscribe 'messages-in-range', p.room_name, p.from, p.to
 Template.header_lastupdates.destroyed = ->
-  this.sub.stop()
+  this.computation.stop()
 # add tooltip to 'more' links, and preserve then so they doesn't leak
 do ->
   for t in ['header_lastupdates', 'header_lastchats']
@@ -425,10 +429,12 @@ Template.header_lastchats.body = ->
 # subscribe when this template is in use/unsubscribe when it is destroyed
 Template.header_lastchats.created = ->
   this.computation = Deps.autorun ->
+    p = share.chat.pageForTimestamp 'general/0', 0, 'subscribe'
+    return unless p? # wait until page info is loaded
     # use autorun to ensure subscription changes if/when nick does
-    nick = if settings.BB_DISABLE_PM then null else Session.get('nick')
-    sub1 = Meteor.subscribe 'paged-messages-nick', nick, 'general/0', 0
-    sub2 = Meteor.subscribe 'paged-messages', 'general/0', 0
-    Deps.onInvalidate -> ( sub1.stop() ; sub2.stop() )
+    nick = Session.get 'nick'
+    if nick? and not settings.BB_DISABLE_PM
+      Meteor.subscribe 'messages-in-range-nick', nick, p.room_name, p.from, p.to
+    Meteor.subscribe 'messages-in-range', p.room_name, p.from, p.to
 Template.header_lastchats.destroyed = ->
   this.computation.stop()
