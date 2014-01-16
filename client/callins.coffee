@@ -4,13 +4,18 @@ settings = share.settings # import
 
 Meteor.startup ->
   newCallInSound = new Audio "sound/new_callin.wav"
-  # note that this observe 'leaks'
-  Meteor.subscribe 'callins'
-  model.CallIns.find({}).observe
-    added: (doc) ->
-      console.log 'ding dong'
-      unless Session.get 'mute'
-        newCallInSound.play()
+  # note that this observe 'leaks'; that's ok, the set of callins is small
+  Deps.autorun ->
+    sub = Meteor.subscribe 'callins'
+    return unless sub.ready() # reactive, will re-execute when ready
+    initial = true
+    model.CallIns.find({}).observe
+      added: (doc) ->
+        return if initial
+        console.log 'ding dong'
+        unless Session.get 'mute'
+          newCallInSound.play()
+    initial = false
 
 Template.callins.callins = ->
   model.CallIns.find {},

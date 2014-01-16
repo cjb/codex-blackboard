@@ -583,6 +583,7 @@ spread_id_to_link = (id) ->
         puzzle: IdOrObject
         answer: NonEmptyString
         who: NonEmptyString
+      return if this.isSimulation # otherwise we trigger callin sound twice
       id = args.puzzle._id or args.puzzle
       newObject "callins", {name:canonical(args.answer), who:args.who},
         puzzle: id
