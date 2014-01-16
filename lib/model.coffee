@@ -229,6 +229,7 @@ if Meteor.isServer
         nick: ''
         to: null
         body: "#{name} joined the room."
+        bodyIsHtml: false
         room_name: presence.room_name
         timestamp: UTCNow()
     removed: (presence) ->
@@ -243,6 +244,7 @@ if Meteor.isServer
         nick: ''
         to: null
         body: "#{name} left the room."
+        bodyIsHtml: false
         room_name: presence.room_name
         timestamp: UTCNow()
   # turn on presence notifications once initial observation set has been
@@ -315,6 +317,7 @@ spread_id_to_link = (id) ->
       nick: canonical(who)
       timestamp: UTCNow()
       body: message
+      bodyIsHtml: false
       type:type
       id:id
       oplog: true

@@ -419,8 +419,9 @@ do ->
 ############## chat log in header ####################
 Template.header_lastchats.lastchats = ->
   LIMIT = 2
-  m = model.Messages.find {room_name: "general/0", system: false}, \
-        {sort: [["timestamp","desc"]], limit: LIMIT}
+  m = model.Messages.find {
+    room_name: "general/0", system: false, bodyIsHtml: false
+  }, {sort: [["timestamp","desc"]], limit: LIMIT}
   m = m.fetch().reverse()
   return m
 Template.header_lastchats.body = ->
