@@ -282,6 +282,7 @@ Deps.autorun ->
     document.documentElement.classList.add('bb-nobot')
   else
     document.documentElement.classList.remove('bb-nobot')
+  scrollMessagesView() if instachat.scrolledToBottom
 
 # ensure that we stay stuck to bottom even after images load
 $(document).on 'load mouseenter', '.bb-message-body .inline-image', (event) ->
