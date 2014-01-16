@@ -116,6 +116,9 @@
     .bb-message-body { min-height: 0; }
   }
 }
+/* hide messages from bot if bot is muted */
+html.bb-nobot .bb-is-bot { display: none; }
+
 .messageRow, .actionRow {
   color: #666; /*font-size: 1.2em; margin: 4px 5px;*/
 }

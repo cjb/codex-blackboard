@@ -6,7 +6,8 @@ GENERAL_ROOM = 'Ringhunters'
 
 Session.setDefault 'room_name', "general/0"
 Session.setDefault 'nick'     , ($.cookie("nick") || "")
-Session.setDefault 'mute'     , $.cookie("mute")
+Session.setDefault 'mute'     , !!$.cookie("mute")
+Session.setDefault 'nobot'    , !!$.cookie("nobot")
 Session.setDefault 'type'     , 'general'
 Session.setDefault 'id'       , '0'
 Session.setDefault 'timestamp', 0
@@ -89,6 +90,7 @@ Template.messages.messages  = ->
         _id: m._id
         followup: false
         message: m
+        isBot: m.nick is 'codexbot' and m.to is null
   messages = messagesForPage p,
     sort: [['timestamp','asc']]
   sameNick = do ->
@@ -102,6 +104,7 @@ Template.messages.messages  = ->
   for m, i in messages.fetch()
     followup: sameNick(m)
     message: m
+    isBot: m.nick is 'codexbot' and m.to is null
 
 Template.messages.email = ->
   cn = model.canonical(this.message.nick)
@@ -266,13 +269,19 @@ scrollMessagesView = ->
   instachat.scrolledToBottom = true
 
 # Event Handlers
-$(document).on 'click', 'button.mute', ->
-  if Session.get "mute"
-    $.removeCookie "mute", {path:'/'}
-  else
-    $.cookie "mute", true, {expires: 365, path: '/'}
+['mute','nobot'].forEach (btn) ->
+  $(document).on 'click', "button.#{btn}", ->
+    if Session.get btn
+      $.removeCookie btn, {path:'/'}
+    else
+      $.cookie btn, true, {expires: 365, path: '/'}
 
-  Session.set "mute", $.cookie "mute"
+    Session.set btn, !!$.cookie btn
+Deps.autorun ->
+  if Session.equals('nobot', true)
+    document.documentElement.classList.add('bb-nobot')
+  else
+    document.documentElement.classList.remove('bb-nobot')
 
 # ensure that we stay stuck to bottom even after images load
 $(document).on 'load mouseenter', '.bb-message-body .inline-image', (event) ->

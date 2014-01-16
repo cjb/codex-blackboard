@@ -108,10 +108,17 @@ Handlebars.registerHelper 'pretty_ts', (args) ->
 
 ############## log in/protect/mute panel ####################
 Template.header_loginmute.volumeIcon = ->
-  if Session.get "mute"
-    "icon-volume-off"
+  if Session.get "mute" then "icon-volume-off" else "icon-volume-up"
+Template.header_loginmute.volumeTitle = ->
+  if Session.get "mute" then "Muted" else "Click to mute"
+Template.header_loginmute.botIcon = ->
+  if Session.get "nobot" then "icon-bot-off" else "icon-bot-on"
+Template.header_loginmute.botTitle = ->
+  if Session.get "nobot"
+    "Codexbot promises not to bother you"
   else
-    "icon-volume-up"
+    "Codexbot is feeling chatty!"
+
 Template.header_loginmute.sessionNick = ->
   nick = Session.get 'nick'
   return nick unless nick
@@ -124,7 +131,9 @@ Template.header_loginmute.sessionNick = ->
   }
 Template.header_loginmute.rendered = ->
   # tool tips
-  $(this.findAll('.bb-buttonbar *[title]')).tooltip placement: 'bottom'
+  $(this.findAll('.bb-buttonbar *[title]')).tooltip
+    placement: 'bottom'
+    container: '.bb-buttonbar'
 # preserve buttons with tooltips, so they don't leak
 Template.header_loginmute.preserve
   '.bb-buttonbar *[title]': (node) -> node.title

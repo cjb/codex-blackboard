@@ -112,8 +112,15 @@
      </button>
     </div>
 {{/if}}
+{{#if currentPageEquals "chat"}}
     <div class="btn-group">
-     <button title="Mute" class="mute btn btn-small btn-inverse">
+     <button title="{{botTitle}}" class="nobot btn btn-small btn-inverse">
+      <span class="{{botIcon}} icon-white"></span>
+     </button>
+    </div>
+{{/if}}
+    <div class="btn-group">
+     <button title="{{volumeTitle}}" class="mute btn btn-small btn-inverse">
       <span class="{{volumeIcon}} icon-white"></span>
      </button>
     </div>
