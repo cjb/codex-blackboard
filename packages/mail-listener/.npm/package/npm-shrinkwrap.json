@@ -1,13 +1,24 @@
 {
   "dependencies": {
-    "mail-listener": {
-      "version": "0.6.3",
+    "mail-listener2": {
+      "version": "https://github.com/chirag04/mail-listener2/tarball/276077b8e7d25013037d39a99418b6e08c807dcb",
       "dependencies": {
         "imap": {
-          "version": "0.7.8",
+          "version": "0.8.7",
           "dependencies": {
             "utf7": {
               "version": "1.0.0"
+            },
+            "readable-stream": {
+              "version": "1.1.10",
+              "dependencies": {
+                "core-util-is": {
+                  "version": "1.0.1"
+                },
+                "debuglog": {
+                  "version": "0.0.2"
+                }
+              }
             }
           }
         },

@@ -171,6 +171,7 @@ doesMentionNick = (doc, raw_nick=(Session.get 'nick')) ->
   return false unless raw_nick
   return false unless doc.body?
   return false if doc.system # system messages don't count as mentions
+  return true if doc.nick is 'thehunt' # special alert for team email!
   nick = model.canonical raw_nick
   return false if nick is doc.nick # messages from yourself don't count
   return true if doc.to is nick # PMs to you count
