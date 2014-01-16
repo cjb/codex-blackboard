@@ -3,14 +3,14 @@ model = share.model # import
 settings = share.settings # import
 
 Meteor.startup ->
-  newAnswerSound = new Audio "sound/new_callin.wav"
+  newCallInSound = new Audio "sound/new_callin.wav"
   # note that this observe 'leaks'
   Meteor.subscribe 'callins'
   model.CallIns.find({}).observe
     added: (doc) ->
       console.log 'ding dong'
       unless Session.get 'mute'
-        newAnswerSound.play()
+        newCallInSound.play()
 
 Template.callins.callins = ->
   model.CallIns.find {},
