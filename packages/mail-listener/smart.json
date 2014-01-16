@@ -1,0 +1,9 @@
+{
+	"name": "mail-listener",
+	"description": "mail-listener NPM module packaged for Meteor.",
+	"homepage": "https://github.com/BenjaminRH/meteor-mail-listener",
+	"author": "Benjamin Harris  (http://benjaminrharris.com)",
+	"version": "0.6.3",
+	"git": "https://github.com/BenjaminRH/meteor-mail-listener.git",
+	"packages": {}
+}
