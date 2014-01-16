@@ -114,7 +114,8 @@ Template.messages.body = ->
     body = Handlebars._escape(body)
     body = body.replace(/\n|\r\n?/g, '<br/>')
     body = convertURLsToLinksAndImages(body, this.message._id)
-    body = highlightNick(body) if doesMentionNick(this.message)
+  if doesMentionNick(this.message)
+    body = highlightNick(body, this.message.bodyIsHtml)
   new Handlebars.SafeString(body)
 
 Template.messages.preserve
@@ -185,7 +186,11 @@ doesMentionNick = (doc, raw_nick=(Session.get 'nick')) ->
     # match against full name
     (realname and (new RegExp (regex_escape realname), "i").test(doc.body))
 
-highlightNick = (html) -> "<span class=\"highlight-nick\">" + html + "</span>"
+highlightNick = (html, isHtml=false) ->
+  if isHtml
+    "<div class=\"highlight-nick\">" + html + "</div>"
+  else
+    "<span class=\"highlight-nick\">" + html + "</span>"
 
 convertURLsToLinksAndImages = (html, id) ->
   linkOrLinkedImage = (url, id) ->
