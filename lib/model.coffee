@@ -497,9 +497,12 @@ spread_id_to_link = (id) ->
       deleteObject "roundgroups", args
 
     newRound: (args) ->
+      link = if Meteor.settings?.round_prefix
+        "#{Meteor.settings.round_prefix}#{canonical(args.name)}"
       r = newObject "rounds", args,
         puzzles: args.puzzles or []
         drive: args.drive or null
+        link: link
       newDriveFolder "rounds", r._id, r.name
       return r
     renameRound: (args) ->
@@ -537,6 +540,8 @@ spread_id_to_link = (id) ->
       return r
 
     newPuzzle: (args) ->
+      link = if Meteor.settings?.puzzle_prefix
+        "#{Meteor.settings.puzzle_prefix}#{canonical(args.name)}"
       p = newObject "puzzles", args,
         answer: null
         incorrectAnswers: []
@@ -544,6 +549,7 @@ spread_id_to_link = (id) ->
         solved_by: null
         drive: args.drive or null
         spreadsheet: args.spreadsheet or null
+        link: link
       # create google drive folder (server only)
       newDriveFolder "puzzles", p._id, p.name
       return p
