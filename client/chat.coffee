@@ -556,6 +556,13 @@ Deps.autorun ->
   update = -> updateNotice total_unread, total_mentions
   update()
 
+# evil hack to workaround scroll issues.
+do ->
+  f = ->
+    return unless Session.equals('currentPage', 'chat')
+    scrollMessagesView() if instachat.scrolledToBottom
+  Meteor.setTimeout f, 5000
+
 # exports
 share.chat =
   favicon: favicon
