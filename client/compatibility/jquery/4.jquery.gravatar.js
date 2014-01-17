@@ -33,7 +33,7 @@
         var baseUrl = options.secure ? 'https://secure.gravatar.com/avatar/' : 'http://www.gravatar.com/avatar/';
 
         return $('<img src="' + baseUrl +
-            $.md5((emailAddress||'').toLowerCase().replace(/^s+|\s+$/g,'')) +
+            $.md5((emailAddress||'').toLowerCase().replace(/^\s+|\s+$/g,'')) +
             '.jpg?' +
             (options.size ? 's=' + options.size + '&' : '') +
             (options.rating ? 'r=' + options.rating + '&' : '') +
