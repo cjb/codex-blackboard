@@ -235,7 +235,7 @@ Template.blackboard_puzzle.tag = (name) ->
 Template.blackboard_puzzle.whos_working = ->
   return model.Presence.find
     room_name: ("puzzles/"+this.puzzle?._id)
-  , sort: ["nick"]
+  , {sort: ["nick"], limit: 5} # XXX QUICK HACK
 
 Template.blackboard_puzzle_tags.tags = (id) ->
   isRound = ('puzzles' of this)
