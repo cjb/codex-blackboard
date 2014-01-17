@@ -8,7 +8,8 @@ SOUND_THRESHOLD_MS = 30*1000 # 30 seconds
 blackboard = {} # store page global state
 
 Meteor.startup ->
-  blackboard.newAnswerSound = new Audio "sound/that_was_easy.wav"
+  if typeof Audio is 'function' # for phantomjs
+    blackboard.newAnswerSound = new Audio "sound/that_was_easy.wav"
   # set up a persistent query so we can play the sound whenever we get a new
   # answer
   # note that this observe 'leaks' -- we're not setting it up/tearing it
@@ -22,7 +23,7 @@ Meteor.startup ->
       return if doc.puzzle is oldDoc.puzzle # answer changed, not really new
       console.log 'that was easy', doc, oldDoc
       unless Session.get 'mute'
-        blackboard.newAnswerSound.play()
+        blackboard.newAnswerSound?.play?()
 
 # Returns an event map that handles the "escape" and "return" keys and
 # "blur" events on a text input (given by selector) and interprets them

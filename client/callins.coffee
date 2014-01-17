@@ -3,7 +3,8 @@ model = share.model # import
 settings = share.settings # import
 
 Meteor.startup ->
-  newCallInSound = new Audio "sound/new_callin.wav"
+  if typeof Audio is 'function' # for phantomjs
+    newCallInSound = new Audio "sound/new_callin.wav"
   # note that this observe 'leaks'; that's ok, the set of callins is small
   Deps.autorun ->
     sub = Meteor.subscribe 'callins'
@@ -14,7 +15,7 @@ Meteor.startup ->
         return if initial
         console.log 'ding dong'
         unless Session.get 'mute'
-          newCallInSound.play()
+          newCallInSound?.play?()
     initial = false
 
 Template.callins.callins = ->

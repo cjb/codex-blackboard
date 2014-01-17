@@ -494,6 +494,7 @@ $(window).unload -> cleanupChat()
 
 # App startup
 Meteor.startup ->
+  return unless typeof Audio is 'function' # for phantomjs
   instachat.messageMentionSound = new Audio "/sound/Electro_-S_Bainbr-7955.wav"
 
 updateNotice = do ->
