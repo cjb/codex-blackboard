@@ -23,6 +23,7 @@ hashtag = '#mysteryhunt'
 twit.stream 'statuses/filter', {track: hashtag}, (stream) ->
   console.log "Listening to #{hashtag} on twitter"
   stream.on 'data', (data) ->
+    return if data.retweeted_status? # don't report retweets
     console.log "Twitter! @#{data.user.screen_name} #{data.text}"
     text = data.text.replace /(^|\s)\#(\w+)\b/g, \
       '$1<a href="https://twitter.com/search?q=%23$2" target="_blank">#$2</a>'
