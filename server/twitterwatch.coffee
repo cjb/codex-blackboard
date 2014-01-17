@@ -23,4 +23,11 @@ hashtag = '#mysteryhunt'
 twit.stream 'statuses/filter', {track: hashtag}, (stream) ->
   console.log "Listening to #{hashtag} on twitter"
   stream.on 'data', (data) ->
-    console.log "@#{data.user.screen_name} #{data.text}"
+    console.log "Twitter! @#{data.user.screen_name} #{data.text}"
+    text = data.text.replace /(^|\s)\#(\w+)\b/g, \
+      '$1<a href="https://twitter.com/search?q=%23$2" target="_blank">#$2</a>'
+    Meteor.call 'newMessage',
+      nick: 'via twitter'
+      action: 'true'
+      body: "<a href='https://twitter.com/#{data.user.screen_name}/status/#{data.id_str}' title='#{data.user.name}' target='_blank'>@#{data.user.screen_name}</a> says: #{text}"
+      bodyIsHtml: true
