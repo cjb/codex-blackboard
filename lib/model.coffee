@@ -609,6 +609,10 @@ spread_id_to_link = (id) ->
         puzzle: callin.puzzle
         answer: callin.answer
         who: args.who
+      Meteor.call 'newMessage',
+        body: "reports that #{callin.answer.toUpperCase()} is CORRECT!"
+        action: true
+        nick: args.who
 
     incorrectCallIn: (args) ->
       check args, ObjectWith
@@ -621,6 +625,10 @@ spread_id_to_link = (id) ->
         puzzle: callin.puzzle
         answer: callin.answer
         who: args.who
+      Meteor.call 'newMessage',
+        body: "sadly relays that #{callin.answer.toUpperCase()} is INCORRECT."
+        action: true
+        nick: args.who
 
     cancelCallIn: (args) ->
       check args, ObjectWith

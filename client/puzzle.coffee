@@ -40,10 +40,17 @@ Template.puzzle.events
       # XXX this is ugly, i'll fix later
       answer = window.prompt "Answer to call in?"
       return unless answer
-      Meteor.call "newCallIn",
-        puzzle: this.puzzle._id
-        answer: answer
-        who: Session.get 'nick'
+      if false # old way
+        Meteor.call "newCallIn",
+          puzzle: this.puzzle._id
+          answer: answer
+          who: Session.get 'nick'
+      else
+        answer = answer.replace(/\s+/g, '') if /for/.test(answer)
+        name = this.puzzle.name
+        Meteor.call "newMessage",
+          body: "bot: call in #{answer.toUpperCase()} for #{name.toUpperCase()}"
+          nick: Session.get 'nick'
   "click .bb-drive-select": (event, template) ->
     event.preventDefault()
     drive = this.puzzle.drive
