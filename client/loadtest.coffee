@@ -167,6 +167,17 @@ addTask "puzzleChat", (cb) ->
   ensureData (error, data) ->
     return if error?
     login()
+    o = { page: 'chat', type: 'puzzles', id: data.puzzle._id }
+    saySomething "#{o.type}/#{o.id}"
+    cb o
+  undefined
+
+addTask "puzzlePage", (cb) ->
+  # ensure there's a puzzle named "puzzle" in a round named "round" in a
+  # roundgroup named "roundgroup"
+  ensureData (error, data) ->
+    return if error?
+    login()
     # pick a puzzle
     o = Random.choice [
       #{ type: 'roundgroups', id: data.roundgroup._id }, # no chat for rgs!
