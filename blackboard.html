@@ -167,9 +167,14 @@
       </td>
     {{#unless canEdit}}
     <td class="puzzle-working">
-      <span class="comma-list">
+      <div {{#if lotsOfPeople whos_working.count}}class="bb-lots"{{/if}}>
+      <span class="bb-short">
+      {{ whos_working.count }} people
+      </span>
+      <span class="bb-long comma-list">
       {{#each whos_working}}{{> nick_presence }} {{/each}}
       </span>
+      </div>
     </td>
     <td class="puzzle-update">
       {{#isolate}}
@@ -287,9 +292,14 @@
     </td>
     {{#unless canEdit}}
     <td class="puzzle-working">
-      <span class="comma-list">
+      <div {{#if lotsOfPeople whos_working.count}}class="bb-lots"{{/if}}>
+      <span class="bb-short">
+      {{ whos_working.count }} people
+      </span>
+      <span class="bb-long comma-list">
       {{#each whos_working}}{{> nick_presence }} {{/each}}
       </span>
+      </div>
     </td>
     <td class="puzzle-update">
       {{#isolate}}

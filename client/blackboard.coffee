@@ -228,14 +228,14 @@ Template.blackboard_round.tag = (name) ->
 Template.blackboard_round.whos_working = ->
   return model.Presence.find
     room_name: ("rounds/"+this.round?._id)
-  , {sort: ["nick"], limit: 5} # XXX QUICK HACK
+  , sort: ["nick"]
 
 Template.blackboard_puzzle.tag = (name) ->
   return (model.getTag this.puzzle, name) or ''
 Template.blackboard_puzzle.whos_working = ->
   return model.Presence.find
     room_name: ("puzzles/"+this.puzzle?._id)
-  , {sort: ["nick"], limit: 5} # XXX QUICK HACK
+  , sort: ["nick"]
 
 Template.blackboard_puzzle_tags.tags = (id) ->
   isRound = ('puzzles' of this)

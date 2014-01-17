@@ -55,6 +55,10 @@ Handlebars.registerHelper 'nickOrName', (args) ->
   n = model.Nicks.findOne canon: model.canonical(nick)
   return model.getTag(n, 'Real Name') or nick
 
+Handlebars.registerHelper 'lotsOfPeople', (args) ->
+  count = (keyword_or_positional 'count', args).count
+  return count > 4
+
 # gravatars
 Handlebars.registerHelper 'gravatar', (args) ->
   args = keyword_or_positional 'id', args
