@@ -596,6 +596,11 @@ spread_id_to_link = (id) ->
         answer: args.answer
         who: args.who
       , {suppressLog:true}
+      Meteor.call 'newMessage',
+        body: "is requesting a call-in for #{args.answer.toUpperCase()}"
+        action: true
+        nick: args.who
+        room_name: "puzzles/#{id}"
       oplog "New answer #{args.answer} submitted for", "puzzles", id, args.who
 
     correctCallIn: (args) ->
@@ -609,10 +614,13 @@ spread_id_to_link = (id) ->
         puzzle: callin.puzzle
         answer: callin.answer
         who: args.who
-      Meteor.call 'newMessage',
+      msg =
         body: "reports that #{callin.answer.toUpperCase()} is CORRECT!"
         action: true
         nick: args.who
+      Meteor.call 'newMessage', msg
+      msg.room_name = "puzzles/#{callin.puzzle}"
+      Meteor.call 'newMessage', msg
 
     incorrectCallIn: (args) ->
       check args, ObjectWith
@@ -625,10 +633,13 @@ spread_id_to_link = (id) ->
         puzzle: callin.puzzle
         answer: callin.answer
         who: args.who
-      Meteor.call 'newMessage',
+      msg =
         body: "sadly relays that #{callin.answer.toUpperCase()} is INCORRECT."
         action: true
         nick: args.who
+      Meteor.call 'newMessage', msg
+      msg.room_name = "puzzles/#{callin.puzzle}"
+      Meteor.call 'newMessage', msg
 
     cancelCallIn: (args) ->
       check args, ObjectWith
