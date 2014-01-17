@@ -43,6 +43,10 @@ Template.callin_row.lastAttempt = (puzzle_id) ->
   attempts.sort (a,b) -> a.timestamp - b.timestamp
   attempts[attempts.length - 1]
 
+Template.callin_row.puzzle_link = (puzzle_id) ->
+  p = if puzzle_id then model.Puzzles.findOne(puzzle_id)
+  p?.link
+
 Template.callin_row.events
   "click .bb-callin-correct": (event, template) ->
      Meteor.call 'correctCallIn',

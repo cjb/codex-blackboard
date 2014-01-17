@@ -24,7 +24,10 @@
 
 <template name="callin_row">
         <tr data-bbedit="{{_id}}">
-            <td>{{link puzzle}}</td>
+            <td>{{link puzzle}}{{#if puzzle_link puzzle}}
+            <br/><small>&nbsp;↦&nbsp;<a href="{{puzzle_link puzzle}}"
+                    target="_blank">on&nbsp;hunt&nbsp;site</a></small>
+            {{/if}}</td>
             <td class="answer">{{answer}}</td>
             <td>{{pretty_ts this.created}}</td>
             <td>{{#with lastAttempt puzzle}}{{pretty_ts timestamp}} <small>({{pretty_ts timestamp=timestamp style="brief duration"}})</small>{{else}}-{{/with}}</td>
