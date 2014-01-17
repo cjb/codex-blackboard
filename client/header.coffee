@@ -161,7 +161,6 @@ Template.header_loginmute.events
     target = event.currentTarget
     ensureNick ->
       canEdit = $(target).attr('data-canEdit') is 'true'
-      console.log 'here i am', canEdit
       Session.set 'canEdit', canEdit or undefined
       Session.set 'editing', undefined # abort current edit, whatever it is
 Template.header_loginmute.wikipage = ->
