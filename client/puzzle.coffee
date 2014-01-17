@@ -35,6 +35,15 @@ Template.puzzle.preserve
   "iframe[src]": (node) -> node.src
 
 Template.puzzle.events
+  "click .bb-callin-btn": (event, template) ->
+    share.ensureNick =>
+      # XXX this is ugly, i'll fix later
+      answer = window.prompt "Answer to call in?"
+      return unless answer
+      Meteor.call "newCallIn",
+        puzzle: this.puzzle._id
+        answer: answer
+        who: Session.get 'nick'
   "click .bb-drive-select": (event, template) ->
     event.preventDefault()
     drive = this.puzzle.drive
