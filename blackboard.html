@@ -45,7 +45,8 @@
     <section id="group{{_id}}">
       <h2 class="bb-editable" data-bbedit="roundgroups/{{_id}}/title">
     {{#if editing "roundgroups" _id "title"}}
-      <input type="text" value="{{name}}"
+      <input type="text" id="roundgroups-{{_id}}-title"
+             value="{{name}}"
              class="input-block-level" autofocus />
     {{else}}
       {{#if canEdit}}
@@ -91,7 +92,8 @@
   <section id="r{{round._id}}">
   <h3 class="bb-editable" data-bbedit="rounds/{{round._id}}/title">
   {{#if editing "rounds" round._id "title"}}
-      <input type="text" value="{{round.name}}"
+      <input type="text" id="rounds-{{round._id}}-title"
+             value="{{round.name}}"
              class="input-block-level" autofocus />
   {{else}}
     {{#if canEdit}}
@@ -134,7 +136,8 @@
       <td class="puzzle-answer bb-editable"
           data-bbedit="tags/{{round._id}}/meta_answer/value">
       {{#if editing "tags" round._id "meta_answer" "value"}}
-        <input type="text" value="{{tag "meta_answer"}}"
+        <input type="text" id="tags-{{round._id}}-meta-answer-value"
+               value="{{tag "meta_answer"}}"
                class="input-block-level" autofocus />
       {{else}}
         {{#if canEdit}}
@@ -151,7 +154,8 @@
       <td class="puzzle-status bb-editable"
         data-bbedit="tags/{{round._id}}/status/value">
       {{#if editing "tags" round._id "status" "value"}}
-        <input type="text" value="{{tag "status"}}"
+        <input type="text" id="tags-{{round._id}}-status-value"
+               value="{{tag "status"}}"
                class="input-block-level" autofocus />
       {{else}}
         {{#if canEdit}}
@@ -229,7 +233,8 @@
     <td class="puzzle-name"><div>{{! div needed to establish relative pos }}
       <div class="bb-editable" data-bbedit="puzzles/{{puzzle._id}}/title">
       {{#if editing "puzzles" puzzle._id "title"}}
-        <input type="text" value="{{puzzle.name}}"
+        <input type="text" id="puzzles-{{puzzle._id}}-title"
+               value="{{puzzle.name}}"
                class="input-block-level" autofocus />
       {{else}}
         {{#if canEdit}}
@@ -257,7 +262,8 @@
     <td class="puzzle-answer bb-editable"
         data-bbedit="puzzles/{{puzzle._id}}/answer">
       {{#if editing "puzzles" puzzle._id "answer"}}
-        <input type="text" value="{{#if puzzle.answer}}{{puzzle.answer}}{{/if}}"
+        <input type="text" id="puzzles-{{puzzle._id}}-answer"
+               value="{{#if puzzle.answer}}{{puzzle.answer}}{{/if}}"
                class="input-block-level" autofocus />
       {{else}}
         {{#if canEdit}}
@@ -276,7 +282,8 @@
     <td class="puzzle-status bb-editable"
         data-bbedit="tags/{{puzzle._id}}/status/value">
       {{#if editing "tags" puzzle._id "status" "value"}}
-        <input type="text" value="{{tag "status"}}"
+        <input type="text" id="tags-{{puzzle._id}}-status-value"
+               value="{{tag "status"}}"
                class="input-block-level" autofocus />
       {{else}}
         {{#if canEdit}}
@@ -317,7 +324,8 @@
     <dt class="bb-editable"
         data-bbedit="tags/{{id}}/{{canon}}/name">
       {{#if editing "tags" id canon "name"}}
-        <input type="text" value="{{name}}"
+        <input type="text" id="tags-{{id}}-{{canon}}-name"
+               value="{{name}}"
                class="input-block-level" autofocus />
       {{else}}
         {{#if canEdit}}
@@ -330,7 +338,8 @@
     <dd class="bb-editable"
         data-bbedit="tags/{{id}}/{{canon}}/value">
       {{#if editing "tags" id canon "value"}}
-        <input type="text" value="{{value}}"
+        <input type="text" id="tags-{{id}}-{{canon}}-value"
+               value="{{value}}"
                class="input-block-level" autofocus />
       {{else}}
         {{#if canEdit}}
@@ -357,7 +366,8 @@
           <td class="bb-editable"
               data-bbedit="tags/{{id}}/{{canon}}/name">
             {{#if editing "tags" id canon "name"}}
-              <input type="text" value="{{name}}"
+              <input type="text" id="tags-{{id}}-{{canon}}-name"
+                     value="{{name}}"
                      class="input-block-level" autofocus />
             {{else}}
               {{#if canEdit}}
@@ -370,7 +380,8 @@
           <td class="bb-editable"
               data-bbedit="tags/{{id}}/{{canon}}/value">
             {{#if editing "tags" id canon "value"}}
-              <input type="text" value="{{value}}"
+              <input type="text" id="tags-{{id}}-{{canon}}-value"
+                     value="{{value}}"
                      class="input-block-level" autofocus />
             {{else}}
               {{#if canEdit}}
