@@ -57,10 +57,11 @@ Deps.autorun ->
     Meteor.subscribe 'puzzle-by-id', p
 
 ## Helper function for linking puzzles in rounds to the hunt-running site
-updateHuntLinks = (round_prefix) ->
+share.updateHuntLinks = (round_prefix, puzzle_prefix) ->
   # round prefix is something like "http://www.coinheist.com/indiana/"
+  puzzle_prefix ?= round_prefix
   model.Rounds.update Session.get("id"), $set: link: round_prefix
   model.Rounds.findOne(Session.get("id")).puzzles \
     .map((p) -> model.Puzzles.findOne p).filter((p) -> not p.link ) \
     .forEach (p) ->
-      model.Puzzles.update p._id, $set: link: "#{round_prefix}#{p.canon}"
+      model.Puzzles.update p._id, $set: link: "#{puzzle_prefix}#{p.canon}"
