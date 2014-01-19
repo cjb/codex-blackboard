@@ -48,7 +48,10 @@ okCancelEvents = (selector, callbacks) ->
   events
 
 ######### general properties of the blackboard page ###########
+Session.setDefault 'hideSolved', !!$.cookie('hideSolved')
 Template.blackboard.sortReverse = -> Session.get 'sortReverse'
+Template.blackboard.hideSolved = ->
+  if Session.get 'hideSolved' then 'checked' else ''
 
 ############## groups, rounds, and puzzles ####################
 Template.blackboard.roundgroups = ->
@@ -96,6 +99,13 @@ Template.blackboard.events
   "click .bb-sort-order button": (event, template) ->
     reverse = $(event.currentTarget).attr('data-sortReverse') is 'true'
     Session.set 'sortReverse', reverse or undefined
+  "change .bb-hide-solved input": (event, template) ->
+    hidden = !$(event.currentTarget).checked
+    if Session.get 'hideSolved'
+      $.removeCookie 'hideSolved', {path:'/'}
+    else
+      $.cookie 'hideSolved', true, {expires: 365, path: '/'}
+    Session.set 'hideSolved', !!$.cookie 'hideSolved'
   "click .bb-add-round-group": (event, template) ->
     alertify.prompt "Name of new round group:", (e,str) ->
       return unless e # bail if cancelled
@@ -217,12 +227,16 @@ processBlackboardEdit =
 Template.blackboard_round.hasPuzzles = -> (this.round?.puzzles?.length > 0)
 # the following is a map() instead of a direct find() to preserve order
 Template.blackboard_round.puzzles = ->
-  ({
+  p = ({
     round_num: this.round_num
     puzzle_num: 1 + index
     puzzle: model.Puzzles.findOne(id) or { _id: id }
     rXpY: "r#{this.round_num}p#{1+index}"
-   } for id, index in this.round.puzzles)
+  } for id, index in this.round.puzzles)
+  editing = (Session.get 'nick') and (Session.get 'canEdit')
+  hideSolved = Session.get 'hideSolved'
+  return p if editing or !hideSolved
+  p.filter (pp) ->  !pp.puzzle.answer
 Template.blackboard_round.tag = (name) ->
   return (model.getTag this.round, name) or ''
 Template.blackboard_round.whos_working = ->

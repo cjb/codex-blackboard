@@ -20,7 +20,7 @@
   {{/isolate}}
   <div id="bb-tables" class="span10 {{#if canEdit}}bb-canEdit{{/if}}">
     <!-- content div -->
-<div class="btn-toolbar pull-right bb-top-buttons">
+<div class="btn-toolbar pull-right text-right bb-top-buttons">
     {{#if canEdit}}
      <div class="btn-group">
      <button class="btn btn-mini btn-inverse bb-add-round-group">
@@ -35,6 +35,14 @@
   <button class="btn btn-small {{#unless sortReverse}}active{{/unless}}"
           data-sortReverse="false">Oldest rounds first</button>
 </div>
+    {{#unless canEdit}}<br/>
+<div class="btn-group bb-hide-solved">
+  <label class="checkbox">
+    <input type="checkbox" id="bb-hide-solved-input" {{#if hideSolved}}checked{{/if}}>
+    Hide solved puzzles
+  </label>
+</div>
+    {{/unless}}
 </div>
     <h1 align="center" class="bb-blackboard-h1">
       <span class="bb-no-wrap"><img src="/img/codex_icon-64x64.png" />
