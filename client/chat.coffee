@@ -297,7 +297,7 @@ $(window).scroll (event) ->
   return unless html?.scrollTop? and html?.scrollHeight?
   return unless html?.clientHeight?
   SLOP=20
-  [scrollPos, scrollMax] = [html.scrollTop+html.clientHeight, html.scrollHeight]
+  [scrollPos, scrollMax] = [body.scrollTop+html.clientHeight, body.scrollHeight]
   atBottom = (scrollPos+SLOP >= scrollMax)
   # firefox says that the HTML element is scrolling, not the body element...
   if html.scrollTopMax?
