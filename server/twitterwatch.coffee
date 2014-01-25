@@ -19,6 +19,28 @@ twit = new Twitter
   access_token_key: settings.access_token_key
   access_token_secret: settings.access_token_secret
 
+linkify = do ->
+  # linkify hashtags, URLs, and usernames.  Do this all in one pass so
+  # that we don't try to linkify the contents of a previously-converted
+  # link  (ie, when given `http://user@host/foo#bar` ).
+  hashtagRE = /\#(?:\w+)/
+  usernameRE = /@(?:[a-z0-9_]{1,15})(?![.a-z0-9_])/i
+  # Note that we are using Gruber's "Liberal, Accurate Regex Pattern,
+  # as amended by @cscott in https://gist.github.com/gruber/249502
+  urlRE = /(?:[a-z][\w\-]+:(?:\/{1,3}|[a-z0-9%])|www\d{0,3}[.]|[a-z0-9.\-]+[.][a-z]{2,4}\/)(?:[^\s()<>]|\((?:[^\s()<>]|(?:\([^\s()<>]+\)))*\))+(?:\((?:[^\s()<>]|(?:\([^\s()<>]+\)))*\)|[^\s`!()\[\]{};:\'\".,<>?«»“”‘’])/i
+  # a little bit of magic to glue these regexps into a single pattern
+  pats = [urlRE,hashtagRE,usernameRE].map (re) -> re.source
+  # start with ^|\s because there's no \b before @user and #hash
+  # but also use \b to allow (http://...)
+  re = new RegExp('(^|\\b|\\s)(?:(' + pats.join(')|(') + '))', 'ig')
+  # ok!
+  return (input) ->
+    input.replace re, (text,sp,url,hashtag,username) -> switch
+      when url? then "#{sp}<a href='#{url}' target='_blank'>#{url}</a>"
+      when hashtag? then "#{sp}<a href='https://twitter.com/search?q=#{encodeURIComponent hashtag}' target='_blank'>#{hashtag}</a>"
+      when username? then "#{sp}<a href='https://twitter.com/#{encodeURIComponent username.slice(1)}' target='_blank'>#{username}</a>"
+      else text # shouldn't really ever reach here
+
 hashtag = '#mysteryhunt'
 twit.stream 'statuses/filter', {track: hashtag}, (stream) ->
   console.log "Listening to #{hashtag} on twitter"
@@ -28,10 +50,9 @@ twit.stream 'statuses/filter', {track: hashtag}, (stream) ->
       console.log 'WEIRD TWIT!', data
       return
     console.log "Twitter! @#{data.user.screen_name} #{data.text}"
-    text = data.text.replace /(^|\s)\#(\w+)\b/g, \
-      '$1<a href="https://twitter.com/search?q=%23$2" target="_blank">#$2</a>'
+    text = linkify data.text
     Meteor.call 'newMessage',
       nick: 'via twitter'
       action: 'true'
-      body: "<a href='https://twitter.com/#{data.user.screen_name}/status/#{data.id_str}' title='#{data.user.name}' target='_blank'>@#{data.user.screen_name}</a> says: #{text}"
+      body: "<a href='https://twitter.com/#{data.user.screen_name}'>@#{data.user.screen_name}</a> <a href='https://twitter.com/#{data.user.screen_name}/status/#{data.id_str}' target='_blank'>says:</a> #{text}"
       bodyIsHtml: true

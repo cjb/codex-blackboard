@@ -134,4 +134,4 @@ x move last read marker to a session variable, then use Session.equals
 . Experiment with mobile app support.
 . Upgrade googleapis package to 1.0.
 . Write test suite.
-. Merge Jeff's twitter linkification patch.
+x Merge Jeff's twitter linkification patch.
