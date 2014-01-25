@@ -23,7 +23,7 @@
   {{/unless}}
   <div class="navbar-text bb-chat-presence">
     <span class="label label-inverse">
-    Hunters present:
+    Hunters present ({{whos_here.count}}):
     </span>
     <span class="comma-list">
       {{#each whos_here}}{{> nick_presence }}{{/each}}
