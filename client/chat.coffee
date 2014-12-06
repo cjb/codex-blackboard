@@ -121,10 +121,19 @@ Template.messages.body = ->
     body = highlightNick(body, this.message.bodyIsHtml)
   new Spacebars.SafeString(body)
 
+selfScroll = null
+
+touchSelfScroll = ->
+  Meteor.clearTimeout selfScroll if selfScroll?
+  selfScroll = Meteor.setTimeout ->
+    selfScroll = null
+  , 1000 # ignore browser-generated scroll events for 1 (more) second
+
 Template.messages.scrollHack = ->
   Meteor.defer ->
+    touchSelfScroll()
     scrollMessagesView() if instachat.scrolledToBottom
-    console.log 'scroll hack', instachat.scrolledToBottom
+    Deps.afterFlush -> touchSelfScroll()
 
 Template.messages.created = ->
   instachat.scrolledToBottom = true
@@ -292,6 +301,8 @@ $(document).on 'load mouseenter', '.bb-message-body .inline-image', (event) ->
 # unstick from bottom if the user manually scrolls
 $(window).scroll (event) ->
   return unless Session.equals('currentPage', 'chat')
+  console.log 'Self scroll' if selfScroll?
+  return if selfScroll?
   # set to false, just in case older browser doesn't have scroll properties
   instachat.scrolledToBottom = false
   [body, html] = [document.body, document.documentElement]
@@ -385,6 +396,7 @@ Template.messages_input.submit = (message) ->
         args.body = "tried to say nothing: #{message}" if missingMessage
         args.action = true
   instachat.scrolledToBottom = true
+  touchSelfScroll()
   Meteor.call 'newMessage', args # updates LastRead as a side-effect
   # make sure we're looking at the most recent messages
   if (+Session.get('timestamp'))
