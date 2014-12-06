@@ -114,12 +114,12 @@ Template.messages.email = ->
 Template.messages.body = ->
   body = this.message.body
   unless this.message.bodyIsHtml
-    body = Handlebars._escape(body)
+    body = UI._escape(body)
     body = body.replace(/\n|\r\n?/g, '<br/>')
     body = convertURLsToLinksAndImages(body, this.message._id)
   if doesMentionNick(this.message)
     body = highlightNick(body, this.message.bodyIsHtml)
-  new Handlebars.SafeString(body)
+  new Spacebars.SafeString(body)
 
 Template.messages.scrollHack = ->
   Meteor.defer ->

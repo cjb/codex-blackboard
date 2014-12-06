@@ -3,7 +3,7 @@ model = share.model # import
 settings = share.settings # import
 
 # templates, event handlers, and subscriptions for the site-wide
-# header bar, including the login modals and general Handlebars helpers
+# header bar, including the login modals and general Spacebars helpers
 
 Meteor.startup ->
   Meteor.call 'getRinghuntersFolder', (error, f) ->
@@ -18,7 +18,7 @@ keyword_or_positional = (name, args) ->
   return a
 
 # link various types of objects
-Handlebars.registerHelper 'link', (args) ->
+UI.registerHelper 'link', (args) ->
   args = keyword_or_positional 'id', args
   return "" unless args.id
   n = model.Names.findOne(args.id)
@@ -27,9 +27,9 @@ Handlebars.registerHelper 'link', (args) ->
   extraclasses = if args.class then (' '+args.class) else ''
   title = if args.title then " title='#{args.title}'" else ''
   link = "<a href='/#{n.type}/#{n._id}' class='#{n.type}-link#{extraclasses}' #{title}>"
-  link += Handlebars._escape(args.text or n.name)
+  link += UI._escape(args.text or n.name)
   link += '</a>'
-  return new Handlebars.SafeString(link)
+  return new Spacebars.SafeString(link)
 
 $(document).on 'click', 'a.puzzles-link, a.rounds-link, a.chat-link, a.home-link, a.oplogs-link', (event) ->
   return unless event.button is 0 # check right-click
@@ -42,33 +42,33 @@ $(document).on 'click', 'a.puzzles-link, a.rounds-link, a.chat-link, a.home-link
   else
     share.Router.navigate $(this).attr('href'), {trigger:true}
 
-Handlebars.registerHelper 'drive_link', (args) ->
+UI.registerHelper 'drive_link', (args) ->
   args = keyword_or_positional 'id', args
   return model.drive_id_to_link(args.id)
-Handlebars.registerHelper 'spread_link', (args) ->
+UI.registerHelper 'spread_link', (args) ->
   args = keyword_or_positional 'id', args
   return model.spread_id_to_link(args.id)
 
 # nicks
-Handlebars.registerHelper 'nickOrName', (args) ->
+UI.registerHelper 'nickOrName', (args) ->
   nick = (keyword_or_positional 'nick', args).nick
   n = model.Nicks.findOne canon: model.canonical(nick)
   return model.getTag(n, 'Real Name') or nick
 
-Handlebars.registerHelper 'lotsOfPeople', (args) ->
+UI.registerHelper 'lotsOfPeople', (args) ->
   count = (keyword_or_positional 'count', args).count
   return count > 4
 
 # gravatars
-Handlebars.registerHelper 'gravatar', (args) ->
+UI.registerHelper 'gravatar', (args) ->
   args = keyword_or_positional 'id', args
   g = $.gravatar(args.id, args)
   # hacky cross-platform version of 'outerHTML'
   html = $('<div>').append( g.eq(0).clone() ).html()
-  return new Handlebars.SafeString(html)
+  return new Spacebars.SafeString(html)
 
 # timestamps
-Handlebars.registerHelper 'pretty_ts', (args) ->
+UI.registerHelper 'pretty_ts', (args) ->
   args = keyword_or_positional 'timestamp', args
   timestamp = args.timestamp
   return unless timestamp
@@ -111,7 +111,7 @@ Handlebars.registerHelper 'pretty_ts', (args) ->
       "Unknown timestamp style: #{style}"
 
 # Scroll spy
-Handlebars.registerHelper 'updateScrollSpy', (args) ->
+UI.registerHelper 'updateScrollSpy', (args) ->
   ss = $("body").data("scrollspy")
   ss?.refresh()
   return ''
@@ -420,7 +420,7 @@ Template.header_lastchats.lastchats = ->
   m = m.fetch().reverse()
   return m
 Template.header_lastchats.body = ->
-  if this.bodyIsHtml then new Handlebars.SafeString(this.body) else this.body
+  if this.bodyIsHtml then new Spacebars.SafeString(this.body) else this.body
 
 # subscribe when this template is in use/unsubscribe when it is destroyed
 Template.header_lastchats.created = ->

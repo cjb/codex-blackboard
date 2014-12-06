@@ -2,7 +2,7 @@
 	"predef": [
 		"Meteor", "Random", "$", "jQuery", "Deps", "Template", "Session",
 		"document", "Backbone", "google", "alertify", "Audio",
-		"Handlebars", "window"
+		"Spacebars", "UI", "window"
 	],
 
 	"bitwise": true,

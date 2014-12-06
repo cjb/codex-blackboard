@@ -10,34 +10,34 @@ chat = share.chat # import
 #   "oplogs"     -- operation logs
 #   "callins"    -- answer queue
 #   "facts"      -- server performance information
-Handlebars.registerHelper "equal", (a, b) -> a is b
+UI.registerHelper "equal", (a, b) -> a is b
 
 # session variables we want to make available from all templates
 do -> for v in ['currentPage']
-  Handlebars.registerHelper v, () -> Session.get(v)
-Handlebars.registerHelper 'currentPageEquals', (arg) ->
+  UI.registerHelper v, () -> Session.get(v)
+UI.registerHelper 'currentPageEquals', (arg) ->
   # register a more precise dependency on the value of currentPage
   Session.equals 'currentPage', arg
-Handlebars.registerHelper 'typeEquals', (arg) ->
+UI.registerHelper 'typeEquals', (arg) ->
   # register a more precise dependency on the value of type
   Session.equals 'type', arg
-Handlebars.registerHelper 'canEdit', () ->
+UI.registerHelper 'canEdit', () ->
   (Session.get 'nick') and (Session.get 'canEdit')
-Handlebars.registerHelper 'editing', (args..., options) ->
+UI.registerHelper 'editing', (args..., options) ->
   return false unless (Session.get 'nick') and (Session.get 'canEdit')
   return Session.equals 'editing', args.join('/')
 
-Handlebars.registerHelper 'wikiRP', (options) ->
+UI.registerHelper 'wikiRP', (options) ->
   [r,p] = [options.hash?.r, options.hash?.p]
   "#{settings.WIKI_HOST}/index.php?title=#{settings.HUNT_YEAR}_R#{r}P#{p}"
-Handlebars.registerHelper 'wiki', (options) ->
+UI.registerHelper 'wiki', (options) ->
   title = options.hash?.title
   return settings.WIKI_HOST unless title
   "#{settings.WIKI_HOST}/index.php?title=#{title}"
 
-Handlebars.registerHelper 'linkify', (contents) ->
-  contents = chat.convertURLsToLinksAndImages(Handlebars._escape(contents))
-  return new Handlebars.SafeString(contents)
+UI.registerHelper 'linkify', (contents) ->
+  contents = chat.convertURLsToLinksAndImages(UI._escape(contents))
+  return new Spacebars.SafeString(contents)
 
 # subscribe to the all-names feed all the time
 Meteor.subscribe 'all-names'
