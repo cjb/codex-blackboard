@@ -121,8 +121,10 @@ Template.messages.body = ->
     body = highlightNick(body, this.message.bodyIsHtml)
   new Handlebars.SafeString(body)
 
-Template.messages.preserve
-  ".inline-image[id]": (node) -> node.id
+Template.messages.scrollHack = ->
+  Meteor.defer ->
+    scrollMessagesView() if instachat.scrolledToBottom
+
 Template.messages.created = ->
   instachat.scrolledToBottom = true
   this.computation = Deps.autorun =>
@@ -159,8 +161,6 @@ Template.messages.created = ->
     Deps.onInvalidate invalidator
 Template.messages.destroyed = ->
   this.computation.stop() # runs invalidation handler, too
-Template.messages.rendered = ->
-  scrollMessagesView() if instachat.scrolledToBottom
 
 Template.chat_header.room_name = -> prettyRoomName()
 Template.chat_header.whos_here = ->
@@ -448,20 +448,13 @@ updateLastRead = ->
 
 hideMessageAlert = -> updateNotice 0, 0
 
-Template.chat.created = ->
-  this.afterFirstRender = ->
-    # created callback means that we've switched to chat, but
-    # can't call ensureNick until after firstRender
-    share.ensureNick ->
-      type = Session.get('type')
-      id = Session.get('id')
-      joinRoom type, id
-
 Template.chat.rendered = ->
   $("title").text("Chat: "+prettyRoomName())
   $(window).resize()
-  this.afterFirstRender?()
-  this.afterFirstRender = undefined
+  share.ensureNick ->
+    type = Session.get('type')
+    id = Session.get('id')
+    joinRoom type, id
 
 startupChat = ->
   return if instachat.keepaliveInterval?

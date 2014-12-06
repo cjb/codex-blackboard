@@ -15,24 +15,23 @@ Template.puzzle.data = ->
 Template.puzzle.created = ->
   $('html').addClass('fullHeight')
   share.chat.startupChat()
-  this.afterFirstRender = ->
-    share.Splitter.vsize.set()
+  this.computation = Deps.autorun =>
+    # set page title
+    type = Session.get('type')
+    id = Session.get('id')
+    name = model.collection(type)?.findOne(id)?.name or id
+    $("title").text("Puzzle: "+name)
 Template.puzzle.rendered = ->
   $('html').addClass('fullHeight')
-  this.afterFirstRender?()
-  this.afterFirstRender = null
-  # set page title
-  type = Session.get('type')
-  id = Session.get('id')
-  name = model.collection(type)?.findOne(id)?.name or id
-  $("title").text("Puzzle: "+name)
-  share.Splitter.vsize.set() unless share.Splitter.vsize.manualResized
+  share.Splitter.vsize.set()
+# XXX we originally did this every time anything in the template was changed:
+#  share.Splitter.vsize.set() unless share.Splitter.vsize.manualResized
+# with the new `rendered` callback semantics this isn't possible.  Maybe we
+# don't really need it?
 Template.puzzle.destroyed = ->
   $('html').removeClass('fullHeight')
   share.chat.cleanupChat()
-
-Template.puzzle.preserve
-  "iframe[src]": (node) -> node.src
+  this.computation.stop()
 
 Template.puzzle.events
   "click .bb-callin-btn": (event, template) ->

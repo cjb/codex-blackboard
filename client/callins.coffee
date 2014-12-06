@@ -22,13 +22,9 @@ Template.callins.callins = ->
   model.CallIns.find {},
     sort: [["created","asc"]]
 
-Template.callins.created = ->
-  this.afterFirstRender = -> share.ensureNick()
-
 Template.callins.rendered = ->
   $("title").text("Answer queue")
-  this.afterFirstRender?()
-  this.afterFirstRender = undefined
+  share.ensureNick()
 
 Template.callin_row.created = ->
   this.get_callin_id = (event) ->

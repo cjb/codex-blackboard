@@ -2,7 +2,6 @@
 
 <!-- puzzles w/ index -->
 <div class="row-fluid">
-  {{#isolate}}
   <div id="bb-sidebar" class="span2">
     <ul class="nav nav-list bb-sidenav span2">
       <li><a class="bb-wiki" href="{{wiki title=""}}"
@@ -11,13 +10,12 @@
       {{#each roundgroups}}
       <li class="nav-header">{{name}}</li>
       {{#each rounds}}
-      <li><a title="r{{round_num}}" href="#r{{round._id}}"><i class="icon-chevron-right"></i>
+      <li><a title="r{{round_num}}" href="#r{{round._id}}{{updateScrollSpy}}"><i class="icon-chevron-right"></i>
       {{round.name}}</a></li>
       {{/each}}
       {{/each}}
     </ul>
   </div>
-  {{/isolate}}
   <div id="bb-tables" class="span10 {{#if canEdit}}bb-canEdit{{/if}}">
     <!-- content div -->
 <div class="btn-toolbar pull-right text-right bb-top-buttons">
@@ -38,7 +36,7 @@
     {{#unless canEdit}}<br/>
 <div class="btn-group bb-hide-solved">
   <label class="checkbox">
-    <input type="checkbox" id="bb-hide-solved-input" {{#if hideSolved}}checked{{/if}}>
+    <input type="checkbox" id="bb-hide-solved-input" checked={{hideSolved}}>
     Hide solved puzzles
   </label>
 </div>
@@ -97,7 +95,7 @@
 </template>
 
 <template name="blackboard_round">
-  <section id="r{{round._id}}">
+  <section id="r{{round._id}}{{updateScrollSpy}}">
   <h3 class="bb-editable" data-bbedit="rounds/{{round._id}}/title">
   {{#if editing "rounds" round._id "title"}}
       <input type="text" id="rounds-{{round._id}}-title"
@@ -179,7 +177,7 @@
       </td>
     {{#unless canEdit}}
     <td class="puzzle-working">
-      <div {{#if lotsOfPeople whos_working.count}}class="bb-lots"{{/if}}>
+      <div class="{{#if lotsOfPeople whos_working.count}}bb-lots{{/if}}">
       <span class="bb-short">
       {{ whos_working.count }} people
       </span>
@@ -189,11 +187,9 @@
       </div>
     </td>
     <td class="puzzle-update">
-      {{#isolate}}
       {{#if tag "meta_answer"}}solved {{pretty_ts timestamp=round.touched style="brief duration"}}{{! XXX }}
       {{else}}added {{pretty_ts timestamp=round.created style="brief duration"}}
       {{/if}}
-      {{/isolate}}
     </td>
     {{/unless}}
     </tr>
@@ -307,7 +303,7 @@
     </td>
     {{#unless canEdit}}
     <td class="puzzle-working">
-      <div {{#if lotsOfPeople whos_working.count}}class="bb-lots"{{/if}}>
+      <div class="{{#if lotsOfPeople whos_working.count}}bb-lots{{/if}}">
       <span class="bb-short">
       {{ whos_working.count }} people
       </span>
@@ -317,11 +313,9 @@
       </div>
     </td>
     <td class="puzzle-update">
-      {{#isolate}}
       {{#if puzzle.solved}}solved {{pretty_ts timestamp=puzzle.solved style="brief duration"}}
       {{else}}added {{pretty_ts timestamp=puzzle.created style="brief duration"}}
       {{/if}}
-      {{/isolate}}
     </td>
     {{/unless}}
   </tr>

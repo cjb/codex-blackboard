@@ -18,13 +18,9 @@ Template.oplog.nextTimestamp = ->
   "/oplogs/#{p.to}"
 Template.oplog.timestamp = -> +Session.get('timestamp')
 
-Template.oplog.created = ->
-  this.afterFirstRender = ->
-    $("body").scrollTo 'max'
 Template.oplog.rendered = ->
   $("title").text("Operation Log Archive")
-  this.afterFirstRender?()
-  this.afterFirstRender = undefined
+  $("body").scrollTo 'max'
 
 Deps.autorun ->
   return unless Session.equals("currentPage", "oplog")

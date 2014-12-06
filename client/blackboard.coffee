@@ -70,31 +70,26 @@ Template.blackboard.rounds = ->
   } for id, index in this.rounds)
   r.reverse() if Session.get 'sortReverse'
   return r
-Template.blackboard.preserve ['#bb-sidebar']
 Template.blackboard.created = ->
-  this.afterFirstRender = ->
-    $("#bb-sidebar").localScroll({ duration: 400, lazy: true })
-    $("body").scrollspy(target: "#bb-sidebar", offset: (NAVBAR_HEIGHT + 10))
   this.find_bbedit = (event) ->
     edit = $(event.currentTarget).closest('*[data-bbedit]').attr('data-bbedit')
     return edit.split('/')
 Template.blackboard.rendered = ->
-  this.afterFirstRender?()
-  this.afterFirstRender = null
-  #  page title
-  $("title").text("Codex Puzzle Blackboard")
-  # update bootstrap "scroll spy" component when rounds list changes
-  ss = $("body").data("scrollspy")
-  ss.refresh()
+  $("#bb-sidebar").localScroll({ duration: 400, lazy: true })
+  ss = $("body").scrollspy(target: "#bb-sidebar", offset: (NAVBAR_HEIGHT + 10))
   # hack to ensure first element is selected on first reload
   ss.activate(ss.targets[0]) if ss.targets.length
   ss.process()
+  #  page title
+  $("title").text("Codex Puzzle Blackboard")
   # affix side menu
   # XXX disabled because it doesn't play nice with narrow screens
   #$("#bb-sidebar > .bb-sidenav").affix()
   # tooltips
   $('#bb-sidebar .nav > li > a').tooltip placement: 'right'
   $('#bb-tables .bb-puzzle .puzzle-name > a').tooltip placement: 'left'
+  # see the global 'updateScrollSpy' helper for details on how
+  # we update scrollspy when the rounds list changes
 Template.blackboard.events
   "click .bb-sort-order button": (event, template) ->
     reverse = $(event.currentTarget).attr('data-sortReverse') is 'true'

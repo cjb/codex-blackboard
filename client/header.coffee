@@ -110,6 +110,12 @@ Handlebars.registerHelper 'pretty_ts', (args) ->
     else
       "Unknown timestamp style: #{style}"
 
+# Scroll spy
+Handlebars.registerHelper 'updateScrollSpy', (args) ->
+  ss = $("body").data("scrollspy")
+  ss?.refresh()
+  return ''
+
 ############## log in/protect/mute panel ####################
 Template.header_loginmute.volumeIcon = ->
   if Session.get "mute" then "icon-volume-off" else "icon-volume-up"
@@ -138,11 +144,6 @@ Template.header_loginmute.rendered = ->
   $(this.findAll('.bb-buttonbar *[title]')).tooltip
     placement: 'bottom'
     container: '.bb-buttonbar'
-# preserve buttons with tooltips, so they don't leak
-Template.header_loginmute.preserve
-  '.bb-buttonbar *[title]': (node) -> node.title
-  '.bb-buttonbar *[data-original-title]': (node) ->
-    $(node).attr('data-original-title')
 Template.header_loginmute.events
   "click .bb-login": (event, template) ->
     event.preventDefault()
@@ -220,11 +221,6 @@ Template.header_breadcrumbs.events
 Template.header_breadcrumbs.rendered = ->
   # tool tips
   $(this.findAll('a.bb-drive-link[title]')).tooltip placement: 'bottom'
-# preserve buttons with tooltips, so they don't leak
-Template.header_breadcrumbs.preserve
-  'a.bb-drive-link[title]': (node) -> node.title
-  'a.bb-drive-link[data-original-title]': (node) ->
-    $(node).attr('data-original-title')
 
 uploadToDriveFolder = share.uploadToDriveFolder = (folder, callback) ->
   return unless google?
@@ -252,25 +248,10 @@ uploadToDriveFolder = share.uploadToDriveFolder = (folder, callback) ->
 
 ############## nick selection ####################
 Template.header_nickmodal.nickModalVisible = -> Session.get 'nickModalVisible'
-Template.header_nickmodal.preserve ['#nickPickModal']
 Template.header_nickmodal_contents.nick = -> Session.get "nick" or ''
 Template.header_nickmodal_contents.created = ->
   # we'd need to subscribe to 'all-nicks' here if we didn't have a permanent
   # subscription to it (in main.coffee)
-  this.afterFirstRender = =>
-    $('#nickPickModal').one 'hide', ->
-      Session.set 'nickModalVisible', undefined
-    $('#nickSuccess').val('false')
-    $('#nickPickModal').modal keyboard: false, backdrop:"static"
-    $('#nickInput').select()
-    firstNick = Session.get 'nick' or ''
-    $('#nickInput').val firstNick
-    this.update firstNick, force:true
-    $('#nickInput').typeahead
-      source: this.typeaheadSource
-      updater: (item) =>
-        this.update(item)
-        return item
   this.typeaheadSource = (query,process) =>
     this.update(query)
     (n.name for n in model.Nicks.find({}).fetch())
@@ -296,8 +277,19 @@ Template.header_nickmodal_contents.created = ->
     else
       container.append(gravatar)
 Template.header_nickmodal_contents.rendered = ->
-  this.afterFirstRender?()
-  this.afterFirstRender = undefined
+  $('#nickPickModal').one 'hide', ->
+    Session.set 'nickModalVisible', undefined
+  $('#nickSuccess').val('false')
+  $('#nickPickModal').modal keyboard: false, backdrop:"static"
+  $('#nickInput').select()
+  firstNick = Session.get 'nick' or ''
+  $('#nickInput').val firstNick
+  this.update firstNick, force:true
+  $('#nickInput').typeahead
+    source: this.typeaheadSource
+    updater: (item) =>
+      this.update(item)
+      return item
 Template.header_nickmodal_contents.events
   "click .bb-submit": (event, template) ->
     $('#nickPick').submit()
@@ -359,13 +351,8 @@ ensureNick = share.ensureNick = (cb=(->)) ->
 ############## confirmation dialog ########################
 Template.header_confirmmodal.confirmModalVisible = ->
   !!(Session.get 'confirmModalVisible')
-Template.header_confirmmodal.preserve ['#confirmModal']
-Template.header_confirmmodal_contents.created = ->
-  this.afterFirstRender = ->
-    $('#confirmModal').modal show: true
 Template.header_confirmmodal_contents.rendered = ->
-  this.afterFirstRender?()
-  this.afterFirstRender = undefined
+  $('#confirmModal').modal show: true
 Template.header_confirmmodal_contents.events
   "click .bb-confirm-ok": (event, template) ->
     Template.header_confirmmodal_contents.cancel = false # do the thing!
@@ -418,15 +405,11 @@ Template.header_lastupdates.created = ->
     Meteor.subscribe 'messages-in-range', p.room_name, p.from, p.to
 Template.header_lastupdates.destroyed = ->
   this.computation.stop()
-# add tooltip to 'more' links, and preserve then so they doesn't leak
+# add tooltip to 'more' links
 do ->
   for t in ['header_lastupdates', 'header_lastchats']
     Template[t].rendered = ->
       $(this.findAll('.right a[title]')).tooltip placement: 'left'
-    Template[t].preserve
-      '.right a[title]': (node) -> node.title
-      '.right a[data-original-title]': (node) ->
-        $(node).attr('data-original-title')
 
 ############## chat log in header ####################
 Template.header_lastchats.lastchats = ->

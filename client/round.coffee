@@ -15,24 +15,23 @@ Template.round.data = ->
 Template.round.created = ->
   $('html').addClass('fullHeight')
   share.chat.startupChat()
-  this.afterFirstRender = ->
-    share.Splitter.vsize.set()
+  this.computation = Deps.autorun =>
+    # set page title
+    type = Session.get('type')
+    id = Session.get('id')
+    name = model.collection(type)?.findOne(id)?.name or id
+    $("title").text("Round: "+name)
 Template.round.rendered = ->
   $('html').addClass('fullHeight')
-  this.afterFirstRender?()
-  this.afterFirstRender = null
-  # set page title
-  type = Session.get('type')
-  id = Session.get('id')
-  name = model.collection(type)?.findOne(id)?.name or id
-  $("title").text("Round: "+name)
-  share.Splitter.vsize.set() unless share.Splitter.vsize.manualResized
+  share.Splitter.vsize.set()
+# XXX we originally did this every time anything in the template was changed:
+#  share.Splitter.vsize.set() unless share.Splitter.vsize.manualResized
+# with the new `rendered` callback semantics this isn't possible.  Maybe we
+# don't really need it?
 Template.round.destroyed = ->
   $('html').removeClass('fullHeight')
   share.chat.cleanupChat()
-
-Template.round.preserve
-  "iframe[src]": (node) -> node.src
+  this.computation.stop()
 
 Template.round.events
   "click .bb-drive-upload": (event, template) ->
