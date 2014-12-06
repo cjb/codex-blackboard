@@ -76,7 +76,8 @@ Template.blackboard.created = ->
     return edit.split('/')
 Template.blackboard.rendered = ->
   $("#bb-sidebar").localScroll({ duration: 400, lazy: true })
-  ss = $("body").scrollspy(target: "#bb-sidebar", offset: (NAVBAR_HEIGHT + 10))
+  $("body").scrollspy(target: "#bb-sidebar", offset: (NAVBAR_HEIGHT + 10))
+  ss = $("body").data("scrollspy")
   # hack to ensure first element is selected on first reload
   ss.activate(ss.targets[0]) if ss.targets.length
   ss.process()

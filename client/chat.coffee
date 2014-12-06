@@ -124,6 +124,7 @@ Template.messages.body = ->
 Template.messages.scrollHack = ->
   Meteor.defer ->
     scrollMessagesView() if instachat.scrolledToBottom
+    console.log 'scroll hack', instachat.scrolledToBottom
 
 Template.messages.created = ->
   instachat.scrolledToBottom = true
