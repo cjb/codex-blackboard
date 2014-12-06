@@ -15,7 +15,7 @@ Template.round.data = ->
 Template.round.created = ->
   $('html').addClass('fullHeight')
   share.chat.startupChat()
-  this.computation = Deps.autorun =>
+  this.autorun =>
     # set page title
     type = Session.get('type')
     id = Session.get('id')
@@ -31,7 +31,6 @@ Template.round.rendered = ->
 Template.round.destroyed = ->
   $('html').removeClass('fullHeight')
   share.chat.cleanupChat()
-  this.computation.stop()
 
 Template.round.events
   "click .bb-drive-upload": (event, template) ->

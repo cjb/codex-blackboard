@@ -137,7 +137,7 @@ Template.messages.scrollHack = ->
 
 Template.messages.created = ->
   instachat.scrolledToBottom = true
-  this.computation = Deps.autorun =>
+  this.autorun =>
     invalidator = =>
       instachat.ready = false
       Session.set 'chatReady', false
@@ -169,8 +169,6 @@ Template.messages.created = ->
     Meteor.subscribe 'messages-in-range', p.room_name, p.from, p.to,
       onReady: onReady
     Deps.onInvalidate invalidator
-Template.messages.destroyed = ->
-  this.computation.stop() # runs invalidation handler, too
 
 Template.chat_header.room_name = -> prettyRoomName()
 Template.chat_header.whos_here = ->

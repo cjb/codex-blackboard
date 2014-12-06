@@ -15,7 +15,7 @@ Template.puzzle.data = ->
 Template.puzzle.created = ->
   $('html').addClass('fullHeight')
   share.chat.startupChat()
-  this.computation = Deps.autorun =>
+  this.autorun =>
     # set page title
     type = Session.get('type')
     id = Session.get('id')
@@ -31,7 +31,6 @@ Template.puzzle.rendered = ->
 Template.puzzle.destroyed = ->
   $('html').removeClass('fullHeight')
   share.chat.cleanupChat()
-  this.computation.stop()
 
 Template.puzzle.events
   "click .bb-callin-btn": (event, template) ->

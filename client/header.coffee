@@ -399,12 +399,10 @@ Template.header_lastupdates.lastupdates = ->
 
 # subscribe when this template is in use/unsubscribe when it is destroyed
 Template.header_lastupdates.created = ->
-  this.computation = Deps.autorun ->
+  this.autorun ->
     p = share.chat.pageForTimestamp 'oplog/0', 0, 'subscribe'
     return unless p? # wait until page info is loaded
     Meteor.subscribe 'messages-in-range', p.room_name, p.from, p.to
-Template.header_lastupdates.destroyed = ->
-  this.computation.stop()
 # add tooltip to 'more' links
 do ->
   for t in ['header_lastupdates', 'header_lastchats']
@@ -424,7 +422,7 @@ Template.header_lastchats.body = ->
 
 # subscribe when this template is in use/unsubscribe when it is destroyed
 Template.header_lastchats.created = ->
-  this.computation = Deps.autorun ->
+  this.autorun ->
     p = share.chat.pageForTimestamp 'general/0', 0, 'subscribe'
     return unless p? # wait until page info is loaded
     # use autorun to ensure subscription changes if/when nick does
@@ -432,5 +430,3 @@ Template.header_lastchats.created = ->
     if nick? and not settings.BB_DISABLE_PM
       Meteor.subscribe 'messages-in-range-nick', nick, p.room_name, p.from, p.to
     Meteor.subscribe 'messages-in-range', p.room_name, p.from, p.to
-Template.header_lastchats.destroyed = ->
-  this.computation.stop()
