@@ -67,9 +67,9 @@ Template.blackboard.rounds = ->
     num_puzzles: (model.Rounds.findOne(id)?.puzzles or []).length
     num_solved: (p for p in (model.Rounds.findOne(id)?.puzzles or []) when \
                  model.Puzzles.findOne(p)?.answer).length
-   } for id, index in this.rounds)
-   r.reverse() if Session.get 'sortReverse'
-   return r
+  } for id, index in this.rounds)
+  r.reverse() if Session.get 'sortReverse'
+  return r
 Template.blackboard.preserve ['#bb-sidebar']
 Template.blackboard.created = ->
   this.afterFirstRender = ->
