@@ -10,9 +10,9 @@ bootstrap@1.0.1
 callback-hook@1.0.0
 check@1.0.1
 coffeescript@1.0.3
-cscottnet:googleapis@0.4.7
+cscottnet:googleapis@0.4.7_1
 cscottnet:mail-listener2@0.1.8
-cscottnet:twitter@0.2.5
+cscottnet:twitter@0.2.13
 ctl-helper@1.0.3
 ctl@1.0.1
 ddp@1.0.9
