@@ -130,3 +130,8 @@ move followup field to object or CSS
 x move last read marker to a session variable, then use Session.equals
   to insert it at the right spot?
   - use model query to ensure timestamp exactly matches a message?
+---
+. Experiment with mobile app support.
+. Upgrade googleapis package to 1.0.
+. Write test suite.
+. Merge Jeff's twitter linkification patch.
