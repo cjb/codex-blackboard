@@ -22,7 +22,7 @@ Template.oplog.rendered = ->
   $("title").text("Operation Log Archive")
   $("body").scrollTo 'max'
 
-Deps.autorun ->
+Tracker.autorun ->
   return unless Session.equals("currentPage", "oplog")
   room_name = 'oplog/0'
   timestamp = +Session.get('timestamp')

@@ -11,7 +11,7 @@ bootstrap
 http
 random
 check
-standard-app-packages
+meteor-platform
 facts
 cscottnet:googleapis
 cscottnet:twitter

@@ -32,7 +32,7 @@ pageForTimestamp = (room_name, timestamp=0, subscribe=false) ->
       to: 0 # means "and everything else" for message-in-range subscription
     }
   else
-    if subscribe and Deps.active # make sure we unsubscribe if necessary!
+    if subscribe and Tracker.active # make sure we unsubscribe if necessary!
       Meteor.subscribe 'page-by-timestamp', room_name, timestamp
     model.Pages.findOne(room_name:room_name, to:timestamp)
 
@@ -133,7 +133,7 @@ Template.messages.scrollHack = ->
   Meteor.defer ->
     touchSelfScroll()
     scrollMessagesView() if instachat.scrolledToBottom
-    Deps.afterFlush -> touchSelfScroll()
+    Tracker.afterFlush -> touchSelfScroll()
 
 Template.messages.created = ->
   instachat.scrolledToBottom = true
@@ -168,7 +168,7 @@ Template.messages.created = ->
       onReady()
     Meteor.subscribe 'messages-in-range', p.room_name, p.from, p.to,
       onReady: onReady
-    Deps.onInvalidate invalidator
+    Tracker.onInvalidate invalidator
 
 Template.chat_header.room_name = -> prettyRoomName()
 Template.chat_header.whos_here = ->
@@ -285,7 +285,7 @@ scrollMessagesView = ->
       $.cookie btn, true, {expires: 365, path: '/'}
 
     Session.set btn, !!$.cookie btn
-Deps.autorun ->
+Tracker.autorun ->
   if Session.equals('nobot', true)
     document.documentElement.classList.add('bb-nobot')
   else
@@ -517,7 +517,7 @@ updateNotice = do ->
     ## XXX check instachat.ready and instachat.alertWhenUnreadMessages ?
     [lastUnread, lastMention] = [unread, mention]
 
-Deps.autorun ->
+Tracker.autorun ->
   pageWithChat = /^(chat|puzzle|round)$/.test Session.get('currentPage')
   nick = model.canonical(Session.get('nick') or '')
   room_name = Session.get 'room_name'

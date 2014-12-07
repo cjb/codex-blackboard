@@ -70,7 +70,7 @@ Template.puzzle.events
 
 # presumably we also want to subscribe to the puzzle's chat room
 # and presence information at some point.
-Deps.autorun ->
+Tracker.autorun ->
   return if settings.BB_SUB_ALL
   return unless Session.equals("type", "puzzles")
   puzzle_id = Session.get('id')

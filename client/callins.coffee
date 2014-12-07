@@ -6,7 +6,7 @@ Meteor.startup ->
   if typeof Audio is 'function' # for phantomjs
     newCallInSound = new Audio "sound/new_callin.wav"
   # note that this observe 'leaks'; that's ok, the set of callins is small
-  Deps.autorun ->
+  Tracker.autorun ->
     sub = Meteor.subscribe 'callins'
     return unless sub.ready() # reactive, will re-execute when ready
     initial = true
@@ -59,7 +59,7 @@ Template.callin_row.events
        id: template.get_callin_id(event)
        who: Session.get('nick')
 
-Deps.autorun ->
+Tracker.autorun ->
   return unless Session.equals("currentPage", "callins")
   Meteor.subscribe 'callins'
   return if settings.BB_SUB_ALL

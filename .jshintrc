@@ -1,8 +1,8 @@
 {
 	"predef": [
-		"Meteor", "Random", "$", "jQuery", "Deps", "Template", "Session",
+		"Meteor", "Random", "$", "jQuery", "Template", "Session",
 		"document", "Backbone", "google", "alertify", "Audio",
-		"Spacebars", "UI", "window"
+		"Mongo", "Spacebars", "Tracker", "UI", "window"
 	],
 
 	"bitwise": true,

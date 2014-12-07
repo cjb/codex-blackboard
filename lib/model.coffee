@@ -21,7 +21,7 @@ BBCollection = Object.create(null) # create new object w/o any inherited cruft
 #   name: string
 #   canon: canonicalized version of name, for searching
 Names = BBCollection.names = \
-  if Meteor.isClient then new Meteor.Collection 'names' else null
+  if Meteor.isClient then new Mongo.Collection 'names' else null
 
 # LastAnswer is a synthetic collection created by the server which gives the
 # solution time of the most recently-solved puzzle.
@@ -29,7 +29,7 @@ Names = BBCollection.names = \
 #    solved: solution time
 #    puzzle: id of most recently solved puzzle
 LastAnswer = BBCollection.last_answer = \
-  if Meteor.isClient then new Meteor.Collection 'last-answer' else null
+  if Meteor.isClient then new Mongo.Collection 'last-answer' else null
 
 # RoundGroups are:
 #   _id: mongodb id
@@ -44,7 +44,7 @@ LastAnswer = BBCollection.last_answer = \
 #   (next fields is a bit racy, oh well)
 #   round_start: integer, indicating how many rounds total are in all
 #                preceding round groups (a bit racy, but server fixes it up)
-RoundGroups = BBCollection.roundgroups = new Meteor.Collection "roundgroups"
+RoundGroups = BBCollection.roundgroups = new Mongo.Collection "roundgroups"
 if Meteor.isServer
   RoundGroups._ensureIndex {canon: 1}, {unique:true, dropDups:true}
   # periodically go through and sync up round_start field
@@ -67,7 +67,7 @@ if Meteor.isServer
 #   tags: [ { name: "Status", canon: "status", value: "stuck" }, ... ]
 #   puzzles: [ array of puzzle _ids, in order ]
 #   drive: google drive url or id
-Rounds = BBCollection.rounds = new Meteor.Collection "rounds"
+Rounds = BBCollection.rounds = new Mongo.Collection "rounds"
 if Meteor.isServer
   Rounds._ensureIndex {canon: 1}, {unique:true, dropDups:true}
 
@@ -86,7 +86,7 @@ if Meteor.isServer
 #   solved_by:  timestamp of Nick who confirmed the answer
 #   tags: [ { name: "Status", canon: "status", value: "stuck" }, ... ]
 #   drive: google drive url or id
-Puzzles = BBCollection.puzzles = new Meteor.Collection "puzzles"
+Puzzles = BBCollection.puzzles = new Mongo.Collection "puzzles"
 if Meteor.isServer
   Puzzles._ensureIndex {canon: 1}, {unique:true, dropDups:true}
 
@@ -96,7 +96,7 @@ if Meteor.isServer
 #   answer: string (proposed answer to call in)
 #   created: timestamp
 #   created_by: canon of Nick
-CallIns = BBCollection.callins = new Meteor.Collection "callins"
+CallIns = BBCollection.callins = new Mongo.Collection "callins"
 if Meteor.isServer
    CallIns._ensureIndex {created: 1}, {}
    CallIns._ensureIndex {puzzle: 1, answer: 1}, {unique:true, dropDups:true}
@@ -107,7 +107,7 @@ if Meteor.isServer
 #   canon: canonicalized version of name, for searching
 #   tags: [ { name: "Real Name", canon: "real_name", value: "C. Scott Ananian" }, ... ]
 # valid tags include "Real Name", "Gravatar" (email address to use for photos)
-Nicks = BBCollection.nicks = new Meteor.Collection "nicks"
+Nicks = BBCollection.nicks = new Mongo.Collection "nicks"
 if Meteor.isServer
   Nicks._ensureIndex {canon: 1}, {unique:true, dropDups:true}
 
@@ -129,7 +129,7 @@ if Meteor.isServer
 # and `room_name="oplog/0"`.  They also have two additional fields,
 # `type` and `id`, which give a mongodb reference to the object
 # modified so we can hyperlink to it.
-Messages = BBCollection.messages = new Meteor.Collection "messages"
+Messages = BBCollection.messages = new Mongo.Collection "messages"
 if Meteor.isServer
   Messages._ensureIndex {to:1, room_name:1, timestamp:-1}, {}
   Messages._ensureIndex {nick:1, room_name:1, timestamp:-1}, {}
@@ -141,7 +141,7 @@ if Meteor.isServer
 #   prev: id of previous page for this room_name, or null
 #   next: id of next page for this room_name, or null
 # Messages with from <= timestamp < to are included in a specific page.
-Pages = BBCollection.pages = new Meteor.Collection "pages"
+Pages = BBCollection.pages = new Mongo.Collection "pages"
 if Meteor.isServer
   # used in the server observe code below
   Pages._ensureIndex {room_name:1, to:-1}, {unique:true}
@@ -189,7 +189,7 @@ if Meteor.isServer
 #   nick: canonicalized string, as in Messages
 #   room_name: string, as in Messages
 #   timestamp: timestamp of last read message
-LastRead = BBCollection.lastread = new Meteor.Collection "lastread"
+LastRead = BBCollection.lastread = new Mongo.Collection "lastread"
 if Meteor.isServer
   LastRead._ensureIndex {nick:1, room_name:1}, {unique:true, dropDups:true}
   LastRead._ensureIndex {nick:1}, {} # be safe
@@ -201,7 +201,7 @@ if Meteor.isServer
 #   foreground: boolean (true if user's tab is still in foreground)
 #   foreground_uuid: identity of client with tab in foreground
 #   present: boolean (true if user is present, false if not)
-Presence = BBCollection.presence = new Meteor.Collection "presence"
+Presence = BBCollection.presence = new Mongo.Collection "presence"
 if Meteor.isServer
   Presence._ensureIndex {nick: 1, room_name:1}, {unique:true, dropDups:true}
   Presence._ensureIndex {timestamp:-1}, {}
@@ -252,7 +252,7 @@ if Meteor.isServer
   # is complete.)
   initiallySuppressPresence = false
 
-# this reverses the name given to Meteor.Collection; that is the
+# this reverses the name given to Mongo.Collection; that is the
 # 'type' argument is the name of a server-side Mongo collection.
 collection = (type) ->
   if Object::hasOwnProperty.call(BBCollection, type)
