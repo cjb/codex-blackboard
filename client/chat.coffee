@@ -167,11 +167,13 @@ Template.messages.created = ->
       onReady: onReady
     Tracker.onInvalidate invalidator
 
+whos_here_helper = ->
+  roomName = Session.get('type') + '/' + Session.get('id')
+  return model.Presence.find {room_name: roomName}, {sort:["nick"]}
+
 Template.chat_header.helpers
   room_name: -> prettyRoomName()
-  whos_here: ->
-    roomName = Session.get('type') + '/' + Session.get('id')
-    return model.Presence.find {room_name: roomName}, {sort:["nick"]}
+  whos_here: whos_here_helper
 
 # Utility functions
 
@@ -423,11 +425,10 @@ Template.messages_input.events
     # tab completion
     if event.which is 9 # tab
       event.preventDefault() # prevent tabbing away from input field
-      whos_here = Template.chat_header.whos_here().fetch()
       $message = $ event.currentTarget
       message = $message.val()
       if message
-        for present in whos_here
+        for present in whos_here_helper().fetch()
           n = model.Nicks.findOne(canon: present.nick)
           realname = if n then model.getTag(n, 'Real Name')
           re = new RegExp "^#{message}", "i"
