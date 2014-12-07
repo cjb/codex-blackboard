@@ -12,7 +12,7 @@ http
 random
 check
 standard-app-packages
-googleapis
 facts
-mail-listener
-twitter
+cscottnet:googleapis
+cscottnet:twitter
+cscottnet:mail-listener2
