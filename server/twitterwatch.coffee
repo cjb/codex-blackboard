@@ -25,7 +25,7 @@ linkify = do ->
   # link  (ie, when given `http://user@host/foo#bar` ).
   hashtagRE = /\#(?:\w+)/
   usernameRE = /@(?:[a-z0-9_]{1,15})(?![.a-z0-9_])/i
-  # Note that we are using Gruber's "Liberal, Accurate Regex Pattern,
+  # Note that we are using Gruber's "Liberal, Accurate Regex Pattern",
   # as amended by @cscott in https://gist.github.com/gruber/249502
   urlRE = /(?:[a-z][\w\-]+:(?:\/{1,3}|[a-z0-9%])|www\d{0,3}[.]|[a-z0-9.\-]+[.][a-z]{2,4}\/)(?:[^\s()<>]|\((?:[^\s()<>]|(?:\([^\s()<>]+\)))*\))+(?:\((?:[^\s()<>]|(?:\([^\s()<>]+\)))*\)|[^\s`!()\[\]{};:\'\".,<>?«»“”‘’])/i
   # a little bit of magic to glue these regexps into a single pattern
