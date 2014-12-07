@@ -18,9 +18,10 @@ Meteor.startup ->
           newCallInSound?.play?()
     initial = false
 
-Template.callins.callins = ->
-  model.CallIns.find {},
-    sort: [["created","asc"]]
+Template.callins.helpers
+  callins: ->
+    model.CallIns.find {},
+      sort: [["created","asc"]]
 
 Template.callins.rendered = ->
   $("title").text("Answer queue")
@@ -30,18 +31,17 @@ Template.callin_row.created = ->
   this.get_callin_id = (event) ->
     $(event.currentTarget).closest('*[data-bbedit]').attr('data-bbedit')
 
-Template.callin_row.sessionNick = -> Session.get 'nick'
-
-Template.callin_row.lastAttempt = (puzzle_id) ->
-  p = if puzzle_id then model.Puzzles.findOne(puzzle_id)
-  return null unless p? and p.incorrectAnswers?.length > 0
-  attempts = p.incorrectAnswers[..]
-  attempts.sort (a,b) -> a.timestamp - b.timestamp
-  attempts[attempts.length - 1]
-
-Template.callin_row.puzzle_link = (puzzle_id) ->
-  p = if puzzle_id then model.Puzzles.findOne(puzzle_id)
-  p?.link
+Template.callin_row.helpers
+  sessionNick: -> Session.get 'nick'
+  lastAttempt: (puzzle_id) ->
+    p = if puzzle_id then model.Puzzles.findOne(puzzle_id)
+    return null unless p? and p.incorrectAnswers?.length > 0
+    attempts = p.incorrectAnswers[..]
+    attempts.sort (a,b) -> a.timestamp - b.timestamp
+    attempts[attempts.length - 1]
+  puzzle_link: (puzzle_id) ->
+    p = if puzzle_id then model.Puzzles.findOne(puzzle_id)
+    p?.link
 
 Template.callin_row.events
   "click .bb-callin-correct": (event, template) ->

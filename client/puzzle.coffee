@@ -2,16 +2,17 @@
 model = share.model # import
 settings = share.settings # import
 
-Template.puzzle.data = ->
-  r = {}
-  puzzle = r.puzzle = model.Puzzles.findOne Session.get("id")
-  round = r.round = model.Rounds.findOne puzzles: puzzle?._id
-  group = r.group = model.RoundGroups.findOne rounds: round?._id
-  r.puzzle_num = 1 + (round?.puzzles or []).indexOf(puzzle?._id)
-  r.round_num = 1 + group?.round_start + \
-                (group?.rounds or []).indexOf(round?._id)
-  r.hunt_year = settings.HUNT_YEAR
-  return r
+Template.puzzle.helpers
+  data: ->
+    r = {}
+    puzzle = r.puzzle = model.Puzzles.findOne Session.get("id")
+    round = r.round = model.Rounds.findOne puzzles: puzzle?._id
+    group = r.group = model.RoundGroups.findOne rounds: round?._id
+    r.puzzle_num = 1 + (round?.puzzles or []).indexOf(puzzle?._id)
+    r.round_num = 1 + group?.round_start + \
+                  (group?.rounds or []).indexOf(round?._id)
+    r.hunt_year = settings.HUNT_YEAR
+    return r
 Template.puzzle.created = ->
   $('html').addClass('fullHeight')
   share.chat.startupChat()

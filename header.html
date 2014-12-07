@@ -167,11 +167,11 @@
     <p class="messageRow">
     <span class="timestamp">{{pretty_ts timestamp}}</span>
     {{#if action}}
-      <strong title="{{nickOrName nick}}">{{nick}}</strong> {{body}}
+      <strong title="{{nickOrName nick}}">{{nick}}</strong> {{msgbody}}
     {{else}}
       <strong title="{{nickOrName nick}}">{{nick}}:</strong>
       {{#if to}}/msg <span title="{{nickOrName to}}">{{to}}</span>{{/if}}
-      {{body}}
+      {{msgbody}}
     {{/if}}
     </p>
     {{/each}}

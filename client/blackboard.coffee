@@ -49,27 +49,28 @@ okCancelEvents = (selector, callbacks) ->
 
 ######### general properties of the blackboard page ###########
 Session.setDefault 'hideSolved', !!$.cookie('hideSolved')
-Template.blackboard.sortReverse = -> Session.get 'sortReverse'
-Template.blackboard.hideSolved = ->
-  if Session.get 'hideSolved' then 'checked' else ''
+Template.blackboard.helpers
+  sortReverse: -> Session.get 'sortReverse'
+  hideSolved: -> if Session.get 'hideSolved' then 'checked' else ''
 
 ############## groups, rounds, and puzzles ####################
-Template.blackboard.roundgroups = ->
-  dir = if Session.get 'sortReverse' then 'desc' else 'asc'
-  model.RoundGroups.find {}, sort: [["created", dir]]
-# the following is a map() instead of a direct find() to preserve order
-Template.blackboard.rounds = ->
-  r = ({
-    round_num: 1+index+this.round_start
-    round: (model.Rounds.findOne(id) or \
-            {_id: id, name: model.Names.findOne(id)?.name})
-    rX: "r#{1+index+this.round_start}"
-    num_puzzles: (model.Rounds.findOne(id)?.puzzles or []).length
-    num_solved: (p for p in (model.Rounds.findOne(id)?.puzzles or []) when \
-                 model.Puzzles.findOne(p)?.answer).length
-  } for id, index in this.rounds)
-  r.reverse() if Session.get 'sortReverse'
-  return r
+Template.blackboard.helpers
+  roundgroups: ->
+    dir = if Session.get 'sortReverse' then 'desc' else 'asc'
+    model.RoundGroups.find {}, sort: [["created", dir]]
+  # the following is a map() instead of a direct find() to preserve order
+  rounds: ->
+    r = ({
+      round_num: 1+index+this.round_start
+      round: (model.Rounds.findOne(id) or \
+              {_id: id, name: model.Names.findOne(id)?.name})
+      rX: "r#{1+index+this.round_start}"
+      num_puzzles: (model.Rounds.findOne(id)?.puzzles or []).length
+      num_solved: (p for p in (model.Rounds.findOne(id)?.puzzles or []) when \
+                   model.Puzzles.findOne(p)?.answer).length
+    } for id, index in this.rounds)
+    r.reverse() if Session.get 'sortReverse'
+    return r
 Template.blackboard.created = ->
   this.find_bbedit = (event) ->
     edit = $(event.currentTarget).closest('*[data-bbedit]').attr('data-bbedit')
@@ -220,40 +221,44 @@ processBlackboardEdit =
     # set tag (overwriting previous value)
     Meteor.call 'setTag', n.type, id, t.name, text, Session.get('nick')
 
-Template.blackboard_round.hasPuzzles = -> (this.round?.puzzles?.length > 0)
-# the following is a map() instead of a direct find() to preserve order
-Template.blackboard_round.puzzles = ->
-  p = ({
-    round_num: this.round_num
-    puzzle_num: 1 + index
-    puzzle: model.Puzzles.findOne(id) or { _id: id }
-    rXpY: "r#{this.round_num}p#{1+index}"
-  } for id, index in this.round.puzzles)
-  editing = (Session.get 'nick') and (Session.get 'canEdit')
-  hideSolved = Session.get 'hideSolved'
-  return p if editing or !hideSolved
-  p.filter (pp) ->  !pp.puzzle.answer
-Template.blackboard_round.tag = (name) ->
-  return (model.getTag this.round, name) or ''
-Template.blackboard_round.whos_working = ->
-  return model.Presence.find
-    room_name: ("rounds/"+this.round?._id)
-  , sort: ["nick"]
+Template.blackboard_round.helpers
+  hasPuzzles: -> (this.round?.puzzles?.length > 0)
+  # the following is a map() instead of a direct find() to preserve order
+  puzzles: ->
+    p = ({
+      round_num: this.round_num
+      puzzle_num: 1 + index
+      puzzle: model.Puzzles.findOne(id) or { _id: id }
+      rXpY: "r#{this.round_num}p#{1+index}"
+    } for id, index in this.round.puzzles)
+    editing = (Session.get 'nick') and (Session.get 'canEdit')
+    hideSolved = Session.get 'hideSolved'
+    return p if editing or !hideSolved
+    p.filter (pp) ->  !pp.puzzle.answer
+  tag: (name) ->
+    return (model.getTag this.round, name) or ''
+  whos_working: ->
+    return model.Presence.find
+      room_name: ("rounds/"+this.round?._id)
+    , sort: ["nick"]
 
-Template.blackboard_puzzle.tag = (name) ->
-  return (model.getTag this.puzzle, name) or ''
-Template.blackboard_puzzle.whos_working = ->
-  return model.Presence.find
-    room_name: ("puzzles/"+this.puzzle?._id)
-  , sort: ["nick"]
+Template.blackboard_puzzle.helpers
+  tag: (name) ->
+    return (model.getTag this.puzzle, name) or ''
+  whos_working: ->
+    return model.Presence.find
+      room_name: ("puzzles/"+this.puzzle?._id)
+    , sort: ["nick"]
 
-Template.blackboard_puzzle_tags.tags = (id) ->
+tagHelper = (id) ->
   isRound = ('puzzles' of this)
   { id: id, name: t.name, canon: t.canon, value: t.value } \
     for t in (this?.tags or []) when not \
         (Session.equals('currentPage', 'blackboard') and \
          (t.canon is 'status' or (isRound and t.canon is 'meta_answer')))
-Template.blackboard_tags.tags = Template.blackboard_puzzle_tags.tags
+
+Template.blackboard_tags.helpers { tags: tagHelper }
+Template.blackboard_puzzle_tags.helpers { tags: tagHelper }
 
 # Subscribe to all group, round, and puzzle information
 Tracker.autorun ->

@@ -63,63 +63,61 @@ Meteor.startup ->
     fontStyle: '700'
 
 # Template Binding
-Template.messages.room_name = -> Session.get('room_name')
-Template.messages.timestamp = -> +Session.get('timestamp')
-Template.messages.ready = -> Session.equals('chatReady', true)
-Template.messages.isLastRead = (ts) -> Session.equals('lastread', +ts)
-Template.messages.prevTimestamp = ->
-  p = pageForTimestamp Session.get('room_name'), +Session.get('timestamp')
-  return unless p?.from
-  "/chat/#{p.room_name}/#{p.from}"
-Template.messages.nextTimestamp = ->
-  p = pageForTimestamp Session.get('room_name'), +Session.get('timestamp')
-  return unless p?.next?
-  p = model.Pages.findOne(p.next)
-  return unless p?
-  "/chat/#{p.room_name}/#{p.to}"
-
-Template.messages.messages  = ->
-  room_name = Session.get 'room_name'
-  nick = model.canonical(Session.get('nick') or '')
-  p = pageForTimestamp room_name, +Session.get('timestamp')
-  unless settings.SLOW_CHAT_FOLLOWUPS
-    # no follow up formatting, but blazing fast client rendering!
-    return messagesForPage p,
+Template.messages.helpers
+  room_name: -> Session.get('room_name')
+  timestamp: -> +Session.get('timestamp')
+  ready: -> Session.equals('chatReady', true)
+  isLastRead: (ts) -> Session.equals('lastread', +ts)
+  prevTimestamp: ->
+    p = pageForTimestamp Session.get('room_name'), +Session.get('timestamp')
+    return unless p?.from
+    "/chat/#{p.room_name}/#{p.from}"
+  nextTimestamp: ->
+    p = pageForTimestamp Session.get('room_name'), +Session.get('timestamp')
+    return unless p?.next?
+    p = model.Pages.findOne(p.next)
+    return unless p?
+    "/chat/#{p.room_name}/#{p.to}"
+  messages: ->
+    room_name = Session.get 'room_name'
+    nick = model.canonical(Session.get('nick') or '')
+    p = pageForTimestamp room_name, +Session.get('timestamp')
+    unless settings.SLOW_CHAT_FOLLOWUPS
+      # no follow up formatting, but blazing fast client rendering!
+      return messagesForPage p,
+        sort: [['timestamp','asc']]
+        transform: (m) ->
+          _id: m._id
+          followup: false
+          message: m
+          isBot: m.nick is 'codexbot' and m.to is null
+    messages = messagesForPage p,
       sort: [['timestamp','asc']]
-      transform: (m) ->
-        _id: m._id
-        followup: false
-        message: m
-        isBot: m.nick is 'codexbot' and m.to is null
-  messages = messagesForPage p,
-    sort: [['timestamp','asc']]
-  sameNick = do ->
-    prevContext = null
-    (m) ->
-      thisContext = m.nick + (if m.to then "/#{m.to}" else "")
-      thisContext = null if m.system or m.action
-      result = thisContext? and (thisContext == prevContext)
-      prevContext = thisContext
-      return result
-  for m, i in messages.fetch()
-    followup: sameNick(m)
-    message: m
-    isBot: m.nick is 'codexbot' and m.to is null
-
-Template.messages.email = ->
-  cn = model.canonical(this.message.nick)
-  n = model.Nicks.findOne canon: cn
-  return model.getTag(n, 'Gravatar') or "#{cn}@#{settings.DEFAULT_HOST}"
-
-Template.messages.body = ->
-  body = this.message.body
-  unless this.message.bodyIsHtml
-    body = UI._escape(body)
-    body = body.replace(/\n|\r\n?/g, '<br/>')
-    body = convertURLsToLinksAndImages(body, this.message._id)
-  if doesMentionNick(this.message)
-    body = highlightNick(body, this.message.bodyIsHtml)
-  new Spacebars.SafeString(body)
+    sameNick = do ->
+      prevContext = null
+      (m) ->
+        thisContext = m.nick + (if m.to then "/#{m.to}" else "")
+        thisContext = null if m.system or m.action
+        result = thisContext? and (thisContext == prevContext)
+        prevContext = thisContext
+        return result
+    for m, i in messages.fetch()
+      followup: sameNick(m)
+      message: m
+      isBot: m.nick is 'codexbot' and m.to is null
+  email: ->
+    cn = model.canonical(this.message.nick)
+    n = model.Nicks.findOne canon: cn
+    return model.getTag(n, 'Gravatar') or "#{cn}@#{settings.DEFAULT_HOST}"
+  body: ->
+    body = this.message.body
+    unless this.message.bodyIsHtml
+      body = UI._escape(body)
+      body = body.replace(/\n|\r\n?/g, '<br/>')
+      body = convertURLsToLinksAndImages(body, this.message._id)
+    if doesMentionNick(this.message)
+      body = highlightNick(body, this.message.bodyIsHtml)
+    new Spacebars.SafeString(body)
 
 selfScroll = null
 
@@ -129,11 +127,12 @@ touchSelfScroll = ->
     selfScroll = null
   , 1000 # ignore browser-generated scroll events for 1 (more) second
 
-Template.messages.scrollHack = ->
-  Meteor.defer ->
-    touchSelfScroll()
-    scrollMessagesView() if instachat.scrolledToBottom
-    Tracker.afterFlush -> touchSelfScroll()
+Template.messages.helpers
+  scrollHack: ->
+    Meteor.defer ->
+      touchSelfScroll()
+      scrollMessagesView() if instachat.scrolledToBottom
+      Tracker.afterFlush -> touchSelfScroll()
 
 Template.messages.created = ->
   instachat.scrolledToBottom = true
@@ -170,10 +169,11 @@ Template.messages.created = ->
       onReady: onReady
     Tracker.onInvalidate invalidator
 
-Template.chat_header.room_name = -> prettyRoomName()
-Template.chat_header.whos_here = ->
-  roomName = Session.get('type') + '/' + Session.get('id')
-  return model.Presence.find {room_name: roomName}, {sort:["nick"]}
+Template.chat_header.helpers
+  room_name: -> prettyRoomName()
+  whos_here: ->
+    roomName = Session.get('type') + '/' + Session.get('id')
+    return model.Presence.find {room_name: roomName}, {sort:["nick"]}
 
 # Utility functions
 
@@ -335,7 +335,8 @@ $(document).on 'submit', '#joinRoom', ->
       $("#roomName").val prettyRoomName()
   return false
 
-Template.messages_input.hasNick = -> Session.get('nick') or false
+Template.messages_input.helpers
+  hasNick: -> Session.get('nick') or false
 
 Template.messages_input.submit = (message) ->
   return unless message

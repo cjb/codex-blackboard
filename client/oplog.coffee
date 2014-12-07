@@ -2,21 +2,23 @@
 model = share.model
 chat = share.chat
 
-Template.oplog.prevTimestamp = ->
-  p = chat.pageForTimestamp 'oplog/0', +Session.get('timestamp')
-  return unless p?.from
-  "/oplogs/#{p.from}"
-Template.oplog.oplogs = ->
-  p = chat.pageForTimestamp 'oplog/0', +Session.get('timestamp')
-  chat.messagesForPage p,
-    sort: [['timestamp','asc']]
-Template.oplog.nextTimestamp = ->
-  p = chat.pageForTimestamp 'oplog/0', +Session.get('timestamp')
-  return unless p?.next?
-  p = model.Pages.findOne(p.next)
-  return unless p?
-  "/oplogs/#{p.to}"
-Template.oplog.timestamp = -> +Session.get('timestamp')
+Template.oplog.helpers
+  prevTimestamp: ->
+    p = chat.pageForTimestamp 'oplog/0', +Session.get('timestamp')
+    return unless p?.from
+    "/oplogs/#{p.from}"
+  oplogs: ->
+    p = chat.pageForTimestamp 'oplog/0', +Session.get('timestamp')
+    chat.messagesForPage p,
+      sort: [['timestamp','asc']]
+  nextTimestamp: ->
+    p = chat.pageForTimestamp 'oplog/0', +Session.get('timestamp')
+    return unless p?.next?
+    p = model.Pages.findOne(p.next)
+    return unless p?
+    "/oplogs/#{p.to}"
+  timestamp: ->
+    +Session.get('timestamp')
 
 Template.oplog.rendered = ->
   $("title").text("Operation Log Archive")

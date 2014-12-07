@@ -117,33 +117,52 @@ Template.registerHelper 'updateScrollSpy', (args) ->
   return ''
 
 ############## log in/protect/mute panel ####################
-Template.header_loginmute.volumeIcon = ->
-  if Session.get "mute" then "icon-volume-off" else "icon-volume-up"
-Template.header_loginmute.volumeTitle = ->
-  if Session.get "mute" then "Muted" else "Click to mute"
-Template.header_loginmute.botIcon = ->
-  if Session.get "nobot" then "icon-bot-off" else "icon-bot-on"
-Template.header_loginmute.botTitle = ->
-  if Session.get "nobot"
-    "Codexbot promises not to bother you"
-  else
-    "Codexbot is feeling chatty!"
+Template.header_loginmute.helpers
+  volumeIcon: ->
+    if Session.get "mute" then "icon-volume-off" else "icon-volume-up"
+  volumeTitle: ->
+    if Session.get "mute" then "Muted" else "Click to mute"
+  botIcon: ->
+    if Session.get "nobot" then "icon-bot-off" else "icon-bot-on"
+  botTitle: ->
+    if Session.get "nobot"
+      "Codexbot promises not to bother you"
+    else
+      "Codexbot is feeling chatty!"
+  sessionNick: ->
+    nick = Session.get 'nick'
+    return nick unless nick
+    n = model.Nicks.findOne canon: model.canonical(nick)
+    return {
+      name: n?.name or nick
+      canon: n?.canon or model.canonical(nick)
+      realname: model.getTag n, 'Real Name'
+      gravatar: (model.getTag n, 'Gravatar') or "#{nick}@#{settings.DEFAULT_HOST}"
+    }
+  wikipage: ->
+    return '' if Session.equals('currentPage', 'blackboard')
+    [type, id] = [Session.get('type'), Session.get('id')]
+    return '' unless (type and id)
+    switch type
+      when 'puzzles'
+        round = model.Rounds.findOne puzzles: id
+        group = model.RoundGroups.findOne rounds: round?._id
+        puzzle_num = 1 + (round?.puzzles or []).indexOf(id)
+        round_num = 1 + group?.round_start + \
+          (group?.rounds or []).indexOf(round?._id)
+        "#{settings.HUNT_YEAR}_R#{round_num}P#{puzzle_num}"
+      when 'rounds'
+        group = model.RoundGroups.findOne rounds: id
+        round_num = 1 + group?.round_start + \
+          (group?.rounds or []).indexOf(id)
+        "#{settings.HUNT_YEAR}_R#{round_num}P0"
 
-Template.header_loginmute.sessionNick = ->
-  nick = Session.get 'nick'
-  return nick unless nick
-  n = model.Nicks.findOne canon: model.canonical(nick)
-  return {
-    name: n?.name or nick
-    canon: n?.canon or model.canonical(nick)
-    realname: model.getTag n, 'Real Name'
-    gravatar: (model.getTag n, 'Gravatar') or "#{nick}@#{settings.DEFAULT_HOST}"
-  }
 Template.header_loginmute.rendered = ->
   # tool tips
   $(this.findAll('.bb-buttonbar *[title]')).tooltip
     placement: 'bottom'
     container: '.bb-buttonbar'
+
 Template.header_loginmute.events
   "click .bb-login": (event, template) ->
     event.preventDefault()
@@ -164,42 +183,27 @@ Template.header_loginmute.events
       canEdit = $(target).attr('data-canEdit') is 'true'
       Session.set 'canEdit', canEdit or undefined
       Session.set 'editing', undefined # abort current edit, whatever it is
-Template.header_loginmute.wikipage = ->
-  return '' if Session.equals('currentPage', 'blackboard')
-  [type, id] = [Session.get('type'), Session.get('id')]
-  return '' unless (type and id)
-  switch type
-    when 'puzzles'
-      round = model.Rounds.findOne puzzles: id
-      group = model.RoundGroups.findOne rounds: round?._id
-      puzzle_num = 1 + (round?.puzzles or []).indexOf(id)
-      round_num = 1 + group?.round_start + \
-        (group?.rounds or []).indexOf(round?._id)
-      "#{settings.HUNT_YEAR}_R#{round_num}P#{puzzle_num}"
-    when 'rounds'
-      group = model.RoundGroups.findOne rounds: id
-      round_num = 1 + group?.round_start + \
-        (group?.rounds or []).indexOf(id)
-      "#{settings.HUNT_YEAR}_R#{round_num}P0"
 
 ############## breadcrumbs #######################
-Template.header_breadcrumbs.round = ->
-  if Session.equals('type', 'puzzles')
-    model.Rounds.findOne puzzles: Session.get("id")
-  else if Session.equals('type', 'rounds')
-    model.Rounds.findOne Session.get('id')
-  else null
-Template.header_breadcrumbs.puzzle = ->
-  if Session.equals('type', 'puzzles')
-    model.Puzzles.findOne Session.get('id')
-  else null
-Template.header_breadcrumbs.type = -> Session.get('type')
-Template.header_breadcrumbs.id = -> Session.get('id')
-Template.header_breadcrumbs.drive = -> switch Session.get('type')
-  when 'general'
-    Session.get 'RINGHUNTERS_FOLDER'
-  when 'rounds', 'puzzles'
-    model.collection(Session.get('type'))?.findOne(Session.get('id'))?.drive
+Template.header_breadcrumbs.helpers
+  round: ->
+    if Session.equals('type', 'puzzles')
+      model.Rounds.findOne puzzles: Session.get("id")
+    else if Session.equals('type', 'rounds')
+      model.Rounds.findOne Session.get('id')
+    else null
+  puzzle: ->
+    if Session.equals('type', 'puzzles')
+      model.Puzzles.findOne Session.get('id')
+    else null
+  type: -> Session.get('type')
+  id: -> Session.get('id')
+  drive: -> switch Session.get('type')
+    when 'general'
+      Session.get 'RINGHUNTERS_FOLDER'
+    when 'rounds', 'puzzles'
+      model.collection(Session.get('type'))?.findOne(Session.get('id'))?.drive
+
 Template.header_breadcrumbs.events
   "click .bb-upload-file": (event, template) ->
     folder = switch Session.get('type')
@@ -218,6 +222,7 @@ Template.header_breadcrumbs.events
         nick: Session.get 'nick'
         action: true
         room_name: Session.get('type')+'/'+Session.get('id')
+
 Template.header_breadcrumbs.rendered = ->
   # tool tips
   $(this.findAll('a.bb-drive-link[title]')).tooltip placement: 'bottom'
@@ -247,8 +252,11 @@ uploadToDriveFolder = share.uploadToDriveFolder = (folder, callback) ->
 
 
 ############## nick selection ####################
-Template.header_nickmodal.nickModalVisible = -> Session.get 'nickModalVisible'
-Template.header_nickmodal_contents.nick = -> Session.get "nick" or ''
+Template.header_nickmodal.helpers
+  nickModalVisible: -> Session.get 'nickModalVisible'
+
+Template.header_nickmodal_contents.helpers
+  nick: -> Session.get "nick" or ''
 Template.header_nickmodal_contents.created = ->
   # we'd need to subscribe to 'all-nicks' here if we didn't have a permanent
   # subscription to it (in main.coffee)
@@ -349,8 +357,8 @@ ensureNick = share.ensureNick = (cb=(->)) ->
     changeNick cb
 
 ############## confirmation dialog ########################
-Template.header_confirmmodal.confirmModalVisible = ->
-  !!(Session.get 'confirmModalVisible')
+Template.header_confirmmodal.helpers
+  confirmModalVisible: -> !!(Session.get 'confirmModalVisible')
 Template.header_confirmmodal_contents.rendered = ->
   $('#confirmModal').modal show: true
 Template.header_confirmmodal_contents.events
@@ -368,34 +376,35 @@ confirmationDialog = share.confirmationDialog = (options) ->
   Session.set 'confirmModalVisible', (options or Object.create(null))
 
 ############## operation log in header ####################
-Template.header_lastupdates.lastupdates = ->
-  LIMIT = 10
-  ologs = model.Messages.find {room_name: "oplog/0"}, \
-        {sort: [["timestamp","desc"]], limit: LIMIT}
-  ologs = ologs.fetch()
-  # now look through the entries and collect similar logs
-  # this way we can say "New puzzles: X, Y, and Z" instead of just
-  # "New Puzzle: Z"
-  return '' unless ologs && ologs.length
-  message = [ ologs[0] ]
-  for ol in ologs[1..]
-    if ol.body is message[0].body and ol.type is message[0].type
-      message.push ol
-    else
-      break
-  type = ''
-  if message[0].id
-    type = ' ' + model.pretty_collection(message[0].type) + \
-      (if message.length > 1 then 's ' else ' ')
-  uniq = (array) ->
-    seen = Object.create(null)
-    ((seen[o.id]=o) for o in array when not (o.id of seen))
-  return {
-    timestamp: message[0].timestamp
-    message: message[0].body + type
-    nick: message[0].nick
-    objects: uniq({type:m.type,id:m.id} for m in message)
-  }
+Template.header_lastupdates.helpers
+  lastupdates: ->
+    LIMIT = 10
+    ologs = model.Messages.find {room_name: "oplog/0"}, \
+          {sort: [["timestamp","desc"]], limit: LIMIT}
+    ologs = ologs.fetch()
+    # now look through the entries and collect similar logs
+    # this way we can say "New puzzles: X, Y, and Z" instead of just
+    # "New Puzzle: Z"
+    return '' unless ologs && ologs.length
+    message = [ ologs[0] ]
+    for ol in ologs[1..]
+      if ol.body is message[0].body and ol.type is message[0].type
+        message.push ol
+      else
+        break
+    type = ''
+    if message[0].id
+      type = ' ' + model.pretty_collection(message[0].type) + \
+        (if message.length > 1 then 's ' else ' ')
+    uniq = (array) ->
+      seen = Object.create(null)
+      ((seen[o.id]=o) for o in array when not (o.id of seen))
+    return {
+      timestamp: message[0].timestamp
+      message: message[0].body + type
+      nick: message[0].nick
+      objects: uniq({type:m.type,id:m.id} for m in message)
+    }
 
 # subscribe when this template is in use/unsubscribe when it is destroyed
 Template.header_lastupdates.created = ->
@@ -410,15 +419,16 @@ do ->
       $(this.findAll('.right a[title]')).tooltip placement: 'left'
 
 ############## chat log in header ####################
-Template.header_lastchats.lastchats = ->
-  LIMIT = 2
-  m = model.Messages.find {
-    room_name: "general/0", system: false, bodyIsHtml: false
-  }, {sort: [["timestamp","desc"]], limit: LIMIT}
-  m = m.fetch().reverse()
-  return m
-Template.header_lastchats.body = ->
-  if this.bodyIsHtml then new Spacebars.SafeString(this.body) else this.body
+Template.header_lastchats.helpers
+  lastchats: ->
+    LIMIT = 2
+    m = model.Messages.find {
+      room_name: "general/0", system: false, bodyIsHtml: false
+    }, {sort: [["timestamp","desc"]], limit: LIMIT}
+    m = m.fetch().reverse()
+    return m
+  msgbody: ->
+    if this.bodyIsHtml then new Spacebars.SafeString(this.body) else this.body
 
 # subscribe when this template is in use/unsubscribe when it is destroyed
 Template.header_lastchats.created = ->
