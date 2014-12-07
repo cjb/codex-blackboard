@@ -10,32 +10,32 @@ chat = share.chat # import
 #   "oplogs"     -- operation logs
 #   "callins"    -- answer queue
 #   "facts"      -- server performance information
-UI.registerHelper "equal", (a, b) -> a is b
+Template.registerHelper "equal", (a, b) -> a is b
 
 # session variables we want to make available from all templates
 do -> for v in ['currentPage']
-  UI.registerHelper v, () -> Session.get(v)
-UI.registerHelper 'currentPageEquals', (arg) ->
+  Template.registerHelper v, () -> Session.get(v)
+Template.registerHelper 'currentPageEquals', (arg) ->
   # register a more precise dependency on the value of currentPage
   Session.equals 'currentPage', arg
-UI.registerHelper 'typeEquals', (arg) ->
+Template.registerHelper 'typeEquals', (arg) ->
   # register a more precise dependency on the value of type
   Session.equals 'type', arg
-UI.registerHelper 'canEdit', () ->
+Template.registerHelper 'canEdit', () ->
   (Session.get 'nick') and (Session.get 'canEdit')
-UI.registerHelper 'editing', (args..., options) ->
+Template.registerHelper 'editing', (args..., options) ->
   return false unless (Session.get 'nick') and (Session.get 'canEdit')
   return Session.equals 'editing', args.join('/')
 
-UI.registerHelper 'wikiRP', (options) ->
+Template.registerHelper 'wikiRP', (options) ->
   [r,p] = [options.hash?.r, options.hash?.p]
   "#{settings.WIKI_HOST}/index.php?title=#{settings.HUNT_YEAR}_R#{r}P#{p}"
-UI.registerHelper 'wiki', (options) ->
+Template.registerHelper 'wiki', (options) ->
   title = options.hash?.title
   return settings.WIKI_HOST unless title
   "#{settings.WIKI_HOST}/index.php?title=#{title}"
 
-UI.registerHelper 'linkify', (contents) ->
+Template.registerHelper 'linkify', (contents) ->
   contents = chat.convertURLsToLinksAndImages(UI._escape(contents))
   return new Spacebars.SafeString(contents)
 

@@ -18,7 +18,7 @@ keyword_or_positional = (name, args) ->
   return a
 
 # link various types of objects
-UI.registerHelper 'link', (args) ->
+Template.registerHelper 'link', (args) ->
   args = keyword_or_positional 'id', args
   return "" unless args.id
   n = model.Names.findOne(args.id)
@@ -42,25 +42,25 @@ $(document).on 'click', 'a.puzzles-link, a.rounds-link, a.chat-link, a.home-link
   else
     share.Router.navigate $(this).attr('href'), {trigger:true}
 
-UI.registerHelper 'drive_link', (args) ->
+Template.registerHelper 'drive_link', (args) ->
   args = keyword_or_positional 'id', args
   return model.drive_id_to_link(args.id)
-UI.registerHelper 'spread_link', (args) ->
+Template.registerHelper 'spread_link', (args) ->
   args = keyword_or_positional 'id', args
   return model.spread_id_to_link(args.id)
 
 # nicks
-UI.registerHelper 'nickOrName', (args) ->
+Template.registerHelper 'nickOrName', (args) ->
   nick = (keyword_or_positional 'nick', args).nick
   n = model.Nicks.findOne canon: model.canonical(nick)
   return model.getTag(n, 'Real Name') or nick
 
-UI.registerHelper 'lotsOfPeople', (args) ->
+Template.registerHelper 'lotsOfPeople', (args) ->
   count = (keyword_or_positional 'count', args).count
   return count > 4
 
 # gravatars
-UI.registerHelper 'gravatar', (args) ->
+Template.registerHelper 'gravatar', (args) ->
   args = keyword_or_positional 'id', args
   g = $.gravatar(args.id, args)
   # hacky cross-platform version of 'outerHTML'
@@ -68,7 +68,7 @@ UI.registerHelper 'gravatar', (args) ->
   return new Spacebars.SafeString(html)
 
 # timestamps
-UI.registerHelper 'pretty_ts', (args) ->
+Template.registerHelper 'pretty_ts', (args) ->
   args = keyword_or_positional 'timestamp', args
   timestamp = args.timestamp
   return unless timestamp
@@ -111,7 +111,7 @@ UI.registerHelper 'pretty_ts', (args) ->
       "Unknown timestamp style: #{style}"
 
 # Scroll spy
-UI.registerHelper 'updateScrollSpy', (args) ->
+Template.registerHelper 'updateScrollSpy', (args) ->
   ss = $("body").data("scrollspy")
   ss?.refresh()
   return ''
