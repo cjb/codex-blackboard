@@ -483,7 +483,8 @@ startupChat = ->
     Meteor.setInterval instachat.keepalive, (model.PRESENCE_KEEPALIVE_MINUTES*60*1000)
 
 cleanupChat = ->
-  favicon.reset()
+  try
+    favicon.reset()
   if instachat.keepaliveInterval?
     Meteor.clearInterval instachat.keepaliveInterval
     instachat.keepalive = instachat.keepaliveInterval = undefined
