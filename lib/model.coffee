@@ -122,6 +122,9 @@ if Meteor.isServer
 #                             "general/0" for main chat.
 #                             "oplog/0" for the operation log.
 #   timestamp: timestamp
+#   followup: boolean (true if the previous message in the log is not
+#                      a system/action/oplog message and shares the same
+#                      `nick` and `to` values)
 #
 # Messages which are part of the operation log have `nick`, `message`,
 # and `timestamp` set to describe what was done, when, and by who.
@@ -130,9 +133,42 @@ if Meteor.isServer
 # `type` and `id`, which give a mongodb reference to the object
 # modified so we can hyperlink to it.
 Messages = BBCollection.messages = new Mongo.Collection "messages"
+computeMessageFollowup = (prev, curr) ->
+  (prev.system == curr.system and
+   prev.action == curr.action and
+   prev.oplog == curr.oplog and
+   prev.nick == curr.nick and
+   prev.to == curr.to)
 if Meteor.isServer
   Messages._ensureIndex {to:1, room_name:1, timestamp:-1}, {}
   Messages._ensureIndex {nick:1, room_name:1, timestamp:-1}, {}
+  # watch messages collection and set the followup field as appropriate
+  do ->
+    check = (room_name, timestamp, m) ->
+      prev = Messages.find(
+        {room_name: room_name, timestamp: $lt: +timestamp},
+        {sort:[['timestamp','desc']], limit: 1 }).fetch()
+      eq = Messages.find(
+        {room_name: room_name, timestamp: +timestamp},
+        {sort:[['timestamp','asc']]}).fetch()
+      next = Messages.find(
+        {room_name: room_name, timestamp: $gt: +timestamp},
+        {sort:[['timestamp','asc']], limit: 1}).fetch()
+      affected = prev.concat(eq, next)
+      # ok, for all possibly affected messages, see if the followup field is
+      # correct.
+      for i in [1...affected.length] by 1
+        [ prev, curr ] = [ affected[i-1], affected[i] ]
+        f = computeMessageFollowup prev, curr
+        if (!!curr.followup) != f
+          console.log 'Updating followup status', curr._id
+          Messages.update curr._id, $set: followup: f
+    Messages.find({}).observe
+      added: (msg) -> check(msg.room_name, msg.timestamp, msg)
+      removed: (msg) -> check(msg.room_name, msg.timestamp)
+      changed: (nmsg, omsg) ->
+        check(omsg.room_name, omsg.timestamp)
+        check(nmsg.room_name, nmsg.timestamp, nmsg)
 
 # Pages -- paging metadata for Messages collection
 #   from: timestamp (first page has from==0)
@@ -688,6 +724,16 @@ spread_id_to_link = (id) ->
           nick: newMsg.nick
           room_name: newMsg.room_name
           timestamp: newMsg.timestamp
+      # update the 'followup' field to reduce flicker.
+      # it doesn't matter if this computation isn't exact (for example if
+      # there are multiple messages with the same timestamp); there's
+      # a server observe thread to compute the actual correct value.  we just
+      # want to reduce flicker in the common case.
+      prev = Messages.find(
+        {room_name: newMsg.room_name, timestamp: $lt: newMsg.timestamp},
+        {sort: [['timestamp','desc']], limit: 1 }).fetch()
+      if prev.length and computeMessageFollowup(prev[0], newMsg)
+        newMsg.followup = true
       newMsg._id = Messages.insert newMsg
       return newMsg
 

@@ -88,7 +88,7 @@ Template.messages.helpers
         sort: [['timestamp','asc']]
         transform: (m) ->
           _id: m._id
-          followup: false
+          followup: m.followup or false
           message: m
           isBot: m.nick is 'codexbot' and m.to is null
     messages = messagesForPage p,

@@ -25,5 +25,12 @@ settings.BB_SUB_ALL = server.subAll ? true
 # disable PMs (more efficient queries if PMs are disabled)
 settings.BB_DISABLE_PM = server.disablePM ? true
 
-# disable special followup formatting in chat to improve client render speed
-settings.SLOW_CHAT_FOLLOWUPS = server.slowChatFollowups ? true
+# use the old client-side followup formatting, which slows down client
+# render speed.  this has been replaced by server-side followup
+# detection... but we're leaving the code in place just in case
+# the server-side code becomes a performance issue.
+# (Note that server-side followups will occassionally not label
+# a followup because a PM (invisible to you) intervened between
+# two messages.  The (slow) client-side followups look specifically
+# at messages visible to you, so don't have this issue.)
+settings.SLOW_CHAT_FOLLOWUPS = server.slowChatFollowups ? false
