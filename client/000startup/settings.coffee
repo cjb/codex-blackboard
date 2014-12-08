@@ -23,7 +23,8 @@ settings.HUNT_YEAR = server.huntYear ? 2014
 settings.BB_SUB_ALL = server.subAll ? true
 
 # disable PMs (more efficient queries if PMs are disabled)
-settings.BB_DISABLE_PM = server.disablePM ? true
+# (PMs are always allows in ringhunters)
+settings.BB_DISABLE_PM = server.disablePM ? false
 
 # use the old client-side followup formatting, which slows down client
 # render speed.  this has been replaced by server-side followup
