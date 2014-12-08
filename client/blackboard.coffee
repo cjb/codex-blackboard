@@ -63,7 +63,7 @@ Template.blackboard.helpers
     r = ({
       round_num: 1+index+this.round_start
       round: (model.Rounds.findOne(id) or \
-              {_id: id, name: model.Names.findOne(id)?.name})
+              {_id: id, name: model.Names.findOne(id)?.name, puzzles: []})
       rX: "r#{1+index+this.round_start}"
       num_puzzles: (model.Rounds.findOne(id)?.puzzles or []).length
       num_solved: (p for p in (model.Rounds.findOne(id)?.puzzles or []) when \
@@ -71,6 +71,31 @@ Template.blackboard.helpers
     } for id, index in this.rounds)
     r.reverse() if Session.get 'sortReverse'
     return r
+
+Template.blackboard_status_grid.helpers
+  roundgroups: ->
+    dir = if Session.get 'sortReverse' then 'desc' else 'asc'
+    model.RoundGroups.find {}, sort: [["created", dir]]
+  # the following is a map() instead of a direct find() to preserve order
+  rounds: ->
+    r = ({
+      round_num: 1+index+this.round_start
+      round: (model.Rounds.findOne(id) or \
+              {_id: id, name: model.Names.findOne(id)?.name, puzzles: []})
+      rX: "r#{1+index+this.round_start}"
+      num_puzzles: (model.Rounds.findOne(id)?.puzzles or []).length
+    } for id, index in this.rounds)
+    return r
+  puzzles: ->
+    p = ({
+      round_num: this.x_num
+      puzzle_num: 1 + index
+      puzzle: model.Puzzles.findOne(id) or { _id: id }
+      rXpY: "r#{this.round_num}p#{1+index}"
+      pY: "p#{1+index}"
+    } for id, index in this.round?.puzzles)
+    return p
+
 Template.blackboard.created = ->
   this.find_bbedit = (event) ->
     edit = $(event.currentTarget).closest('*[data-bbedit]').attr('data-bbedit')
