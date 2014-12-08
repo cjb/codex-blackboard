@@ -71,6 +71,32 @@ Template.blackboard.helpers
     } for id, index in this.rounds)
     r.reverse() if Session.get 'sortReverse'
     return r
+  puzzleDisplayGroups: ->
+    group = []
+    group_size = 9
+    ps = this.round?.puzzles
+    for i in [0...ps?.length] by group_size
+      group.push {
+        round: this.round
+        puzzles: ps[i...i+group_size]
+        round_num: if i == 0 then this.round_num else "" # label only the first group
+        group_start: i
+      }
+    if group.length == 0 then group = [{
+      round_num: this.round_num
+      puzzles: []
+    }]
+    console.log(group)
+    return group
+  puzzles: ->
+    p = ({
+      round_num: this.x_num
+      puzzle_num: 1 + index + this.group_start
+      puzzle: model.Puzzles.findOne(id) or { _id: id }
+      rXpY: "r#{this.round_num}p#{1+index}"
+    } for id, index in this.puzzles)
+    return p
+  hasAnswer: -> (this.puzzle?.answer?.length > 0)
 Template.blackboard.created = ->
   this.find_bbedit = (event) ->
     edit = $(event.currentTarget).closest('*[data-bbedit]').attr('data-bbedit')
