@@ -16,3 +16,5 @@ facts
 cscottnet:googleapis
 cscottnet:twitter
 cscottnet:mail-listener2
+cscottnet:alertify-bootstrap
+
