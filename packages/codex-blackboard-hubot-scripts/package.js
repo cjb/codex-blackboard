@@ -7,7 +7,7 @@ Package.describe({
 
 Npm.depends({
     // it is annoying that Meteor requires an exact hash here :(
-    "codex-blackboard-hubot-scripts": "https://github.com/cscott/codex-blackboard-hubot-scripts/tarball/764503916393a076bfb2aa729ab63c3b313fc1bf",
+    "codex-blackboard-hubot-scripts": "https://github.com/cscott/codex-blackboard-hubot-scripts/tarball/f57c178a2faee9b36d07a7905c29093b9824e0b0",
     "coffee-script": "1.8.0"
 });
 

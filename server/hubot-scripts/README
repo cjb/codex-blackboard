@@ -1,10 +1,15 @@
 These are stock hubot scripts, with one exception:
 Instead of:
   modules.export = (robot) ->
+    /* stuff */
 Use:
   share.hubot.ping = (robot) ->
+    robot.commands.push 'cmd1 arg - desc'
+    robot.commands.push 'cmd2 arg - desc'
+    /* stuff */
 
-Note that the name of the script is given as the field name.
+Note that the name of the script is given as the field name, and you
+must manually add help entries for your commands.
 
 This directory is intended for scripts which are tightly integrated
 with Meteor and the codex blackboard.  For packaged hubot scripts

@@ -61,6 +61,12 @@ phrases = [
 regex_escape = (s) -> s.replace /[\^\\$*+?.()|{}\[\]\/]/g, '\\$&'
 
 share.hubot.ping = (robot) ->
+  robot.commands.push 'ping - Reply with pong'
+  robot.commands.push 'echo <text> - Reply back with <text>'
+  robot.commands.push 'time - Reply with current time'
+  robot.commands.push 'cry - Make the bot cry'
+  robot.commands.push 'tell me a secret - Reply via private message'
+
   name_regex = new RegExp("#{regex_escape robot.name}\\?$", "i")
   robot.hear name_regex, (msg) ->
     msg.reply msg.random phrases

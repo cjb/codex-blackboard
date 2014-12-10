@@ -1,7 +1,7 @@
 {
   "dependencies": {
     "codex-blackboard-hubot-scripts": {
-      "version": "https://github.com/cscott/codex-blackboard-hubot-scripts/tarball/764503916393a076bfb2aa729ab63c3b313fc1bf",
+      "version": "https://github.com/cscott/codex-blackboard-hubot-scripts/tarball/f57c178a2faee9b36d07a7905c29093b9824e0b0",
       "dependencies": {
         "hubot-calculator": {
           "version": "0.4.0",
