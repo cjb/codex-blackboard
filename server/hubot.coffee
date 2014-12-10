@@ -143,6 +143,7 @@ Meteor.startup ->
   robot.respond /(?:)/, -> false
   mynameRE = robot.listeners.pop().regex
   # register scripts
+  HubotScripts(robot)
   Object.keys(share.hubot).forEach (scriptName) ->
     console.log "Loading hubot script: #{scriptName}"
     share.hubot[scriptName](robot)

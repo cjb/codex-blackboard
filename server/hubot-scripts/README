@@ -5,3 +5,11 @@ Use:
   share.hubot.ping = (robot) ->
 
 Note that the name of the script is given as the field name.
+
+This directory is intended for scripts which are tightly integrated
+with Meteor and the codex blackboard.  For packaged hubot scripts
+and lightly-modified forked packages, add the code to the
+github:cscott/codex-blackboard-hubot-scripts package (see the
+README there) and then update the git commit hash in the
+`packages/codex-blackboard-hubot-scripts/package.js` file
+in this repo.
