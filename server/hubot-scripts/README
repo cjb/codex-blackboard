@@ -1,0 +1,7 @@
+These are stock hubot scripts, with one exception:
+Instead of:
+  modules.export = (robot) ->
+Use:
+  share.hubot.ping = (robot) ->
+
+Note that the name of the script is given as the field name.
