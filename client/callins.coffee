@@ -18,14 +18,34 @@ Meteor.startup ->
           newCallInSound?.play?()
     initial = false
 
+Template.callins.created = ->
+  this.get_quip_id = (event) ->
+    $(event.currentTarget).closest('*[data-bbquip]').attr('data-bbquip')
+
 Template.callins.helpers
   callins: ->
     model.CallIns.find {},
       sort: [["created","asc"]]
+  quips: ->
+    # We may want to make this a special limited subscription
+    # (rather than having to subscribe to all quips)
+    model.Quips.find {},
+      sort: [["last_used","asc"],["created","asc"]]
+      limit: 5
 
 Template.callins.rendered = ->
   $("title").text("Answer queue")
   share.ensureNick()
+
+Template.callins.events
+  "click .bb-quip-next": (event, template) ->
+    Meteor.call 'useQuip',
+      id: template.get_quip_id(event)
+      who: Session.get('nick')
+  "click .bb-quip-remove": (event, template) ->
+    Meteor.call 'removeQuip',
+      id: template.get_quip_id(event)
+      who: Session.get('nick')
 
 Template.callin_row.created = ->
   this.get_callin_id = (event) ->
@@ -62,5 +82,6 @@ Template.callin_row.events
 Tracker.autorun ->
   return unless Session.equals("currentPage", "callins")
   Meteor.subscribe 'callins'
+  Meteor.subscribe 'quips'
   return if settings.BB_SUB_ALL
   Meteor.subscribe 'all-roundsandpuzzles'
