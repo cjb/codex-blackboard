@@ -11,7 +11,31 @@ Hubot.Response::priv = (strings...) ->
 # More monkey-patching
 Hubot.Robot::loadAdapter = -> # disable
 
-sendHelper = (robot, envelope, strings, map) ->
+# grrrr, Meteor.bindEnvironment doesn't preserve `this` apparently
+bind = (f) ->
+  g = Meteor.bindEnvironment (self, args...) -> f.apply(self, args)
+  (args...) -> g @, args...
+
+class Robot extends Hubot.Robot
+  constructor: (args...) ->
+    super args...
+    @hear = bind @hear
+    @respond = bind @respond
+    @enter = bind @enter
+    @leave = bind @leave
+    @topic = bind @topic
+    @error = bind @error
+    @catchAll = bind @catchAll
+  loadAdapter: -> false
+  hear:    (regex, callback) -> super regex, Meteor.bindEnvironment callback
+  respond: (regex, callback) -> super regex, Meteor.bindEnvironment callback
+  enter: (callback) -> super Meteor.bindEnvironment(callback)
+  leave: (callback) -> super Meteor.bindEnvironment(callback)
+  topic: (callback) -> super Meteor.bindEnvironment(callback)
+  error: (callback) -> super Meteor.bindEnvironment(callback)
+  catchAll: (callback) -> super Meteor.bindEnvironment(callback)
+
+sendHelper = Meteor.bindEnvironment (robot, envelope, strings, map) ->
   # be present in the room
   try
     Meteor.call 'setPresence',
@@ -112,7 +136,7 @@ class BlackboardAdapter extends Hubot.Adapter
   close: ->
 
 Meteor.startup ->
-  robot = Hubot.loadBot null, null, false, Meteor.settings?.botname ? 'codexbot'
+  robot = new Robot null, null, false, Meteor.settings?.botname ? 'codexbot'
   robot.alias = 'bot'
   adapter = robot.adapter = new BlackboardAdapter robot
   # what's (the regexp for) my name?
