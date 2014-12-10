@@ -104,8 +104,10 @@ if Meteor.isServer
 # Quips are:
 #   _id: mongodb id
 #   text: string (quip to present at callin)
+#   created: timestamp
 #   created_by: canon of Nick
-#   last_used: timestamp
+#   last_used: timestamp (0 if never used)
+#   use_count: integer
 Quips = BBCollection.quips = new Mongo.Collection "quips"
 if Meteor.isServer
   Quips._ensureIndex {last_used: 1}, {}
@@ -652,20 +654,28 @@ spread_id_to_link = (id) ->
     newQuip: (args) ->
       check args, ObjectWith
         text: NonEmptyString
-        created_by: NonEmptyString
-        last_used: Number
-      Quips.insert args
+      # "Name" of a quip is a truncated version of the text for now, but
+      # we should do something more clever, so the oplogs don't spoil
+      # the quips.
+      name = args.text.slice(0, 16)
+      newObject "quips", {name:name, who:args.who},
+        text: args.text
+        last_used: 0 # not yet used
+        use_count: 0 # not yet used
 
     useQuip: (args) ->
       check args, ObjectWith
         id: NonEmptyString
-      Quips.update args.id, $set:
-        last_used: UTCNow()
+        who: NonEmptyString
+      now = UTCNow()
+      updated = Quips.update args.id,
+        $set: {last_used: now, touched: now, touched_by: canonical(args.who)}
+        $inc: use_count: 1
+      throw new Meteor.Error(400, "bad quip id") unless updated > 0
+      true
 
     removeQuip: (args) ->
-      check args, ObjectWith
-        id: NonEmptyString
-      Quips.remove args.id
+      deleteObject "quips", args
 
     correctCallIn: (args) ->
       check args, ObjectWith
