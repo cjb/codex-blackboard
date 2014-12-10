@@ -669,12 +669,17 @@ spread_id_to_link = (id) ->
       check args, ObjectWith
         id: NonEmptyString
         who: NonEmptyString
+      quip = Quips.findOne args.id
+      throw new Meteor.Error(400, "bad quip id") unless quip
       now = UTCNow()
       updated = Quips.update args.id,
         $set: {last_used: now, touched: now, touched_by: canonical(args.who)}
         $inc: use_count: 1
-      throw new Meteor.Error(400, "bad quip id") unless updated > 0
-      true
+      Meteor.call 'newMessage',
+        body: "answers the phone: #{UI._escape(quip.text)} <a class='bb-add-chat-link' href=\"/chat/quips/0\">(add quip)</a>"
+        action: true
+        nick: args.who
+        bodyIsHtml: true
 
     removeQuip: (args) ->
       deleteObject "quips", args
