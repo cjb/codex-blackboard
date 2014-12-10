@@ -398,6 +398,19 @@ SAMPLE_NICKS = [
   tags: [
     { name: "Gravatar", value: "z@x.org" }
   ]
+,
+  name: "kwal"
+  tags: [
+    { name: "Real Name", value: "Kevin Wallace" }
+    { name: "Gravatar", value: "kevin@pentabarf.net" }
+  ]
+]
+SAMPLE_QUIPS = [
+  text: "A codex is a book made up of a number of sheets of paper, vellum, papyrus, or similar, with hand-written content"
+  who: "kwal"
+,
+  text: "Hello, this is Codex! We wrote the book on mystery hunts."
+  who: "cscott"
 ]
 
 Meteor.startup ->
@@ -439,4 +452,7 @@ Meteor.startup ->
     # add some user ids
     for nick in SAMPLE_NICKS
       Meteor.call "newNick", nick
+    # add some quips
+    for quip in SAMPLE_QUIPS
+      Meteor.call "newQuip", quip
     console.log 'Done populating initial database.'
