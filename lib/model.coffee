@@ -101,6 +101,15 @@ if Meteor.isServer
    CallIns._ensureIndex {created: 1}, {}
    CallIns._ensureIndex {puzzle: 1, answer: 1}, {unique:true, dropDups:true}
 
+# Quips are:
+#   _id: mongodb id
+#   text: string (quip to present at callin)
+#   created_by: canon of Nick
+#   last_used: timestamp
+Quips = BBCollection.quips = new Mongo.Collection "quips"
+if Meteor.isServer
+  Quips._ensureIndex {last_used: 1}, {}
+
 # Nicks are:
 #   _id: mongodb id
 #   name: string
@@ -640,6 +649,24 @@ spread_id_to_link = (id) ->
         room_name: "puzzles/#{id}"
       oplog "New answer #{args.answer} submitted for", "puzzles", id, args.who
 
+    newQuip: (args) ->
+      check args, ObjectWith
+        text: NonEmptyString
+        created_by: NonEmptyString
+        last_used: Number
+      Quips.insert args
+
+    useQuip: (args) ->
+      check args, ObjectWith
+        id: NonEmptyString
+      Quips.update args.id, $set:
+        last_used: UTCNow()
+
+    removeQuip: (args) ->
+      check args, ObjectWith
+        id: NonEmptyString
+      Quips.remove args.id
+
     correctCallIn: (args) ->
       check args, ObjectWith
         id: NonEmptyString
@@ -1034,6 +1061,7 @@ share.model =
   NOT_A_TIMESTAMP: NOT_A_TIMESTAMP
   # collection types
   CallIns: CallIns
+  Quips: Quips
   Names: Names
   LastAnswer: LastAnswer
   RoundGroups: RoundGroups

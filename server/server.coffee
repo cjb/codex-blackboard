@@ -127,6 +127,10 @@ Meteor.publish 'callins', ->
   model.CallIns.find {},
     sort: [["created","asc"]]
 
+Meteor.publish 'quips', ->
+  model.Quips.find {},
+    sort: [["last_used","asc"]]
+
 # synthetic 'all-names' collection which maps ids to type/name/canon
 Meteor.publish 'all-names', ->
   self = this
