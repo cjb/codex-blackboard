@@ -9,10 +9,12 @@ boilerplate-generator@1.0.1
 bootstrap@1.0.1
 callback-hook@1.0.1
 check@1.0.2
+codex-blackboard-hubot-scripts@1.0.0
 coffeescript@1.0.4
 cscottnet:alertify-bootstrap@0.3.11
 cscottnet:es5-shim@4.0.5_1
 cscottnet:googleapis@0.4.7_1
+cscottnet:hubot@2.10.0_1
 cscottnet:mail-listener2@0.1.8
 cscottnet:twitter@0.2.13
 ctl-helper@1.0.4
