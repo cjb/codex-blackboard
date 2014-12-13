@@ -11,6 +11,8 @@ Template.oplog.helpers
     p = chat.pageForTimestamp 'oplog/0', +Session.get('timestamp')
     chat.messagesForPage p,
       sort: [['timestamp','asc']]
+  prettyType: ->
+    model.pretty_collection(this.type)
   nextTimestamp: ->
     p = chat.pageForTimestamp 'oplog/0', +Session.get('timestamp')
     return unless p?.next?
