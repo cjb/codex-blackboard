@@ -654,10 +654,12 @@ spread_id_to_link = (id) ->
     newQuip: (args) ->
       check args, ObjectWith
         text: NonEmptyString
-      # "Name" of a quip is a truncated version of the text for now, but
-      # we should do something more clever, so the oplogs don't spoil
-      # the quips.
-      name = args.text.slice(0, 16)
+      # "Name" of a quip is a random name based on its hash, so the
+      # oplogs don't spoil the quips.
+      name = if Meteor.isSimulation
+        args.text.slice(0, 16) # placeholder
+      else
+        RandomName(seed: args.text)
       newObject "quips", {name:name, who:args.who},
         text: args.text
         last_used: 0 # not yet used
