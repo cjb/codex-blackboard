@@ -359,6 +359,7 @@ spread_id_to_link = (id) ->
       oplog: true
       action: true
       system: false
+      followup: true
       to: null
 
   newObject = (type, args, extra, options={}) ->
