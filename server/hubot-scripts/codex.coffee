@@ -75,7 +75,7 @@ share.hubot.codex = (robot) ->
 
   # newCallIn
   robot.commands.push 'bot call in <answer> for <puzzle> - Updates codex blackboard'
-  robot.respond (rejoin /Call\s*in /,thingRE,/\ for /,thingRE,/$/i), (msg) ->
+  robot.respond (rejoin /Call\s*in( answer)? /,thingRE,/\ for( puzzle)? /,thingRE,/$/i), (msg) ->
     answer = strip msg.match[1]
     name = strip msg.match[2]
     who = msg.envelope.user.id
