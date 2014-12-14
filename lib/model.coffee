@@ -676,7 +676,7 @@ spread_id_to_link = (id) ->
         $set: {last_used: now, touched: now, touched_by: canonical(args.who)}
         $inc: use_count: 1
       Meteor.call 'newMessage',
-        body: "answers the phone: #{UI._escape(quip.text)} <a class='bb-add-chat-link' href=\"/chat/quips/0\">(add quip)</a>"
+        body: "<span class=\"bb-quip-action\">#{UI._escape(quip.text)} <a class='bb-add-quip-link' href=\"/chat/quips/0\"></a></span>"
         action: true
         nick: args.who
         bodyIsHtml: true

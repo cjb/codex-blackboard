@@ -103,6 +103,21 @@
     /* compensate for 20px of padding on container-fluid */
     margin-left: -20px; margin-right: -20px;
   }
+  .bb-quip-action {
+    &:before {
+      content: "answers the phone: ";
+      font-weight: normal;
+    }
+    .bb-add-quip-link {
+      float: right;
+      margin-right: 5px;
+      font-size: .65em;
+      font-weight: normal;
+      color: #66aacc;
+      text-transform: uppercase;
+      &:after { content: "[Add new quip]"; }
+    }
+  }
 }
 @media (max-width: 480px) {
   .bb-chat-messages {
