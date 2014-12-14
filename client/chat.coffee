@@ -322,8 +322,8 @@ $(document).on 'mouseenter', '.bb-message-body .inline-image', imageScrollHack
 # unstick from bottom if the user manually scrolls
 $(window).scroll (event) ->
   return unless Session.equals('currentPage', 'chat')
-  console.log 'Self scroll' if selfScroll?
-  return if selfScroll?
+  #console.log if selfScroll? then 'Self scroll' else 'External scroll'
+  return maybeScrollMessagesView() if selfScroll?
   # set to false, just in case older browser doesn't have scroll properties
   instachat.scrolledToBottom = false
   [body, html] = [document.body, document.documentElement]
