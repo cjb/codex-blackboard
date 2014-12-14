@@ -11,6 +11,7 @@
 #   hubot bot: Delete round <name>
 #   hubot bot: <roundgroup> is a new round group
 #   hubot bot: Delete round group <roundgroup>
+#   hubot bot: New quip: <quip>
 
 # helper function: concat regexes
 rejoin = (regs...) ->
@@ -234,4 +235,15 @@ share.hubot.codex = (robot) ->
       msg.reply "Somthing went wrong."
       return
     msg.reply "Okay, I deleted round group \"#{gname}\"."
+    msg.finish()
+
+# Quips
+  robot.commands.push 'bot new quip <quip> - Updates codex quips list'
+  robot.respond (rejoin /new quip:? /,thingRE,/$/i), (msg) ->
+    text = strip msg.match[1]
+    who = msg.envelope.user.id
+    quip = Meteor.call "newQuip",
+      text: text
+      who: who
+    msg.reply "Okay, added quip.  I'm naming this one \"#{quip.name}\"."
     msg.finish()
