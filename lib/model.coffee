@@ -672,7 +672,7 @@ spread_id_to_link = (id) ->
       quip = Quips.findOne args.id
       throw new Meteor.Error(400, "bad quip id") unless quip
       now = UTCNow()
-      updated = Quips.update args.id,
+      Quips.update args.id,
         $set: {last_used: now, touched: now, touched_by: canonical(args.who)}
         $inc: use_count: 1
       Meteor.call 'newMessage',
