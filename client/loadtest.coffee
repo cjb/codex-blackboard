@@ -137,7 +137,8 @@ addPuzzles = (data) ->
             who: who
           , ->
             Meteor.call 'setAnswer',
-              puzzle: p._id
+              type: "puzzles"
+              target: p._id
               answer: Random.choice ['root beer', 'watermelon', 'ice cream']
               who: who
             , cb

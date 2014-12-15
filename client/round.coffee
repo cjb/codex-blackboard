@@ -13,6 +13,8 @@ Template.round.helpers
       for p in (round?.puzzles or []))
     r.hunt_year = settings.HUNT_YEAR
     return r
+  tag: (name) ->
+    return (model.getTag this, name) or ''
 Template.round.created = ->
   $('html').addClass('fullHeight')
   share.chat.startupChat()
@@ -34,6 +36,17 @@ Template.round.destroyed = ->
   share.chat.cleanupChat()
 
 Template.round.events
+  "click .bb-callin-btn": (event, template) ->
+    share.ensureNick =>
+      # XXX this is ugly, i'll fix later
+      answer = window.prompt "Answer to call in?"
+      return unless answer
+      answer = answer.replace(/\s+/g, '') if /answer/.test(answer)
+      name = this.round.name
+      Meteor.call "newMessage",
+        body: "bot: call in #{answer.toUpperCase()}"
+        nick: Session.get 'nick'
+        room_name: "rounds/"+this.round._id
   "click .bb-drive-upload": (event, template) ->
     event.preventDefault()
     drive = this.round.drive

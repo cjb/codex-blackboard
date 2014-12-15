@@ -53,14 +53,14 @@ Template.callin_row.created = ->
 
 Template.callin_row.helpers
   sessionNick: -> Session.get 'nick'
-  lastAttempt: (puzzle_id) ->
-    p = if puzzle_id then model.Puzzles.findOne(puzzle_id)
+  lastAttempt: (type, target) ->
+    p = if target then model.collection(type).findOne(target)
     return null unless p? and p.incorrectAnswers?.length > 0
     attempts = p.incorrectAnswers[..]
     attempts.sort (a,b) -> a.timestamp - b.timestamp
     attempts[attempts.length - 1]
-  puzzle_link: (puzzle_id) ->
-    p = if puzzle_id then model.Puzzles.findOne(puzzle_id)
+  hunt_link: (type, target) ->
+    p = if target then model.collection(type).findOne(target)
     p?.link
 
 Template.callin_row.events

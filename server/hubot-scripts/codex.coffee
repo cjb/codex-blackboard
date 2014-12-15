@@ -51,14 +51,18 @@ share.hubot.codex = (robot) ->
     name = strip msg.match[1]
     answer = strip msg.match[2]
     who = msg.envelope.user.id
-    puzzle = Meteor.call "getByName",
+    target = Meteor.call "getByName",
       name: name
       optional_type: "puzzles"
-    if not puzzle
+    if not target
+      target = Meteor.call "getByName",
+        name: name
+    if not target
       msg.reply "I can't find a puzzle called \"#{name}\"."
       return
     res = Meteor.call "setAnswer",
-      puzzle: puzzle.object._id
+      type: target.type
+      target: target.object._id
       answer: answer
       who: who
     unless res
@@ -72,8 +76,8 @@ share.hubot.codex = (robot) ->
       "Who'd have thought?"
       "#{answer}?  Really?  Whoa."
       "Rock on!"
-      "#{puzzle.object.name} bites the dust!"
-      "#{puzzle.object.name}, meet #{answer}.  We rock!"
+      "#{target.object.name} bites the dust!"
+      "#{target.object.name}, meet #{answer}.  We rock!"
     ]
     msg.reply msg.random solution_banter
     msg.finish()
@@ -84,18 +88,21 @@ share.hubot.codex = (robot) ->
     answer = strip msg.match[2]
     name = strip msg.match[4]
     who = msg.envelope.user.id
-    puzzle = Meteor.call "getByName",
+    target = Meteor.call "getByName",
       name: name
       optional_type: "puzzles"
-    if not puzzle
+    if not target
+      target = Meteor.call "getByName",
+        name: name
+    if not target
       msg.reply "I can't find a puzzle called \"#{name}\"."
       return
     Meteor.call "newCallIn",
-      puzzle: puzzle.object._id
+      type: target.type
+      target: target.object._id
       answer: answer
       who: who
-      name: name + ':' + answer
-    msg.reply "Okay, \"#{answer}\" for #{puzzle.object.name} added to call-in list!"
+    msg.reply "Okay, \"#{answer}\" for #{target.object.name} added to call-in list!"
     msg.finish()
   robot.respond (rejoin /Call\s*in( answer)? /,thingRE,/$/i), (msg) ->
     answer = strip msg.match[2]
@@ -106,18 +113,19 @@ share.hubot.codex = (robot) ->
     if type is "general"
       msg.reply "You need to tell me which puzzle this is an answer for."
       return msg.finish()
-    unless type is "puzzles" # we might be more generous, eventually
-      msg.reply "I can only call in answers for puzzles."
+    unless type is 'puzzles' or type is 'rounds' or type is 'roundgroups'
+      msg.reply "I can only call in answers for puzzles/rounds/roundgroups."
       return msg.finish()
     object = Meteor.call "get", type, id
     unless object
       msg.reply "Something went wrong.  I can't look up #{room}."
       return msg.finish()
     Meteor.call "newCallIn",
-      puzzle: object._id
+      type: type
+      target: object._id
       answer: answer
       who: who
-      name: object.name + ':' + answer
+      notifyGeneral: true
     msg.reply "Okay, \"#{answer}\" for #{object.name} added to call-in list!"
     msg.finish()
 
@@ -126,16 +134,20 @@ share.hubot.codex = (robot) ->
   robot.respond (rejoin /Delete( the)? answer (to|for)( puzzle)? /,thingRE,/$/i), (msg) ->
     name = strip msg.match[4]
     who = msg.envelope.user.id
-    puzzle = Meteor.call "getByName",
+    target = Meteor.call "getByName",
       name: name
       optional_type: "puzzles"
-    if not puzzle
+    if not target
+      target = Meteor.call "getByName",
+        name: name
+    if not target
       msg.reply "I can't find a puzzle called \"#{name}\"."
       return
     Meteor.call "deleteAnswer",
-      puzzle: puzzle.object._id
+      type: target.type
+      puzzle: target.object._id
       who: who
-    msg.reply "Okay, I deleted the answer to \"#{puzzle.object.name}\"."
+    msg.reply "Okay, I deleted the answer to \"#{target.object.name}\"."
     msg.finish()
 
 ## PUZZLES

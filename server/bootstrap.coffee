@@ -12,8 +12,8 @@ SAMPLE_DATA = [
     tags: [
       { name: "Transform", value: "HELICAL via ALPHA DECAY" }
       { name: "Hint", value: "answers contain notes (do, re, mi)" }
-      { name: "Meta answer", value: "BLUE SHIFT" }
     ]
+    answer: "BLUE SHIFT"
     chats: [
       { nick: "cscott", body: "This round is wack." }
     ]
@@ -69,8 +69,8 @@ SAMPLE_DATA = [
     name: "Blackberry man round"
     tags: [
       { name: "Transform", value: "BAKER via ODDSFINDER" }
-      { name: "Meta answer", value: "TELEGRAPH SWITCH" }
     ]
+    answer: "TELEGRAPH SWITCH"
     puzzles: [
       name: "Redundant obsolescence"
       answer: "ANGORA"
@@ -93,8 +93,8 @@ SAMPLE_DATA = [
     name: "Craps man round"
     tags: [
       { name: "Transform", value: "SCRAPS via WORD SWORD" }
-      { name: "Meta answer", value: "ODDSFINDER" }
     ]
+    answer: "ODDSFINDER"
     puzzles: [
       name: "Scrambling attributes yields conundrum"
       answer: "THE QUEEN OF SPADES"
@@ -118,8 +118,8 @@ SAMPLE_DATA = [
     name: "Minus man round"
     tags: [
       { name: "Transform", value: "IMAGO via TELEGRAPH SWITCH" }
-      { name: "Meta answer", value: "ALPHA DECAY" }
     ]
+    answer: "ALPHA DECAY"
     puzzles: [
       name: "Magnitude"
       answer: "INEQUALITY"
@@ -143,8 +143,8 @@ SAMPLE_DATA = [
     name: "Stagecraft man round"
     tags: [
       { name: "Transform", value: "SERF via removing DNA" }
-      { name: "Meta answer", value: "WORD SWORD" }
     ]
+    answer: "WORD SWORD"
     puzzles: [
       name: "The cats meow"
       answer: "BASSET"
@@ -166,8 +166,8 @@ SAMPLE_DATA = [
   ,
     name: "Dr wily's really really really long fortress round" # slight hack
     tags: [
-      { name: "Meta answer", value: "ZELDA" }
     ]
+    answer: "ZELDA"
     puzzles: [
       name: "Fortress puzzle"
       answer: "WILYCOYOTE"
@@ -178,9 +178,9 @@ SAMPLE_DATA = [
   rounds: [
     name: "Zelda round"
     tags: [
-      { name: "Meta answer", value: "Inspiration: POLLINATE, Holiness: CREATURES, Fellowship: REGAL RING" }
       { name: "Unused answer", value: "PINTS OF LAGER" }
     ]
+    answer: "Inspiration: POLLINATE, Holiness: CREATURES, Fellowship: REGAL RING"
     puzzles: [
       name: "Making the possible"
       answer: "ABSOLUTE AUTHORITY/THE FIRST NOEL/FLOOD"
@@ -212,8 +212,8 @@ SAMPLE_DATA = [
   ,
     name: "Ganon's lair round"
     tags: [
-      { name: "Meta answer", value: "NERF SWORD" }
     ]
+    answer: "NERF SWORD"
     puzzles: [
       name: "Ganon's lair puzzle"
     ]
@@ -374,8 +374,8 @@ SAMPLE_DATA = [
   ,
     name: "Wonders round"
     tags: [
-      { name: "Meta answer", value: "ORANGE" }
     ]
+    answer: "ORANGE"
     puzzles: [
     ]
   ]
@@ -433,6 +433,8 @@ Meteor.startup ->
         console.log '  Round:', round.name
         r = Meteor.call "newRound", extend(round,{who:WHO,puzzles:null})
         Meteor.call "addRoundToGroup", {round:r, group:rg, who:WHO}
+        if round.answer
+          Meteor.call "setAnswer", {type:'rounds', target:r._id, answer:round.answer, who:WHO}
         for chat in (round.chats or [])
           chat.room_name = "rounds/" + r._id
           Meteor.call "newMessage", chat
@@ -441,7 +443,7 @@ Meteor.startup ->
           p = Meteor.call "newPuzzle", extend(puzzle,{who:WHO})
           Meteor.call "addPuzzleToRound", {puzzle:p, round:r, who:WHO}
           if puzzle.answer
-            Meteor.call "setAnswer", {puzzle:p._id, answer:puzzle.answer, who:WHO}
+            Meteor.call "setAnswer", {type:'puzzles', target:p._id, answer:puzzle.answer, who:WHO}
           for chat in (puzzle.chats or [])
             chat.room_name = "puzzles/" + p._id
             Meteor.call "newMessage", chat

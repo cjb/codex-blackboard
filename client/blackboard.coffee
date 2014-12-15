@@ -19,8 +19,8 @@ Meteor.startup ->
   # ignore added; that's just the startup state.  Watch 'changed'
   model.LastAnswer.find({}).observe
     changed: (doc, oldDoc) ->
-      return unless doc.puzzle? # 'no recent puzzle was solved'
-      return if doc.puzzle is oldDoc.puzzle # answer changed, not really new
+      return unless doc.target? # 'no recent puzzle was solved'
+      return if doc.target is oldDoc.target # answer changed, not really new
       console.log 'that was easy', doc, oldDoc
       unless Session.get 'mute'
         blackboard.newAnswerSound?.play?()
@@ -67,7 +67,7 @@ Template.blackboard.helpers
       rX: "r#{1+index+this.round_start}"
       num_puzzles: (model.Rounds.findOne(id)?.puzzles or []).length
       num_solved: (p for p in (model.Rounds.findOne(id)?.puzzles or []) when \
-                   model.Puzzles.findOne(p)?.answer).length
+                   model.Puzzles.findOne(p)?.solved?).length
     } for id, index in this.rounds)
     r.reverse() if Session.get 'sortReverse'
     return r
@@ -191,12 +191,6 @@ processBlackboardEdit =
       Meteor.call 'deleteRoundGroup', {id:id, who:Session.get('nick')}
     else
       Meteor.call 'renameRoundGroup', {id:id,name:text,who:Session.get('nick')}
-  puzzles_answer: (text, id) ->
-    who = Session.get 'nick'
-    if text is null
-      Meteor.call 'deleteAnswer', {puzzle:id, who:who}
-    else
-      Meteor.call 'setAnswer', {puzzle:id, answer:text, who:who}
   tags_name: (text, id, canon) ->
     who = Session.get('nick')
     n = model.Names.findOne(id)
@@ -212,7 +206,7 @@ processBlackboardEdit =
     tags = model.collection(n.type).findOne(id).tags
     t = (tag for tag in tags when tag.canon is canon)[0]
     # special case for 'status' tag, which might not previously exist
-    for special in ['Status', 'Meta Answer']
+    for special in ['Status', 'Answer']
       if (not t) and canon is model.canonical(special)
         t =
           name: special
@@ -234,7 +228,7 @@ Template.blackboard_round.helpers
     editing = (Session.get 'nick') and (Session.get 'canEdit')
     hideSolved = Session.get 'hideSolved'
     return p if editing or !hideSolved
-    p.filter (pp) ->  !pp.puzzle.answer
+    p.filter (pp) ->  !pp.puzzle.solved?
   tag: (name) ->
     return (model.getTag this.round, name) or ''
   whos_working: ->
@@ -251,11 +245,13 @@ Template.blackboard_puzzle.helpers
     , sort: ["nick"]
 
 tagHelper = (id) ->
-  isRound = ('puzzles' of this)
+  isRoundGroup = ('rounds' of this)
   { id: id, name: t.name, canon: t.canon, value: t.value } \
     for t in (this?.tags or []) when not \
-        (Session.equals('currentPage', 'blackboard') and \
-         (t.canon is 'status' or (isRound and t.canon is 'meta_answer')))
+        ((Session.equals('currentPage', 'blackboard') and \
+         (t.canon is 'status' or (!isRoundGroup and t.canon is 'answer'))) or \
+         (Session.equals('currentPage', 'puzzle') and t.canon is 'answer') or \
+         (Session.equals('currentPage', 'round') and t.canon is 'answer'))
 
 Template.blackboard_tags.helpers { tags: tagHelper }
 Template.blackboard_puzzle_tags.helpers { tags: tagHelper }

@@ -140,21 +140,21 @@
         {{#with round}}{{>blackboard_puzzle_tags}}{{/with}}
       </div></td>
       <td class="puzzle-answer bb-editable"
-          data-bbedit="tags/{{round._id}}/meta_answer/value">
-      {{#if editing "tags" round._id "meta_answer" "value"}}
-        <input type="text" id="tags-{{round._id}}-meta-answer-value"
-               value="{{tag "meta_answer"}}"
+          data-bbedit="tags/{{round._id}}/answer/value">
+      {{#if editing "tags" round._id "answer" "value"}}
+        <input type="text" id="tags-{{round._id}}-answer-value"
+               value="{{tag "answer"}}"
                class="input-block-level" autofocus />
       {{else}}
         {{#if canEdit}}
           <i class="bb-edit-icon icon-pencil pull-right"
              title="Change the meta answer for this round"></i>
-          {{#if tag "meta_answer"}}
+          {{#if tag "answer"}}
             <i class="bb-delete-icon icon-remove pull-left"
                title="Delete the meta answer for this round"></i>
           {{/if}}
         {{/if}}
-        <b>{{tag "meta_answer"}}</b>
+        <b>{{tag "answer"}}</b>
       {{/if}}
       </td>
       <td class="puzzle-status bb-editable"
@@ -187,7 +187,7 @@
       </div>
     </td>
     <td class="puzzle-update">
-      {{#if tag "meta_answer"}}solved {{pretty_ts timestamp=round.touched style="brief duration"}}{{! XXX }}
+      {{#if round.solved}}solved {{pretty_ts timestamp=round.solved style="brief duration"}}
       {{else}}added {{pretty_ts timestamp=round.created style="brief duration"}}
       {{/if}}
     </td>
@@ -264,22 +264,22 @@
       {{#with puzzle}}{{>blackboard_puzzle_tags}}{{/with}}
     </div></td>
     <td class="puzzle-answer bb-editable"
-        data-bbedit="puzzles/{{puzzle._id}}/answer">
-      {{#if editing "puzzles" puzzle._id "answer"}}
-        <input type="text" id="puzzles-{{puzzle._id}}-answer"
-               value="{{#if puzzle.answer}}{{puzzle.answer}}{{/if}}"
+        data-bbedit="tags/{{puzzle._id}}/answer/value">
+      {{#if editing "tags" puzzle._id "answer" "value"}}
+        <input type="text" id="tags-{{puzzle._id}}-answer-value"
+               value="{{tag "answer"}}"
                class="input-block-level" autofocus />
       {{else}}
         {{#if canEdit}}
           <i class="bb-edit-icon icon-pencil pull-right"
              title="Change the answer of this puzzle"></i>
         {{/if}}
-        {{#if puzzle.answer}}
+        {{#if tag "answer"}}
           {{#if canEdit}}
             <i class="bb-delete-icon icon-remove pull-left"
                title="Delete the answer to this puzzle"></i>
           {{/if}}
-          <span class="answer">{{puzzle.answer}}</span>
+          <span class="answer">{{tag "answer"}}</span>
         {{/if}}
       {{/if}}
     </td>

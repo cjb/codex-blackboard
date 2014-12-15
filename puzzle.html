@@ -7,16 +7,16 @@
 <div class="bb-top-content">{{! start top of splitter }}
 
 <div class="bb-top-left-content">{{! start top left splitter }}
-<button class="btn btn-small bb-callin-btn">Request Call-In</button>
+{{#unless puzzle.solved}}<button class="btn btn-small bb-callin-btn">Request Call-In</button>{{/unless}}
 <h1>Puzzle <small>{{puzzle.name}}
   (<a class="bb-wiki" href="{{wikiRP r=round_num p=puzzle_num}}">wiki r{{round_num}}p{{puzzle_num}}</a>)
   {{#if puzzle.link}}(<a href="{{puzzle.link}}" target="_blank">puzzle link</a>){{/if}}
 </small></h1>
 
 {{#with puzzle}}{{> blackboard_tags }}{{/with}}
-{{#if puzzle.answer}}
+{{#if puzzle.solved}}
   <dl class="dl-horizontal bb-correct-answer">
-    <dt>Answer:</dt><dd class="answer"><span>{{puzzle.answer}}</span> <span class="timestamp">{{pretty_ts puzzle.solved}}</span></dd>
+    <dt>Answer:</dt><dd class="answer"><span>{{#with puzzle}}{{tag "answer"}}{{/with}}</span> <span class="timestamp">{{pretty_ts puzzle.solved}}</span></dd>
   </dl>
 {{/if}}
 <dl class="dl-horizontal bb-incorrect-answers">

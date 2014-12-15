@@ -13,6 +13,8 @@ Template.puzzle.helpers
                   (group?.rounds or []).indexOf(round?._id)
     r.hunt_year = settings.HUNT_YEAR
     return r
+  tag: (name) ->
+    return (model.getTag this, name) or ''
 Template.puzzle.created = ->
   $('html').addClass('fullHeight')
   share.chat.startupChat()
@@ -41,15 +43,17 @@ Template.puzzle.events
       return unless answer
       if false # old way
         Meteor.call "newCallIn",
-          puzzle: this.puzzle._id
+          type: 'puzzles'
+          target: this.puzzle._id
           answer: answer
           who: Session.get 'nick'
       else
-        answer = answer.replace(/\s+/g, '') if /for/.test(answer)
+        answer = answer.replace(/\s+/g, '') if /answer/.test(answer)
         name = this.puzzle.name
         Meteor.call "newMessage",
-          body: "bot: call in #{answer.toUpperCase()} for #{name.toUpperCase()}"
+          body: "bot: call in #{answer.toUpperCase()}"
           nick: Session.get 'nick'
+          room_name: "puzzles/"+this.puzzle._id
   "click .bb-drive-select": (event, template) ->
     event.preventDefault()
     drive = this.puzzle.drive

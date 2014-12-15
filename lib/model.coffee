@@ -27,7 +27,8 @@ Names = BBCollection.names = \
 # solution time of the most recently-solved puzzle.
 #    _id: random UUID
 #    solved: solution time
-#    puzzle: id of most recently solved puzzle
+#    type: string ("puzzles", "rounds", or "roundgroups")
+#    target: id of most recently solved puzzle/round/round group
 LastAnswer = BBCollection.last_answer = \
   if Meteor.isClient then new Mongo.Collection 'last-answer' else null
 
@@ -39,9 +40,14 @@ LastAnswer = BBCollection.last_answer = \
 #   created_by: canon of Nick
 #   touched: timestamp -- records edits to tag, order, group, etc.
 #   touched_by: canon of Nick with last touch
+#   solved:  timestamp -- null (not missing or zero) if not solved
+#            (actual answer is in a tag w/ name "Answer")
+#   solved_by:  timestamp of Nick who confirmed the answer
+#   incorrectAnswers: [ { answer: "Wrong", who: "answer submitter",
+#                         timestamp: ... }, ... ]
 #   tags: [ { name: "Status", canon: "status", value: "stuck" }, ... ]
 #   rounds: [ array of round _ids, in order ]
-#   (next fields is a bit racy, oh well)
+#   (next field is a bit racy, but it's fixed up by the server)
 #   round_start: integer, indicating how many rounds total are in all
 #                preceding round groups (a bit racy, but server fixes it up)
 RoundGroups = BBCollection.roundgroups = new Mongo.Collection "roundgroups"
@@ -83,6 +89,11 @@ if Meteor.isServer
 #   created_by: canon of Nick
 #   touched: timestamp -- records edits to tag, order, group, etc.
 #   touched_by: canon of Nick with last touch
+#   solved:  timestamp -- null (not missing or zero) if not solved
+#            (actual answer is in a tag w/ name "Answer")
+#   solved_by:  timestamp of Nick who confirmed the answer
+#   incorrectAnswers: [ { answer: "Wrong", who: "answer submitter",
+#                         timestamp: ... }, ... ]
 #   tags: [ { name: "Status", canon: "status", value: "stuck" }, ... ]
 #   puzzles: [ array of puzzle _ids, in order ]
 #   drive: google drive url or id
@@ -94,15 +105,15 @@ if Meteor.isServer
 #   _id: mongodb id
 #   name: string
 #   canon: canonicalized version of name, for searching
-#   answer: string (field is null (not missing or undefined) if not solved)
-#   incorrectAnswers: [ { answer: "Wrong", who: "answer submitter",
-#                         timestamp: ... }, ... ]
 #   created: timestamp
 #   created_by: canon of Nick
 #   touched: timestamp
 #   touched_by: canon of Nick with last touch
-#   solved:  timestamp
+#   solved:  timestamp -- null (not missing or zero) if not solved
+#            (actual answer is in a tag w/ name "Answer")
 #   solved_by:  timestamp of Nick who confirmed the answer
+#   incorrectAnswers: [ { answer: "Wrong", who: "answer submitter",
+#                         timestamp: ... }, ... ]
 #   tags: [ { name: "Status", canon: "status", value: "stuck" }, ... ]
 #   drive: google drive url or id
 Puzzles = BBCollection.puzzles = new Mongo.Collection "puzzles"
@@ -111,14 +122,15 @@ if Meteor.isServer
 
 # CallIns are:
 #   _id: mongodb id
-#   puzzle: _id of Puzzle
+#   type: string ("puzzles", "rounds", or "roundgroups")
+#   target: _id of Puzzle/Round/RoundGroup
 #   answer: string (proposed answer to call in)
 #   created: timestamp
 #   created_by: canon of Nick
 CallIns = BBCollection.callins = new Mongo.Collection "callins"
 if Meteor.isServer
    CallIns._ensureIndex {created: 1}, {}
-   CallIns._ensureIndex {puzzle: 1, answer: 1}, {unique:true, dropDups:true}
+   CallIns._ensureIndex {type: 1, target: 1, answer: 1}, {unique:true, dropDups:true}
 
 # Quips are:
 #   _id: mongodb id
@@ -372,6 +384,10 @@ spread_id_to_link = (id) ->
   ValidType = Match.Where (x) ->
     check x, NonEmptyString
     Object::hasOwnProperty.call(BBCollection, x)
+  # a type of an object that can have an answer
+  ValidAnswerType = Match.Where (x) ->
+    check x, ValidType
+    x == 'puzzles' || x == 'rounds' || x == 'roundgroups'
   # either an id, or an object containing an id
   IdOrObject = Match.OneOf NonEmptyString, Match.Where (o) ->
     typeof o is 'object' and ((check o._id, NonEmptyString) or true)
@@ -458,6 +474,60 @@ spread_id_to_link = (id) ->
           type, null, args.who
     collection(type).remove(args.id)
     return true
+
+  setTagInternal = (args) ->
+      check args, ObjectWith
+        type: ValidType
+        object: IdOrObject
+        name: NonEmptyString
+        value: Match.Any
+        who: NonEmptyString
+        now: Number
+      id = args.object._id or args.object
+      now = args.now
+      canon = canonical(args.name)
+      loop
+        tags = collection(args.type).findOne(id).tags
+        # remove existing value for tag, if present
+        ntags = (tag for tag in tags when tag.canon isnt canon)
+        # add new tag, but keep tags sorted
+        ntags.push
+          name:args.name
+          canon:canon
+          value:args.value
+          touched: now
+          touched_by: canonical(args.who)
+        ntags.sort (a, b) -> (a?.canon or "").localeCompare (b?.canon or "")
+        # update the tag set only if there wasn't a race
+        numchanged = collection(args.type).update { _id: id, tags: tags }, $set:
+          tags: ntags
+          touched: now
+          touched_by: canonical(args.who)
+        # try again if this update failed due to a race (server only)
+        break unless Meteor.isServer and numchanged is 0
+      return true
+
+  deleteTagInternal = (args) ->
+      check args, ObjectWith
+        type: ValidType
+        object: IdOrObject
+        name: NonEmptyString
+        who: NonEmptyString
+        now: Number
+      id = args.object._id or args.object
+      now = args.now
+      canon = canonical(args.name)
+      loop
+        tags = collection(args.type).findOne(id).tags
+        ntags = (tag for tag in tags when tag.canon isnt canon)
+        # update the tag set only if there wasn't a race
+        numchanged = collection(args.type).update { _id: id, tags: tags }, $set:
+          tags: ntags
+          touched: now
+          touched_by: canonical(args.who)
+        # try again if this update failed due to a race (server only)
+        break unless Meteor.isServer and numchanged is 0
+      return true
 
   newDriveFolder = (type, id, name) ->
     check type, NonEmptyString
@@ -556,6 +626,9 @@ spread_id_to_link = (id) ->
   Meteor.methods
     newRoundGroup: (args) ->
       newObject "roundgroups", args,
+        incorrectAnswers: []
+        solved: null
+        solved_by: null
         rounds: args.rounds or []
         round_start: Rounds.find({}).count() # approx; server will fix up
     renameRoundGroup: (args) ->
@@ -574,6 +647,9 @@ spread_id_to_link = (id) ->
       link = if Meteor.settings?.round_prefix
         "#{Meteor.settings.round_prefix}#{canonical(args.name)}"
       r = newObject "rounds", args,
+        incorrectAnswers: []
+        solved: null
+        solved_by: null
         puzzles: args.puzzles or []
         drive: args.drive or null
         link: link
@@ -617,7 +693,6 @@ spread_id_to_link = (id) ->
       link = if Meteor.settings?.puzzle_prefix
         "#{Meteor.settings.puzzle_prefix}#{canonical(args.name)}"
       p = newObject "puzzles", args,
-        answer: null
         incorrectAnswers: []
         solved: null
         solved_by: null
@@ -660,22 +735,27 @@ spread_id_to_link = (id) ->
 
     newCallIn: (args) ->
       check args, ObjectWith
-        puzzle: IdOrObject
+        type: ValidAnswerType
+        target: IdOrObject
         answer: NonEmptyString
         who: NonEmptyString
       return if this.isSimulation # otherwise we trigger callin sound twice
-      id = args.puzzle._id or args.puzzle
-      newObject "callins", {name:canonical(args.answer), who:args.who},
-        puzzle: id
+      id = args.target._id or args.target
+      name = collection(args.type).findOne(args.target)?.name
+      throw new Meteor.Error(400, "bad target") unless name?
+      newObject "callins", {name:name+':'+args.answer, who:args.who},
+        type: args.type
+        target: id
         answer: args.answer
         who: args.who
       , {suppressLog:true}
       Meteor.call 'newMessage',
-        body: "is requesting a call-in for #{args.answer.toUpperCase()}"
+        body: "is requesting a call-in for #{args.answer.toUpperCase()}" + \
+          (if args.notifyGeneral then " (#{name})" else "")
         action: true
         nick: args.who
-        room_name: "puzzles/#{id}"
-      oplog "New answer #{args.answer} submitted for", "puzzles", id, args.who
+        room_name: if args.notifyGeneral then null else "#{args.type}/#{id}"
+      oplog "New answer #{args.answer} submitted for", args.type, id, args.who
 
     newQuip: (args) ->
       check args, ObjectWith
@@ -718,7 +798,8 @@ spread_id_to_link = (id) ->
       throw new Meteor.Error(400, "bad callin") unless callin
       # call-in is cancelled as a side-effect of setAnswer
       Meteor.call "setAnswer",
-        puzzle: callin.puzzle
+        type: callin.type
+        target: callin.target
         answer: callin.answer
         who: args.who
       msg =
@@ -726,7 +807,7 @@ spread_id_to_link = (id) ->
         action: true
         nick: args.who
       Meteor.call 'newMessage', msg
-      msg.room_name = "puzzles/#{callin.puzzle}"
+      msg.room_name = "#{callin.type}/#{callin.target}"
       Meteor.call 'newMessage', msg
 
     incorrectCallIn: (args) ->
@@ -737,7 +818,8 @@ spread_id_to_link = (id) ->
       throw new Meteor.Error(400, "bad callin") unless callin
       # call-in is cancelled as a side-effect of addIncorrectAnswer
       Meteor.call "addIncorrectAnswer",
-        puzzle: callin.puzzle
+        type: callin.type
+        target: callin.target
         answer: callin.answer
         who: args.who
       msg =
@@ -745,7 +827,7 @@ spread_id_to_link = (id) ->
         action: true
         nick: args.who
       Meteor.call 'newMessage', msg
-      msg.room_name = "puzzles/#{callin.puzzle}"
+      msg.room_name = "#{callin.type}/#{callin.target}"
       Meteor.call 'newMessage', msg
 
     cancelCallIn: (args) ->
@@ -756,7 +838,7 @@ spread_id_to_link = (id) ->
       callin = CallIns.findOne(args.id)
       throw new Meteor.Error(400, "bad callin") unless callin
       unless args.suppressLog
-        oplog "Canceled call-in of #{callin.answer} for", "puzzles", callin.puzzle, args.who
+        oplog "Canceled call-in of #{callin.answer} for", callin.type, callin.target, args.who
       deleteObject "callins",
         id: args.id
         who: args.who
@@ -893,7 +975,7 @@ spread_id_to_link = (id) ->
       now = UTCNow()
       # disallow modifications to the following fields; use other APIs for these
       for f in ['name','canon','created','created_by','solved','solved_by',
-               'tags','rounds','round_start','puzzles']
+               'tags','rounds','round_start','puzzles','incorrectAnswers']
         delete args.fields[f]
       args.fields.touched = now
       args.fields.touched_by = canonical(args.who)
@@ -902,54 +984,28 @@ spread_id_to_link = (id) ->
 
     setTag: (args) ->
       check args, ObjectWith
-        type: ValidType
-        object: IdOrObject
         name: NonEmptyString
-        value: Match.Any
-        who: NonEmptyString
-      id = args.object._id or args.object
-      now = UTCNow()
-      canon = canonical(args.name)
-      loop
-        tags = collection(args.type).findOne(id).tags
-        # remove existing value for tag, if present
-        ntags = (tag for tag in tags when tag.canon isnt canon)
-        # add new tag, but keep tags sorted
-        ntags.push
-          name:args.name
-          canon:canon
-          value:args.value
-          touched: now
-          touched_by: canonical(args.who)
-        ntags.sort (a, b) -> (a?.canon or "").localeCompare (b?.canon or "")
-        # update the tag set only if there wasn't a race
-        numchanged = collection(args.type).update { _id: id, tags: tags }, $set:
-          tags: ntags
-          touched: now
-          touched_by: canonical(args.who)
-        # try again if this update failed due to a race (server only)
-        break unless Meteor.isServer and numchanged is 0
-      return true
+      # bail to setAnswer/deleteAnswer if this is the 'answer' tag.
+      if canonical(args.name) is 'answer'
+        return Meteor.call (if args.value then "setAnswer" else "deleteAnswer"),
+          type: args.type
+          target: args.object
+          answer: args.value
+          who: args.who
+      args.now = UTCNow() # don't let caller lie about the time
+      return setTagInternal args
+
     deleteTag: (args) ->
       check args, ObjectWith
-        type: ValidType
-        object: IdOrObject
         name: NonEmptyString
-        who: NonEmptyString
-      id = object._id or object
-      now = UTCNow()
-      canon = canonical(name)
-      loop
-        tags = collection(args.type).findOne(id).tags
-        ntags = (tag for tag in tags when tag.canon isnt canon)
-        # update the tag set only if there wasn't a race
-        numchanged = collection(args.type).update { _id: id, tags: tags }, $set:
-          tags: ntags
-          touched: now
-          touched_by: canonical(args.who)
-        # try again if this update failed due to a race (server only)
-        break unless Meteor.isServer and numchanged is 0
-      return true
+      # bail to deleteAnswer if this is the 'answer' tag.
+      if canonical(args.name) is 'answer'
+        return Meteor.call "deleteAnswer",
+          type: args.type
+          target: args.object
+          who: args.who
+      args.now = UTCNow() # don't let caller lie about the time
+      return deleteTagInternal args
 
     addRoundToGroup: (args) ->
       check args, ObjectWith
@@ -1023,26 +1079,34 @@ spread_id_to_link = (id) ->
 
     setAnswer: (args) ->
       check args, ObjectWith
-        puzzle: IdOrObject
+        type: ValidAnswerType
+        target: IdOrObject
         answer: NonEmptyString
         who: NonEmptyString
-      id = args.puzzle._id or args.puzzle
-      now = UTCNow()
+      id = args.target._id or args.target
 
       # Only perform the update and oplog if the answer is changing
-      # XXX: This is racy with updates to findOne().answer.
-      if Puzzles.findOne(id).answer is args.answer
+      oldAnswer = (tag for tag in collection(args.type).findOne(id).tags \
+                      when tag.canon is 'answer')[0]?.value
+      if oldAnswer is args.answer
         return false
 
-      Puzzles.update id, $set:
-        answer: args.answer
+      now = UTCNow()
+      setTagInternal
+        type: args.type
+        object: args.target
+        name: 'Answer'
+        value: args.answer
+        who: args.who
+        now: now
+      collection(args.type).update id, $set:
         solved: now
         solved_by: canonical(args.who)
         touched: now
         touched_by: canonical(args.who)
-      oplog "Found an answer to", "puzzles", id, args.who
+      oplog "Found an answer to", args.type, id, args.who
       # cancel any entries on the call-in queue for this puzzle
-      for c in CallIns.find(puzzle: id).fetch()
+      for c in CallIns.find(type: args.type, target: id).fetch()
         Meteor.call 'cancelCallIn',
           id: c._id
           who: args.who
@@ -1051,23 +1115,24 @@ spread_id_to_link = (id) ->
 
     addIncorrectAnswer: (args) ->
       check args, ObjectWith
-        puzzle: IdOrObject
+        type: ValidAnswerType
+        target: IdOrObject
         answer: NonEmptyString
         who: NonEmptyString
-      id = args.puzzle._id or args.puzzle
+      id = args.target._id or args.target
       now = UTCNow()
 
-      puzzle = Puzzles.findOne(id)
-      throw new Meteor.Error(400, "bad puzzle") unless puzzle
-      Puzzles.update id, $push:
+      target = collection(args.type).findOne(id)
+      throw new Meteor.Error(400, "bad target") unless target
+      collection(args.type).update id, $push:
          incorrectAnswers:
           answer: args.answer
           timestamp: UTCNow()
           who: args.who
 
-      oplog "Incorrect answer #{args.answer} for", "puzzles", id, args.who
+      oplog "Incorrect answer #{args.answer} for", args.type, id, args.who
       # cancel any matching entries on the call-in queue for this puzzle
-      for c in CallIns.find(puzzle: id, answer: args.answer).fetch()
+      for c in CallIns.find(type: args.type, target: id, answer: args.answer).fetch()
         Meteor.call 'cancelCallIn',
           id: c._id
           who: args.who
@@ -1076,17 +1141,23 @@ spread_id_to_link = (id) ->
 
     deleteAnswer: (args) ->
       check args, ObjectWith
-        puzzle: IdOrObject
+        type: ValidAnswerType
+        target: IdOrObject
         who: NonEmptyString
-      id = args.puzzle._id or args.puzzle
+      id = args.target._id or args.target
       now = UTCNow()
-      Puzzles.update id, $set:
-        answer: null
+      deleteTagInternal
+        type: args.type
+        object: args.target
+        name: 'Answer'
+        who: args.who
+        now: now
+      collection(args.type).update id, $set:
         solved: null
         solved_by: null
         touched: now
         touched_by: canonical(args.who)
-      oplog "Deleted answer for", "puzzles", id, args.who
+      oplog "Deleted answer for", args.type, id, args.who
       return true
 
     getRinghuntersFolder: ->
@@ -1095,9 +1166,7 @@ spread_id_to_link = (id) ->
       return share.drive.ringhuntersFolder
 )()
 
-UTCNow = ->
-  now = new Date()
-  return now.getTime()
+UTCNow = -> Date.now()
 
 # exports
 share.model =
