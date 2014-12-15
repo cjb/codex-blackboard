@@ -149,7 +149,7 @@ Meteor.startup ->
     share.hubot[scriptName](robot)
   # register our nick
   n = Meteor.call 'newNick', {name: 'codexbot'}
-  Meteor.call 'setTag', 'nicks', n._id, 'Gravatar', 'codex@printf.net', n.canon
+  Meteor.call 'setTag', {type:'nicks', object:n._id, name:'Gravatar', value:'codex@printf.net', who:n.canon}
   # register our presence in general chat
   keepalive = -> Meteor.call 'setPresence',
     nick: 'codexbot'

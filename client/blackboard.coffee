@@ -128,7 +128,7 @@ Template.blackboard.events
     who = Session.get('nick')
     alertify.prompt "Name of new tag:", (e,str) ->
       return unless e # bail if cancelled
-      Meteor.call 'setTag', type, id, str, '', who
+      Meteor.call 'setTag', {type:type, object:id, name:str, value:'', who:who}
   "click .bb-move-up, click .bb-move-down": (event, template) ->
     [type, id, rest...] = template.find_bbedit(event)
     up = event.currentTarget.classList.contains('bb-move-up')
@@ -201,12 +201,12 @@ processBlackboardEdit =
     who = Session.get('nick')
     n = model.Names.findOne(id)
     if text is null # delete tag
-      return Meteor.call 'deleteTag', n.type, id, canon, who
+      return Meteor.call 'deleteTag', {type:n.type, object:id, name:canon, who:who}
     tags = model.collection(n.type).findOne(id).tags
     t = (tag for tag in tags when tag.canon is canon)[0]
-    Meteor.call 'setTag', n.type, id, text, t.value, who, (error,result) ->
+    Meteor.call 'setTag', {type:n.type, object:id, name:text, value:t.value, who:who}, (error,result) ->
       if (t.canon isnt model.canonical(text)) and (not error)
-        Meteor.call 'deleteTag', n.type, id, t.name, who
+        Meteor.call 'deleteTag', {type:n.type, object:id, name:t.name, who:who}
   tags_value: (text, id, canon) ->
     n = model.Names.findOne(id)
     tags = model.collection(n.type).findOne(id).tags
@@ -219,7 +219,7 @@ processBlackboardEdit =
           canon: model.canonical(special)
           value: ''
     # set tag (overwriting previous value)
-    Meteor.call 'setTag', n.type, id, t.name, text, Session.get('nick')
+    Meteor.call 'setTag', {type:n.type, object:id, name:t.name, value:text, who:Session.get('nick')}
 
 Template.blackboard_round.helpers
   hasPuzzles: -> (this.round?.puzzles?.length > 0)

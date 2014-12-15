@@ -332,7 +332,7 @@ $(document).on 'submit', '#nickPick', ->
         if model.getTag(n, tagname) is value
           cb()
         else
-          Meteor.call 'setTag', 'nicks', n._id, tagname, value, n.canon, ->
+          Meteor.call 'setTag', {type:'nicks', object:n._id, name:tagname, value:value, who:n.canon}, ->
             cb()
       tagsetter realname, 'Real Name', ->
         tagsetter gravatar, 'Gravatar'

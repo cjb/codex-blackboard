@@ -876,67 +876,70 @@ spread_id_to_link = (id) ->
         return {type:type,object:o} if o
       return null # no match found
 
-    setField: (type, object, fields, who) ->
-      check type, ValidType
-      check object, IdOrObject
-      check fields, Object
-      check who, NonEmptyString
-      id = object._id or object
+    setField: (args) ->
+      check args, ObjectWith
+        type: ValidType
+        object: IdOrObject
+        fields: Object
+        who: NonEmptyString
+      id = args.object._id or args.object
       now = UTCNow()
       # disallow modifications to the following fields; use other APIs for these
       for f in ['name','canon','created','created_by','solved','solved_by',
                'tags','rounds','round_start','puzzles']
-        delete fields[f]
-      fields.touched = now
-      fields.touched_by = canonical(who)
-      collection(type).update id, $set: fields
+        delete args.fields[f]
+      args.fields.touched = now
+      args.fields.touched_by = canonical(args.who)
+      collection(args.type).update id, $set: args.fields
       return true
 
-    setTag: (type, object, name, value, who) ->
-      check type, ValidType
-      check object, IdOrObject
-      check name, NonEmptyString
-      check who, NonEmptyString
-      check value, Match.Any
-      id = object._id or object
+    setTag: (args) ->
+      check args, ObjectWith
+        type: ValidType
+        object: IdOrObject
+        name: NonEmptyString
+        value: Match.Any
+        who: NonEmptyString
+      id = args.object._id or args.object
       now = UTCNow()
-      canon = canonical(name)
+      canon = canonical(args.name)
       loop
-        tags = collection(type).findOne(id).tags
+        tags = collection(args.type).findOne(id).tags
         # remove existing value for tag, if present
         ntags = (tag for tag in tags when tag.canon isnt canon)
         # add new tag, but keep tags sorted
         ntags.push
-          name:name
+          name:args.name
           canon:canon
-          value:value
+          value:args.value
           touched: now
-          touched_by: canonical(who)
+          touched_by: canonical(args.who)
         ntags.sort (a, b) -> (a?.canon or "").localeCompare (b?.canon or "")
         # update the tag set only if there wasn't a race
-        numchanged = collection(type).update { _id: id, tags: tags }, $set:
+        numchanged = collection(args.type).update { _id: id, tags: tags }, $set:
           tags: ntags
           touched: now
-          touched_by: canonical(who)
+          touched_by: canonical(args.who)
         # try again if this update failed due to a race (server only)
         break unless Meteor.isServer and numchanged is 0
       return true
-    deleteTag: (type, object, name, who) ->
-      check type, ValidType
-      check object, IdOrObject
-      check name, NonEmptyString
-      check who, NonEmptyString
+    deleteTag: (args) ->
+      check args, ObjectWith
+        type: ValidType
+        object: IdOrObject
+        name: NonEmptyString
+        who: NonEmptyString
       id = object._id or object
       now = UTCNow()
       canon = canonical(name)
       loop
-        tags = collection(type).findOne(id).tags
+        tags = collection(args.type).findOne(id).tags
         ntags = (tag for tag in tags when tag.canon isnt canon)
         # update the tag set only if there wasn't a race
-        numchanged = collection(type).update { _id: id, tags: tags }, $set:
+        numchanged = collection(args.type).update { _id: id, tags: tags }, $set:
           tags: ntags
           touched: now
-          touched_by: canonical(who)
+          touched_by: canonical(args.who)
         # try again if this update failed due to a race (server only)
         break unless Meteor.isServer and numchanged is 0
       return true
