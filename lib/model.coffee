@@ -47,14 +47,33 @@ LastAnswer = BBCollection.last_answer = \
 RoundGroups = BBCollection.roundgroups = new Mongo.Collection "roundgroups"
 if Meteor.isServer
   RoundGroups._ensureIndex {canon: 1}, {unique:true, dropDups:true}
-  # periodically go through and sync up round_start field
-  Meteor.setInterval ->
+  updateRoundStart = ->
     round_start = 0
     RoundGroups.find({}, sort: ["created"]).forEach (rg) ->
       if rg.round_start isnt round_start
         RoundGroups.update rg._id, $set: round_start: round_start
       round_start += rg.rounds.length
-  , 60*1000
+  queueUpdateRoundStart = do ->
+    pending = false
+    return ->
+      if not pending
+        pending = true
+        # this should be `Tracker.afterFlush`, but see
+        # https://github.com/meteor/meteor/issues/3293
+        # workaround with Meteor.setTimeout -- we want to ensure that
+        # we give all the observeChanges time to fire before we do
+        # the update
+        Meteor.setTimeout ->
+          pending = false
+          updateRoundStart()
+        , 0
+  # observe changes to the rounds field and update round_start
+  queueUpdateRoundStart()
+  RoundGroups.find({}).observeChanges
+    added: (id, fields) -> queueUpdateRoundStart()
+    removed: (id, fields) -> queueUpdateRoundStart()
+    changed: (id, fields) ->
+      queueUpdateRoundStart() if 'created' of fields or 'rounds' of fields
 
 # Rounds are:
 #   _id: mongodb id
