@@ -3,7 +3,7 @@
 #
 # Commands:
 #   hubot bot: The answer to <puzzle> is <answer>
-#   hubot bot: Call in <answer> for <puzzle>
+#   hubot bot: Call in <answer> [for <puzzle>]
 #   hubot bot: Delete the answer to <puzzle>
 #   hubot bot: <puzzle> is a new puzzle in round <round>
 #   hubot bot: Delete puzzle <puzzle>
@@ -75,10 +75,10 @@ share.hubot.codex = (robot) ->
     msg.finish()
 
   # newCallIn
-  robot.commands.push 'bot call in <answer> for <puzzle> - Updates codex blackboard'
+  robot.commands.push 'bot call in <answer> [for <puzzle>] - Updates codex blackboard'
   robot.respond (rejoin /Call\s*in( answer)? /,thingRE,/\ for( puzzle)? /,thingRE,/$/i), (msg) ->
-    answer = strip msg.match[1]
-    name = strip msg.match[2]
+    answer = strip msg.match[2]
+    name = strip msg.match[4]
     who = msg.envelope.user.id
     puzzle = Meteor.call "getByName",
       name: name
@@ -92,6 +92,29 @@ share.hubot.codex = (robot) ->
       who: who
       name: name + ':' + answer
     msg.reply "Okay, \"#{answer}\" for #{puzzle.object.name} added to call-in list!"
+    msg.finish()
+  robot.respond (rejoin /Call\s*in( answer)? /,thingRE,/$/i), (msg) ->
+    answer = strip msg.match[2]
+    who = msg.envelope.user.id
+    # get puzzle id from room name
+    room = msg.envelope.room
+    [type,id] = room.split('/', 2)
+    if type is "general"
+      msg.reply "You need to tell me which puzzle this is an answer for."
+      return msg.finish()
+    unless type is "puzzles" # we might be more generous, eventually
+      msg.reply "I can only call in answers for puzzles."
+      return msg.finish()
+    object = Meteor.call "get", type, id
+    unless object
+      msg.reply "Something went wrong.  I can't look up #{room}."
+      return msg.finish()
+    Meteor.call "newCallIn",
+      puzzle: object._id
+      answer: answer
+      who: who
+      name: object.name + ':' + answer
+    msg.reply "Okay, \"#{answer}\" for #{object.name} added to call-in list!"
     msg.finish()
 
 # deleteAnswer
