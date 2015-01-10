@@ -64,7 +64,6 @@ body {
   .bb-spreadsheet-frame {
     width: 100%;
     height: 500px;
-    border-top: 1px solid #ccc;
   }
   .answer > span:first-child {
     /* Vertically align answer timestamps */
@@ -206,7 +205,6 @@ body {
     -webkit-box-shadow: 0 1px 4px rgba(0,0,0,.065);
        -moz-box-shadow: 0 1px 4px rgba(0,0,0,.065);
             box-shadow: 0 1px 4px rgba(0,0,0,.065);
-    border: 1px solid #e5e5e5;
 
     position: fixed; /* for wide screens */
 
@@ -252,11 +250,11 @@ body {
   -webkit-border-radius: 6px;
      -moz-border-radius: 6px;
           border-radius: 6px;
-  border: 1px solid #e5e5e5;
   -webkit-box-shadow: 0 1px 4px rgba(0,0,0,0.065);
      -moz-box-shadow: 0 1px 4px rgba(0,0,0,0.065);
           box-shadow: 0 1px 4px rgba(0,0,0,0.065);
   font-size: 93%; /* 13px for body text */
+  &, td, tr, th { border: none; }
 
   section {
     /* Indent our sections to start underneath the chat/update log */
@@ -264,7 +262,6 @@ body {
     margin-top: (-@navbar-height);
   }
   h2 {
-    border-bottom: 1px solid #e5e5e5;
     font-size: 200%;
     .bb-edit-icon, .bb-delete-icon { margin-top: 13px; }
   }
@@ -308,7 +305,6 @@ body {
   }
   .bb-puzzle {
     margin-bottom: 0;
-    th { background: #f8f8f8; }
     .bb-edit-icon, .bb-delete-icon {
       margin-top: 3px;
     }
@@ -369,7 +365,6 @@ body {
     }
 
     .puzzle-working {
-      .background { color: #ccc; }
       .bb-lots {
          .bb-short { display: block; }
          .bb-long { display: none; }
