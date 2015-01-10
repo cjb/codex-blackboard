@@ -80,13 +80,6 @@ body {
     font-size: 80%;
     margin-top: 12px;
     margin-bottom: 4px;
-    .raised() {
-      .border-radius(3px);
-      box-shadow:
-        0 0.1rem 0 rgba(0,0,0,.05),
-        inset 0 0.1rem 0.2rem rgba(255,255,255,.67),
-        inset 0 -0.1rem 0 rgba(0,0,0,.14);
-    }
     .bb-row {
       width: 100%;
       clear: both;
@@ -98,7 +91,6 @@ body {
       padding-top:10%;
       float: left;
       display: inline-block;
-      .raised();
     }
     .cell-position() {
       position:absolute;
@@ -109,17 +101,14 @@ body {
     }
     .bb-grid-round-number {
       .cell-position();
-      .raised();
       background:#eefcff;
     }
     .bb-grid-solved {
       .cell-position();
-      .raised();
       background:#8d0;
     }
     .bb-grid-unsolved {
       .cell-position();
-      .raised();
       background:#fcfcfc;
     }
   }
@@ -202,9 +191,6 @@ body {
     -webkit-border-radius: 6px;
        -moz-border-radius: 6px;
             border-radius: 6px;
-    -webkit-box-shadow: 0 1px 4px rgba(0,0,0,.065);
-       -moz-box-shadow: 0 1px 4px rgba(0,0,0,.065);
-            box-shadow: 0 1px 4px rgba(0,0,0,.065);
 
     position: fixed; /* for wide screens */
 
@@ -250,9 +236,6 @@ body {
   -webkit-border-radius: 6px;
      -moz-border-radius: 6px;
           border-radius: 6px;
-  -webkit-box-shadow: 0 1px 4px rgba(0,0,0,0.065);
-     -moz-box-shadow: 0 1px 4px rgba(0,0,0,0.065);
-          box-shadow: 0 1px 4px rgba(0,0,0,0.065);
   font-size: 93%; /* 13px for body text */
   &, td, tr, th { border: none; }
 
