@@ -16,7 +16,7 @@
       {{/each}}
     </ul>
   </div>
-  <div id="bb-tables" class="span10 {{#if canEdit}}bb-canEdit{{/if}}">
+  <div id="bb-tables" class="span8 {{#if canEdit}}bb-canEdit{{/if}}">
     <!-- content div -->
 <div class="btn-toolbar pull-right text-right bb-top-buttons">
     {{#if canEdit}}
@@ -91,6 +91,31 @@
     </section>
     {{/each}}
   </div><!-- bb-tables -->
+  <div id="bb-right-sidebar" class="span2">
+      <div class="bb-status-grid span2">
+      {{#each roundgroups}}
+      {{#each rounds}}
+      {{#each puzzleDisplayGroups}}
+      <div class="bb-row">
+        <div class="bb-grid-cell">
+          <div class="bb-grid-round-number">
+          <a title="r{{round_num}}" href="#r{{round._id}}{{updateScrollSpy}}">{{round_num}}</a>
+          </div>
+        </div>
+        {{#each puzzles}}
+        <div class="bb-grid-cell">
+          <div class="bb-grid-{{#if hasAnswer}}solved{{else}}unsolved{{/if}}">
+          {{puzzle_num}}
+          </div>
+        </div>
+        {{/each}}
+      </div>
+      {{/each}}
+      {{/each}}
+      {{/each}}
+      <div class="bb-row"></div>
+      </div><!-- bb-grid -->
+  </div><!-- bb-right-sidebar -->
 </div><!-- row-fluid -->
 </template>
 

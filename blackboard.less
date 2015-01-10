@@ -42,6 +42,12 @@
           transform: scaleX(-1);
 }
 
+.border-radius(@radius: 5px) {
+  -webkit-border-radius: @radius;
+     -moz-border-radius: @radius;
+          border-radius: @radius;
+}
+
 @navbar-height: 69px;
 
 body {
@@ -69,6 +75,58 @@ body {
 .bb-chat-messages {
   margin-bottom: 26px; /* 41px navbar - 15px padding on #bb-body */
 }
+
+#bb-right-sidebar {
+  .bb-status-grid {
+    position: fixed;
+    font-size: 80%;
+    margin-top: 12px;
+    margin-bottom: 4px;
+    .raised() {
+      .border-radius(3px);
+      box-shadow:
+        0 0.1rem 0 rgba(0,0,0,.05),
+        inset 0 0.1rem 0.2rem rgba(255,255,255,.67),
+        inset 0 -0.1rem 0 rgba(0,0,0,.14);
+    }
+    .bb-row {
+      width: 100%;
+      clear: both;
+    }
+    .bb-grid-cell {
+      position:relative;
+      height: 1px;
+      width:10%;
+      padding-top:10%;
+      float: left;
+      display: inline-block;
+      .raised();
+    }
+    .cell-position() {
+      position:absolute;
+      top:0;
+      bottom:0;
+      left:0;
+      right:0;
+    }
+    .bb-grid-round-number {
+      .cell-position();
+      .raised();
+      background:#eefcff;
+    }
+    .bb-grid-solved {
+      .cell-position();
+      .raised();
+      background:#8d0;
+    }
+    .bb-grid-unsolved {
+      .cell-position();
+      .raised();
+      background:#fcfcfc;
+    }
+  }
+}
+
 #bb-body {
   padding-top: @navbar-height;
   padding-bottom: 15px;
@@ -486,6 +544,13 @@ html.fullHeight {
   #bb-sidebar {
     .bb-sidenav {
       /* unfix sidebar */
+      position: static;
+      width: 100%;
+    }
+  }
+  #bb-right-sidebar {
+    .bb-status-grid  {
+      /* unfix right sidebar */
       position: static;
       width: 100%;
     }
