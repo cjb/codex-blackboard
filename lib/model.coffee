@@ -47,7 +47,7 @@ LastAnswer = BBCollection.last_answer = \
 #            (actual answer is in a tag w/ name "Answer")
 #   solved_by:  timestamp of Nick who confirmed the answer
 #   incorrectAnswers: [ { answer: "Wrong", who: "answer submitter",
-#                         timestamp: ... }, ... ]
+#                         backsolve: ..., timestamp: ... }, ... ]
 #   tags: [ { name: "Status", canon: "status", value: "stuck" }, ... ]
 #   rounds: [ array of round _ids, in order ]
 #   (next field is a bit racy, but it's fixed up by the server)
@@ -96,7 +96,7 @@ if Meteor.isServer
 #            (actual answer is in a tag w/ name "Answer")
 #   solved_by:  timestamp of Nick who confirmed the answer
 #   incorrectAnswers: [ { answer: "Wrong", who: "answer submitter",
-#                         timestamp: ... }, ... ]
+#                         backsolve: ..., timestamp: ... }, ... ]
 #   tags: [ { name: "Status", canon: "status", value: "stuck" }, ... ]
 #   puzzles: [ array of puzzle _ids, in order ]
 #   drive: google drive url or id
@@ -143,7 +143,7 @@ if Meteor.isServer
 #            (actual answer is in a tag w/ name "Answer")
 #   solved_by:  timestamp of Nick who confirmed the answer
 #   incorrectAnswers: [ { answer: "Wrong", who: "answer submitter",
-#                         timestamp: ... }, ... ]
+#                         backsolve: ..., timestamp: ... }, ... ]
 #   tags: [ { name: "Status", canon: "status", value: "stuck" }, ... ]
 #   drive: google drive url or id
 Puzzles = BBCollection.puzzles = new Mongo.Collection "puzzles"
@@ -170,6 +170,7 @@ if Meteor.isServer
 #   created: timestamp
 #   created_by: canon of Nick
 #   submitted_to_hq: true/false
+#   backsolve: true/false
 CallIns = BBCollection.callins = new Mongo.Collection "callins"
 if Meteor.isServer
    CallIns._ensureIndex {created: 1}, {}
@@ -782,20 +783,23 @@ spread_id_to_link = (id) ->
         target: IdOrObject
         answer: NonEmptyString
         who: NonEmptyString
+        backsolve: Match.Optional(Boolean)
       return if this.isSimulation # otherwise we trigger callin sound twice
       id = args.target._id or args.target
       name = collection(args.type).findOne(args.target)?.name
       throw new Meteor.Error(400, "bad target") unless name?
+      backsolve = if args.backsolve then " [backsolved]" else ''
       newObject "callins", {name:name+':'+args.answer, who:args.who},
         type: args.type
         target: id
         answer: args.answer
         who: args.who
         submitted_to_hq: false
+        backsolve: !!args.backsolve
       , {suppressLog:true}
       Meteor.call 'newMessage',
         body: "is requesting a call-in for #{args.answer.toUpperCase()}" + \
-          (if args.notifyGeneral then " (#{name})" else "")
+          (if args.notifyGeneral then " (#{name})" else "") + backsolve
         action: true
         nick: args.who
         room_name: if args.notifyGeneral then null else "#{args.type}/#{id}"
@@ -847,9 +851,12 @@ spread_id_to_link = (id) ->
         type: callin.type
         target: callin.target
         answer: callin.answer
+        backsolve: callin.backsolve
         who: args.who
+      backsolve = if callin.backsolve then " [backsolved]" else ''
       msg =
-        body: "reports that #{callin.answer.toUpperCase()} is CORRECT!"
+        body: "reports that #{callin.answer.toUpperCase()} is CORRECT!" + \
+          backsolve
         action: true
         nick: args.who
       Meteor.call 'newMessage', msg
@@ -867,6 +874,7 @@ spread_id_to_link = (id) ->
         type: callin.type
         target: callin.target
         answer: callin.answer
+        backsolve: callin.backsolve
         who: args.who
       msg =
         body: "sadly relays that #{callin.answer.toUpperCase()} is INCORRECT."
@@ -1129,6 +1137,7 @@ spread_id_to_link = (id) ->
         target: IdOrObject
         answer: NonEmptyString
         who: NonEmptyString
+        backsolve: Match.Optional(Boolean)
       id = args.target._id or args.target
 
       # Only perform the update and oplog if the answer is changing
@@ -1145,6 +1154,14 @@ spread_id_to_link = (id) ->
         value: args.answer
         who: args.who
         now: now
+      if args.backsolve
+        setTagInternal
+          type: args.type
+          object: args.target
+          name: 'Backsolve'
+          value: 'yes'
+          who: args.who
+          now: now
       collection(args.type).update id, $set:
         solved: now
         solved_by: canonical(args.who)
@@ -1165,6 +1182,7 @@ spread_id_to_link = (id) ->
         target: IdOrObject
         answer: NonEmptyString
         who: NonEmptyString
+        backsolve: Match.Optional(Boolean)
       id = args.target._id or args.target
       now = UTCNow()
 
@@ -1175,6 +1193,7 @@ spread_id_to_link = (id) ->
           answer: args.answer
           timestamp: UTCNow()
           who: args.who
+          backsolve: !!args.backsolve
 
       oplog "Incorrect answer #{args.answer} for", args.type, id, args.who
       # cancel any matching entries on the call-in queue for this puzzle
@@ -1196,6 +1215,12 @@ spread_id_to_link = (id) ->
         type: args.type
         object: args.target
         name: 'Answer'
+        who: args.who
+        now: now
+      deleteTagInternal
+        type: args.type
+        object: args.target
+        name: 'Backsolve'
         who: args.who
         now: now
       collection(args.type).update id, $set:

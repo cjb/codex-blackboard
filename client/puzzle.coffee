@@ -13,8 +13,7 @@ Template.puzzle.helpers
                   (group?.rounds or []).indexOf(round?._id)
     r.hunt_year = settings.HUNT_YEAR
     return r
-  tag: (name) ->
-    return (model.getTag this, name) or ''
+
 Template.puzzle.created = ->
   $('html').addClass('fullHeight')
   share.chat.startupChat()
@@ -36,24 +35,6 @@ Template.puzzle.destroyed = ->
   share.chat.cleanupChat()
 
 Template.puzzle.events
-  "click .bb-callin-btn": (event, template) ->
-    share.ensureNick =>
-      # XXX this is ugly, i'll fix later
-      answer = window.prompt "Answer to call in?"
-      return unless answer
-      if false # old way
-        Meteor.call "newCallIn",
-          type: 'puzzles'
-          target: this.puzzle._id
-          answer: answer
-          who: Session.get 'nick'
-      else
-        answer = answer.replace(/\s+/g, '') if /answer/.test(answer)
-        name = this.puzzle.name
-        Meteor.call "newMessage",
-          body: "bot: call in #{answer.toUpperCase()}"
-          nick: Session.get 'nick'
-          room_name: "puzzles/"+this.puzzle._id
   "click .bb-drive-select": (event, template) ->
     event.preventDefault()
     drive = this.puzzle.drive
@@ -72,6 +53,30 @@ Template.puzzle.events
     return unless drive
     share.uploadToDriveFolder drive, (docs) -> console.log docs
   "mousedown .bb-splitter-handle": (e,t) -> share.Splitter.handleEvent(e,t)
+
+Template.puzzle_correct_answer.helpers
+  tag: (name) -> (model.getTag this, name) or ''
+
+Template.puzzle_callin_modal.events
+  "click .bb-callin-btn": (event, template) ->
+    share.ensureNick =>
+      template.$('input:text').val('')
+      template.$('input:checked').val([])
+      template.$('.modal').modal show: true
+      template.$('input:text').focus()
+  "click .bb-callin-submit": (event, template) ->
+    answer = template.$('.bb-callin-answer').val()
+    return unless answer
+    backsolve = ''
+    if template.$('input:checked').val() is 'backsolve'
+      backsolve = "backsolve "
+    if /answer|backsolve|for|puzzle|^[\'\"]/i.test(answer)
+      answer = '"' + answer.replace(/\"/g,'\\"') + '"'
+    Meteor.call "newMessage",
+      body: "bot: call in #{backsolve}#{answer.toUpperCase()}"
+      nick: Session.get 'nick'
+      room_name: "#{Session.get 'type'}/#{Session.get 'id'}"
+    template.$('.modal').modal 'hide'
 
 # presumably we also want to subscribe to the puzzle's chat room
 # and presence information at some point.

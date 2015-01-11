@@ -41,7 +41,7 @@
             <br/><small>&nbsp;↦&nbsp;<a href="{{hunt_link type target}}"
                     target="_blank">on&nbsp;hunt&nbsp;site</a></small>
             {{/if}}</td>
-            <td class="answer">{{answer}}</td>
+            <td><div class="answer">{{answer}}</div>{{#if backsolve}}(backsolve){{/if}}</td>
             <td>{{pretty_ts this.created}}</td>
             <td>{{#with lastAttempt type target}}{{pretty_ts timestamp}} <small>({{pretty_ts timestamp=timestamp style="brief duration"}})</small>{{else}}-{{/with}}</td>
             {{#if sessionNick}}

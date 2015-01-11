@@ -7,23 +7,15 @@
 <div class="bb-top-content">{{! start top of splitter }}
 
 <div class="bb-top-left-content">{{! start top left splitter }}
-{{#unless puzzle.solved}}<button class="btn btn-small bb-callin-btn">Request Call-In</button>{{/unless}}
+{{#unless puzzle.solved}}{{> puzzle_callin_modal}}{{/unless}}
 <h1>Puzzle <small>{{puzzle.name}}
   (<a class="bb-wiki" href="{{wikiRP r=round_num p=puzzle_num}}">wiki r{{round_num}}p{{puzzle_num}}</a>)
   {{#if puzzle.link}}(<a href="{{puzzle.link}}" target="_blank">puzzle link</a>){{/if}}
 </small></h1>
 
 {{#with puzzle}}{{> blackboard_tags }}{{/with}}
-{{#if puzzle.solved}}
-  <dl class="dl-horizontal bb-correct-answer">
-    <dt>Answer:</dt><dd class="answer"><span>{{#with puzzle}}{{tag "answer"}}{{/with}}</span> <span class="timestamp">{{pretty_ts puzzle.solved}}</span></dd>
-  </dl>
-{{/if}}
-<dl class="dl-horizontal bb-incorrect-answers">
-{{#each puzzle.incorrectAnswers}}
-  <dt>Incorrect answer:</dt><dd class="answer"><span>{{answer}}</span> <span class="timestamp">{{pretty_ts timestamp}}</span></dd>
-{{/each}}
-</dl>
+{{#if puzzle.solved}}{{#with puzzle}}{{> puzzle_correct_answer}}{{/with}}{{/if}}
+{{#with puzzle}}{{> puzzle_incorrect_answers}}{{/with}}
 
 {{#unless "true"}}
 <ul>
@@ -83,5 +75,48 @@ Open spreadsheet in new window</a>
 </div>
 {{/with}}
 
+</div>
+</template>
+
+<template name="puzzle_correct_answer">
+  <dl class="dl-horizontal bb-correct-answer">
+    <dt>Answer:</dt><dd class="answer"><span>{{tag "answer"}}</span>
+    <span class="timestamp">{{pretty_ts solved}}</span>
+    {{#if tag "backsolve"}}<span class="backsolve">(backsolve)</span>{{/if}}
+    </dd>
+  </dl>
+</template>
+
+<template name="puzzle_incorrect_answers">
+<dl class="dl-horizontal bb-incorrect-answers">
+{{#each incorrectAnswers}}
+  <dt>Incorrect answer:</dt><dd class="answer"><span>{{answer}}</span>
+    <span class="timestamp">{{pretty_ts timestamp}}</span>
+    {{#if backsolve}}<span class="backsolve">(backsolve)</span>{{/if}}
+    </dd>
+{{/each}}
+</dl>
+</template>
+
+<template name="puzzle_callin_modal">
+<button class="btn btn-small bb-callin-btn">Request Call-In</button>
+<div class="modal">
+  <div class="modal-header">
+    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+    <h3>Request an answer call-in</h3>
+  </div>
+  <div class="modal-body">
+    <form class="form">
+      <label>Answer to call in:</label>
+      <input type="text" class="bb-callin-answer" placeholder="Answer">
+      <label class="checkbox">
+        <input type="checkbox" value="backsolve"> Backsolved?
+      </label>
+    </form>
+  </div>
+  <div class="modal-footer">
+    <button class="btn" data-dismiss="modal">Cancel</button>
+    <button class="btn btn-primary bb-callin-submit">Request Call-in</button>
+  </div>
 </div>
 </template>

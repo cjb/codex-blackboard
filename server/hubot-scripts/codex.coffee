@@ -35,7 +35,8 @@ thingRE = /// (
  \S(?:.*?\S)?
 ) ///
 strip = (s) ->
-  if (/^[\"\']/.test s) and s[0] == s[s.length-1] then JSON.parse(s) else s
+  (try return JSON.parse(s)) if (/^[\"\']/.test s) and s[0] == s[s.length-1]
+  s
 
 # BEWARE: regular expressions can't start with whitespace in coffeescript
 # (https://github.com/jashkenas/coffeescript/issues/3756)
@@ -84,9 +85,10 @@ share.hubot.codex = (robot) ->
 
   # newCallIn
   robot.commands.push 'bot call in <answer> [for <puzzle>] - Updates codex blackboard'
-  robot.respond (rejoin /Call\s*in( answer)? /,thingRE,/\ for( puzzle)? /,thingRE,/$/i), (msg) ->
-    answer = strip msg.match[2]
-    name = strip msg.match[4]
+  robot.respond (rejoin /Call\s*in( backsolved?)?( answer)? /,thingRE,/\ for( puzzle)? /,thingRE,/$/i), (msg) ->
+    backsolve = msg.match[1]?
+    answer = strip msg.match[3]
+    name = strip msg.match[5]
     who = msg.envelope.user.id
     target = Meteor.call "getByName",
       name: name
@@ -102,10 +104,12 @@ share.hubot.codex = (robot) ->
       target: target.object._id
       answer: answer
       who: who
+      backsolve: backsolve
     msg.reply "Okay, \"#{answer}\" for #{target.object.name} added to call-in list!"
     msg.finish()
-  robot.respond (rejoin /Call\s*in( answer)? /,thingRE,/$/i), (msg) ->
-    answer = strip msg.match[2]
+  robot.respond (rejoin /Call\s*in( backsolved?)?( answer)? /,thingRE,/$/i), (msg) ->
+    backsolve = msg.match[1]?
+    answer = strip msg.match[3]
     who = msg.envelope.user.id
     # get puzzle id from room name
     room = msg.envelope.room
@@ -126,6 +130,7 @@ share.hubot.codex = (robot) ->
       answer: answer
       who: who
       notifyGeneral: true
+      backsolve: backsolve
     msg.reply "Okay, \"#{answer}\" for #{object.name} added to call-in list!"
     msg.finish()
 

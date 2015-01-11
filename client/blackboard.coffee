@@ -254,8 +254,9 @@ tagHelper = (id) ->
     for t in (this?.tags or []) when not \
         ((Session.equals('currentPage', 'blackboard') and \
          (t.canon is 'status' or (!isRoundGroup and t.canon is 'answer'))) or \
-         (Session.equals('currentPage', 'puzzle') and t.canon is 'answer') or \
-         (Session.equals('currentPage', 'round') and t.canon is 'answer'))
+         ((t.canon is 'answer' or t.canon is 'backsolve') and \
+          (Session.equals('currentPage', 'puzzle') or \
+           Session.equals('currentPage', 'round'))))
 
 Template.blackboard_tags.helpers { tags: tagHelper }
 Template.blackboard_puzzle_tags.helpers { tags: tagHelper }
