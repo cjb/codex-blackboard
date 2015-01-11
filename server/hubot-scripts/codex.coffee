@@ -16,11 +16,15 @@
 # helper function: concat regexes
 rejoin = (regs...) ->
   [...,last] = regs
-  flags = if typeof last is 'string'
-    regs.pop()
-  else if last? # use the flags of the last regexp, if there are any
+  flags = if last instanceof RegExp
+    # use the flags of the last regexp, if there are any
     ( /\/([gimy]*)$/.exec last.toString() )?[1]
-  return new RegExp( ((regs.map (r) -> r.source).join ''), flags ? '')
+  else if typeof last is 'object'
+    # use the flags property of the last object parameter
+    regs.pop().flags
+  return new RegExp( regs.reduce( (acc,r) ->
+    acc + if r instanceof RegExp then r.source else r
+  , '' ), flags ? '')
 
 # regexp for puzzle/round/group name, w/ optional quotes
 # don't allow empty strings to be things, that's just confusing
