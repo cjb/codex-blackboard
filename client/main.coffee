@@ -9,6 +9,7 @@ chat = share.chat # import
 #   "chat"       -- chat room
 #   "oplogs"     -- operation logs
 #   "callins"    -- answer queue
+#   "quips"      -- view/edit phone-answering quips
 #   "facts"      -- server performance information
 Template.registerHelper "equal", (a, b) -> a is b
 
@@ -58,6 +59,7 @@ BlackboardRouter = Backbone.Router.extend
     "chat/:type/:id/:timestamp": "ChatPage"
     "oplogs/:timestamp": "OpLogPage"
     "callins": "CallInPage"
+    "quips/:id": "QuipPage"
     "facts": "FactsPage"
     "loadtest/:which": "LoadTestPage"
 
@@ -83,6 +85,9 @@ BlackboardRouter = Backbone.Router.extend
 
   CallInPage: ->
     this.Page("callins", "general", "0")
+
+  QuipPage: (id) ->
+    this.Page("quip", "quips", id)
 
   FactsPage: ->
     this.Page("facts", "general", "0")
@@ -118,11 +123,12 @@ BlackboardRouter = Backbone.Router.extend
     (Meteor._relativeToSiteRootUrl "/chat#{this.urlFor(type,id)}") + \
     (if (+timestamp) then "/#{+timestamp}" else "")
 
-  goToRound: (round) ->
-    this.navigate(this.urlFor("rounds",round._id), {trigger:true})
+  goTo: (type,id) ->
+    this.navigate(this.urlFor(type,id), {trigger:true})
 
-  goToPuzzle: (puzzle) ->
-    this.navigate(this.urlFor("puzzles",puzzle._id), {trigger:true})
+  goToRound: (round) -> this.goTo("rounds", round._id)
+
+  goToPuzzle: (puzzle) ->  this.goTo("puzzles", puzzle._id)
 
   goToChat: (type, id, timestamp) ->
     this.navigate(this.chatUrlFor(type, id, timestamp), {trigger:true})

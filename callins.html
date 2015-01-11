@@ -25,11 +25,11 @@
   {{#if quips.count}}
     <table class="table">
       {{#each quips}}
-        {{> quip }}
+        {{> callins_quip }}
       {{/each}}
     </table>
   {{else}}
-    No quips!  <a href="/chat/quips/0">Add some</a>.
+    No quips!  <a class="quips-link" href="{{quipAddUrl}}">Add some</a>.
   {{/if}}
 </div>
 </template>
@@ -55,7 +55,7 @@
         </tr>
 </template>
 
-<template name="quip">
+<template name="callins_quip">
   <tr class="bb-quip" data-bbquip="{{_id}}">
     <td class="btn-group">
       <button class="btn btn-success bb-quip-next">Use</button>

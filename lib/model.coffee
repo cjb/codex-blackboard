@@ -823,8 +823,10 @@ spread_id_to_link = (id) ->
       Quips.update args.id,
         $set: {last_used: now, touched: now, touched_by: canonical(args.who)}
         $inc: use_count: 1
+      quipAddUrl = # see Router.urlFor
+        Meteor._relativeToSiteRootUrl "/quips/new"
       Meteor.call 'newMessage',
-        body: "<span class=\"bb-quip-action\">#{UI._escape(quip.text)} <a class='bb-add-quip-link' href=\"/chat/quips/0\"></a></span>"
+        body: "<span class=\"bb-quip-action\">#{UI._escape(quip.text)} <a class='quips-link' href=\"#{quipAddUrl}\"></a></span>"
         action: true
         nick: args.who
         bodyIsHtml: true

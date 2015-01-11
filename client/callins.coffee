@@ -32,6 +32,8 @@ Template.callins.helpers
     model.Quips.find {},
       sort: [["last_used","asc"],["created","asc"]]
       limit: 5
+  quipAddUrl: ->
+    share.Router.urlFor 'quips', 'new'
 
 Template.callins.rendered = ->
   $("title").text("Answer queue")

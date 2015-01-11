@@ -31,7 +31,7 @@ Template.registerHelper 'link', (args) ->
   link += '</a>'
   return new Spacebars.SafeString(link)
 
-$(document).on 'click', 'a.puzzles-link, a.rounds-link, a.chat-link, a.home-link, a.oplogs-link', (event) ->
+$(document).on 'click', 'a.puzzles-link, a.rounds-link, a.chat-link, a.home-link, a.oplogs-link, a.quips-link', (event) ->
   return unless event.button is 0 # check right-click
   return if event.ctrlKey or event.shiftKey or event.altKey # check alt/ctrl/shift clicks
   event.preventDefault()
@@ -198,8 +198,13 @@ Template.header_breadcrumbs.helpers
     if Session.equals('type', 'puzzles')
       model.Puzzles.findOne Session.get('id')
     else null
+  quip: ->
+    if Session.equals('type', 'quips')
+      model.Quips.findOne Session.get('id')
+    else null
   type: -> Session.get('type')
   id: -> Session.get('id')
+  idIsNew: -> Session.equals('id', 'new')
   drive: -> switch Session.get('type')
     when 'general'
       Session.get 'RINGHUNTERS_FOLDER'

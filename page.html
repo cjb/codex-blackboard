@@ -46,6 +46,9 @@ catch (e) { console.warn('Google Drive disabled', e); google = null; }
   {{#if currentPageEquals "callins"}}
     {{> callins }}
   {{/if}}
+  {{#if currentPageEquals "quip"}}
+    {{> quip }}
+  {{/if}}
   {{#if currentPageEquals "facts"}}
     {{> facts }}
   {{/if}}

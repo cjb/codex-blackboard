@@ -1,0 +1,46 @@
+<template name="quip">
+<div class="row-fluid bb-puzzleround bb-quip">
+{{#if idIsNew}}
+  <h2>Add new quip</h2>
+  <form class="bb-add-new-quip">
+  <fieldset>
+    <span class="help-block">
+Give us a fun way for our duty officer to answer the Codex phone when HQ calls.
+    </span>
+    <textarea placeholder="Hello, this is Codex…" rows="3"></textarea><br/>
+    <button type="submit" class="btn">Submit</button>
+  </fieldset>
+  </form>
+  <h3>Recently added quips</h3>
+  <span class="help-block">Perhaps you could use some inspiration.</span>
+  <ul>{{#each recentQuips}}
+  <li><a href="/quips/{{_id}}" class="quips-link">[edit]</a> {{text}}
+    <small>
+    (by <span title="{{nickOrName created_by}}">{{created_by}}</span>
+    at {{pretty_ts created}})
+    </small>
+  </li>
+  {{/each}}</ul>
+{{else}}{{#with quip}}
+  <button class="btn btn-small bb-addquip-btn">Add new quip</button>
+  <h2>Quip: {{name}}</h2>
+  <dl class="dl-horizontal">
+    <dt>Text:</dt><dd>{{text}}</dd>
+    <dt>Used:</dt><dd>
+      {{#if use_count}}
+        {{use_count}} times, last at {{pretty_ts last_used}}
+      {{else}}
+        never
+      {{/if}}
+    </dd>
+    <dt>Created by:</dt><dd><span title="{{nickOrName created_by}}">{{created_by}}</span> at {{pretty_ts created}}</dd>
+  </dl>
+  {{> blackboard_tags }}
+<div class="btn-group">
+  <button class="btn bb-quip-edit-btn">Edit quip</button>
+  <button class="btn bb-quip-tag-btn">Add tag</button><!-- edit, too? -->
+  <button class="btn bb-quip-delete-btn btn-danger">Delete quip</button>
+</div>
+{{/with}}{{/if}}
+</div>
+</template>
