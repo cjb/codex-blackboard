@@ -169,6 +169,7 @@ if Meteor.isServer
 #   answer: string (proposed answer to call in)
 #   created: timestamp
 #   created_by: canon of Nick
+#   submitted_to_hq: true/false
 CallIns = BBCollection.callins = new Mongo.Collection "callins"
 if Meteor.isServer
    CallIns._ensureIndex {created: 1}, {}
@@ -790,6 +791,7 @@ spread_id_to_link = (id) ->
         target: id
         answer: args.answer
         who: args.who
+        submitted_to_hq: false
       , {suppressLog:true}
       Meteor.call 'newMessage',
         body: "is requesting a call-in for #{args.answer.toUpperCase()}" + \

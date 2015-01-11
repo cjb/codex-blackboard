@@ -6,8 +6,9 @@
       <tr>
         <th>Puzzle</th>
         <th>Answer</th>
-        <th>Submitted</th>
+        <th>Proposed at</th>
         <th>Last guess</th>
+        <th>Submitted to HQ</th>
         <th align="center">Resolution</th>
       </tr>
       {{#each callins}}
@@ -44,6 +45,7 @@
             <td>{{pretty_ts this.created}}</td>
             <td>{{#with lastAttempt type target}}{{pretty_ts timestamp}} <small>({{pretty_ts timestamp=timestamp style="brief duration"}})</small>{{else}}-{{/with}}</td>
             {{#if sessionNick}}
+            <td><input type="checkbox" class="bb-submitted-to-hq" checked={{submitted_to_hq}}></td>
             <td class="btn-group">
               <button class="btn btn-success bb-callin-correct">Correct</button>
               <button class="btn btn-danger bb-callin-incorrect">Incorrect</button>

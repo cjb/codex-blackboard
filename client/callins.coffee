@@ -81,6 +81,14 @@ Template.callin_row.events
        id: template.get_callin_id(event)
        who: Session.get('nick')
 
+  "change .bb-submitted-to-hq": (event, template) ->
+     checked = !!event.currentTarget.checked
+     Meteor.call 'setField',
+       type: 'callins'
+       object: template.get_callin_id(event)
+       fields: submitted_to_hq: checked
+       who: Session.get('nick')
+
 Tracker.autorun ->
   return unless Session.equals("currentPage", "callins")
   Meteor.subscribe 'callins'
