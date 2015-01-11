@@ -150,12 +150,14 @@ Template.header_loginmute.helpers
         puzzle_num = 1 + (round?.puzzles or []).indexOf(id)
         round_num = 1 + group?.round_start + \
           (group?.rounds or []).indexOf(round?._id)
-        "#{settings.HUNT_YEAR}_R#{round_num}P#{puzzle_num}"
+        "#{settings.HUNT_YEAR}/R#{round_num}P#{puzzle_num}"
       when 'rounds'
         group = model.RoundGroups.findOne rounds: id
         round_num = 1 + group?.round_start + \
           (group?.rounds or []).indexOf(id)
-        "#{settings.HUNT_YEAR}_R#{round_num}P0"
+        "#{settings.HUNT_YEAR}/R#{round_num}P0"
+      else
+        ''
 
 Template.header_loginmute.rendered = ->
   # tool tips
