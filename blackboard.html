@@ -96,6 +96,7 @@
 
 <template name="blackboard_round">
   <section id="r{{round._id}}{{updateScrollSpy}}">
+  {{#if showRound }}
   <h3 class="bb-editable" data-bbedit="rounds/{{round._id}}/title">
   {{#if editing "rounds" round._id "title"}}
       <input type="text" id="rounds-{{round._id}}-title"
@@ -125,6 +126,7 @@
       {{/unless}}
     </tr>
     {{! META }}
+    {{#if showMeta}}
     <tr>
       <td class="puzzle-name"><div>
         <b>{{link id=round._id title=rX text="ROUND/META" editing=canEdit}}</b>
@@ -193,6 +195,7 @@
     </td>
     {{/unless}}
     </tr>
+    {{/if}}
 
     {{#each puzzles}}
       {{> blackboard_puzzle}}
@@ -223,7 +226,7 @@
        Move round up
      </button>
   </div>
-  {{/if}}
+  {{/if}}{{/if}}
   </section>
 </template>
 
