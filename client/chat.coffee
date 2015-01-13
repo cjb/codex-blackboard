@@ -263,11 +263,11 @@ prettyRoomName = ->
     model.Names.findOne(id)?.name
   return (name or "unknown")
 
-joinRoom = (type, id) ->
+joinRoom = (type, id, timestamp) ->
   roomName = type + '/' + id
   # xxx: could record the room name in a set here.
   Session.set "room_name", roomName
-  share.Router.goToChat(type, id, Session.get('timestamp'))
+  share.Router.goToChat(type, id, timestamp ? Session.get('timestamp'))
   Tracker.afterFlush -> scrollMessagesView()
   $("#messageInput").select()
   startupChat()
@@ -347,12 +347,12 @@ $(document).on 'submit', '#joinRoom', ->
     $("#roomName").val prettyRoomName()
   # is this the general room?
   else if model.canonical(roomName) is model.canonical(GENERAL_ROOM)
-    joinRoom "general", "0"
+    joinRoom "general", "0", 0
   else
     # try to find room as a group, round, or puzzle name
     n = model.Names.findOne canon: model.canonical(roomName)
     if n
-      joinRoom n.type, n._id
+      joinRoom n.type, n._id, 0
     else
       # reset to old room name
       $("#roomName").val prettyRoomName()
@@ -398,6 +398,16 @@ Template.messages_input.submit = (message) ->
       args.to = args.nick
       args.action = true
       args.body = "needs to log out and log in again to change nicks"
+    when "/join"
+      args.to = args.nick
+      args.action = true
+      return Meteor.call 'getByName', {name: rest.trim()}, (error,result) ->
+        if error? or not result?
+          args.body = "tried to join an unknown chat room"
+          return Meteor.call 'newMessage', args
+        hideMessageAlert()
+        cleanupChat()
+        joinRoom result.type, result.object._id, 0
     when "/msg", "/m"
       # find who it's to
       [to, rest] = rest.split(/\s+([^]*)/, 2)
@@ -484,8 +494,11 @@ updateLastRead = ->
 
 hideMessageAlert = -> updateNotice 0, 0
 
+Template.chat.created = ->
+  this.autorun =>
+    $("title").text("Chat: "+prettyRoomName())
+
 Template.chat.rendered = ->
-  $("title").text("Chat: "+prettyRoomName())
   $(window).resize()
   share.ensureNick ->
     type = Session.get('type')

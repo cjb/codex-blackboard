@@ -1017,7 +1017,31 @@ spread_id_to_link = (id) ->
         continue if args.optional_type and args.optional_type isnt type
         o = collection(type).findOne canon: canonical(args.name)
         return {type:type,object:o} if o
+      # try RxPy notation
+      if /^r\d+(p\d+)?$/i.test(args.name)
+        [_,round,puzzle] = args.name.split /\D+/
+        return Meteor.call 'getByRP',
+          round: +round
+          puzzle: if puzzle? then +puzzle
       return null # no match found
+
+    # parse RxPy notation.
+    getByRP: (args) ->
+      check args, ObjectWith
+        round: Number
+        puzzle: Match.Optional(Number)
+      rg = RoundGroups.findOne({
+        round_start: $lte: (args.round-1)
+      },{
+        sort:[['round_start','desc']]
+      })
+      rid = if rg? then rg.rounds[args.round - rg.round_start - 1]
+      r = if rid? then Rounds.findOne(rid)
+      return { type: 'rounds', object: r } if r? and not args.puzzle?
+      pid = if r? then r.puzzles[args.puzzle - 1]
+      p = if pid? then Puzzles.findOne(pid)
+      return { type: 'puzzles', object: p } if p?
+      null
 
     setField: (args) ->
       check args, ObjectWith
