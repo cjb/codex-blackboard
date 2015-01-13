@@ -23,11 +23,14 @@ Template.registerHelper 'link', (args) ->
   return "" unless args.id
   n = model.Names.findOne(args.id)
   return args.id.slice(0,8) unless n
-  return (args.text or n.name) if args.editing
+  return ('' + (args.text ? n.name)) if args.editing
   extraclasses = if args.class then (' '+args.class) else ''
-  title = if args.title then " title='#{args.title}'" else ''
+  title = ''
+  if args.title?
+    title = ' title="' + \
+      args.title.replace(/[&\"]/g, (c) -> '&#' + c.charCodeAt(0) + ';') + '"'
   link = "<a href='/#{n.type}/#{n._id}' class='#{n.type}-link#{extraclasses}' #{title}>"
-  link += UI._escape(args.text or n.name)
+  link += UI._escape('' + (args.text ? n.name))
   link += '</a>'
   return new Spacebars.SafeString(link)
 
