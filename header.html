@@ -50,6 +50,7 @@
   {{/if}}
   <li class="{{#if currentPageEquals "chat"}}active{{else}}bb-omit-when-narrow{{/if}}">
   <a href="/chat/{{type}}/{{id}}" class="chat-link"><i class="icon-comment icon-white"></i>
+    {{#if typeEquals "roundgroups"}}{{link id=id editing=true}}{{/if}}
     {{#if typeEquals "rounds"}}Round{{/if}}
     {{#if typeEquals "puzzles"}}Puzzle{{/if}}
     {{#if typeEquals "general"}}General{{/if}}

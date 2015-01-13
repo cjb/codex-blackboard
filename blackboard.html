@@ -60,6 +60,8 @@
            title="Delete this round group"></i>
         <i class="bb-edit-icon icon-pencil pull-right"
            title="Edit the name of this round group"></i>
+      {{else}}
+        {{link id=_id text="[chat]" class="pull-right bb-rg-chat"}}
       {{/if}}
       {{name}}
     {{/if}}
