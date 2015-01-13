@@ -12,6 +12,9 @@ MESSAGE_PAGE = 100
 # this is used to yield "zero results" in collections which index by timestamp
 NOT_A_TIMESTAMP = -9999
 
+# migrate old documents with different 'answer' representation
+MIGRATE_ANSWERS = true
+
 BBCollection = Object.create(null) # create new object w/o any inherited cruft
 
 # Names is a synthetic collection created by the server which indexes
@@ -100,6 +103,33 @@ if Meteor.isServer
 Rounds = BBCollection.rounds = new Mongo.Collection "rounds"
 if Meteor.isServer
   Rounds._ensureIndex {canon: 1}, {unique:true, dropDups:true}
+  if MIGRATE_ANSWERS
+    # migrate objects -- rename 'Meta answer' tag to 'Answer'
+    Meteor.startup ->
+      Rounds.find({}).forEach (r) ->
+        answer = getTag(r, 'Meta Answer')
+        return unless answer?
+        console.log 'Migrating round', r.name
+        tweak = (tag) ->
+          name = if tag.canon is 'meta_answer' then 'Answer' else tag.name
+          return {
+            name: name
+            canon: canonical(name)
+            value: tag.value
+            touched: tag.touched ? r.created
+            touched_by: tag.touched_by ? r.created_by
+          }
+        ntags = (tweak(tag) for tag in r.tags)
+        ntags.sort (a, b) -> (a?.canon or "").localeCompare (b?.canon or "")
+        [solved, solved_by] = [null, null]
+        ntags.forEach (tag) -> if tag.canon is canonical('Answer')
+          [solved, solved_by] = [tag.touched, tag.touched_by]
+        Rounds.update r._id, $set:
+          tags: ntags
+          incorrectAnswers: []
+          solved: solved
+          solved_by: solved_by
+
 
 # Puzzles are:
 #   _id: mongodb id
@@ -119,6 +149,18 @@ if Meteor.isServer
 Puzzles = BBCollection.puzzles = new Mongo.Collection "puzzles"
 if Meteor.isServer
   Puzzles._ensureIndex {canon: 1}, {unique:true, dropDups:true}
+  if MIGRATE_ANSWERS
+    # migrate objects -- we used to have an `answer` field in Puzzles.
+    Meteor.startup ->
+      Puzzles.find(answer: { $exists: true, $ne: null }).forEach (p) ->
+        console.log 'Migrating puzzle', p.name
+        update = {$set: {solved: p.solved}, $unset: {answer: ''}}
+        Meteor.call "setAnswer",
+          type: 'puzzles'
+          target: p._id
+          answer: p.answer
+          who: p.solved_by
+        Puzzles.update p._id, update
 
 # CallIns are:
 #   _id: mongodb id
