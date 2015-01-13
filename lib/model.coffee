@@ -354,9 +354,16 @@ spread_id_to_link = (id) ->
   # private helpers, not exported
   unimplemented = -> throw new Meteor.Error(500, "Unimplemented")
 
-  canonicalTags = (tags) ->
+  canonicalTags = (tags, who) ->
     check tags, [ObjectWith(name:NonEmptyString,value:Match.Any)]
-    ({name:tag.name,canon:canonical(tag.name),value:tag.value} for tag in tags)
+    now = UTCNow()
+    ({
+      name: tag.name
+      canon: canonical(tag.name)
+      value: tag.value
+      touched: tag.touched ? now
+      touched_by: tag.touched_by ? canonical(who)
+    } for tag in tags)
 
   NonEmptyString = Match.Where (x) ->
     check x, String
@@ -404,7 +411,7 @@ spread_id_to_link = (id) ->
       created_by: canonical(args.who)
       touched: now
       touched_by: canonical(args.who)
-      tags: canonicalTags(args.tags or [])
+      tags: canonicalTags(args.tags or [], args.who)
     for own key,value of (extra or Object.create(null))
       object[key] = value
     try
@@ -762,7 +769,7 @@ spread_id_to_link = (id) ->
       newObject "nicks",
         name: args.name
         who: args.name
-        tags: canonicalTags(args.tags or [])
+        tags: canonicalTags(args.tags or [], args.name)
       , {}, {suppressLog:true}
     renameNick: (args) ->
       renameObject "nicks", args, {suppressLog:true}
