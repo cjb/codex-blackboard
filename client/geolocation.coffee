@@ -1,0 +1,68 @@
+'use strict'
+model = share.model # import
+settings = share.settings # import
+
+# Geolocation-related utilities
+
+GEOLOCATION_DISTANCE_THRESHOLD = 0.002 # 0.002 is 11 feet
+GEOLOCATION_NEAR_DISTANCE = 1 # folks within a mile of you are "near"
+
+deg2rad = (deg) ->
+  deg * Math.PI / 180
+
+distance = (one, two) ->
+  [lat1,lon1,lat2,lon2] = [one.lat,one.lng,two.lat,two.lng]
+  R = 6371.009 # Radius of the earth in km
+  Rmi = 3958.761 # Radius of the earth in miles
+  dLat = deg2rad(lat2 - lat1) # deg2rad below
+  dLon = deg2rad(lon2 - lon1)
+  a =
+    Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+    Math.cos(deg2rad(lat1)) * Math.cos(deg2rad(lat2)) *
+    Math.sin(dLon / 2) * Math.sin(dLon / 2)
+
+  c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a))
+  d = Rmi * c # Distance in miles
+  return d
+
+# As long as the user is logged in, stream position updates to server
+Tracker.autorun ->
+  return if settings.DISABLE_GEOLOCATION
+  nick = Session.get 'nick'
+  return unless nick?
+  pos = Geolocation.latLng(enableHighAccuracy:false)
+  Session.set("position", pos) # always use most current location client-side
+  return
+  if pos?
+    # XXX possibly throttle these calls based on GEOLOCATION_DISTANCE_THRESHOLD
+    Meteor.call 'locateNick',
+      name: nick
+      lat: pos.lat
+      lng: pos.lng
+
+distanceTo = (nick) ->
+  return null unless nick?
+  p = Session.get('position')
+  return null unless p?
+  n = model.Nicks.findOne canon: model.canonical(nick)
+  return null unless n? and n.located_at?
+  return distance(n.located_at, p)
+
+Template.registerHelper 'nickNear', (args) ->
+  args = share.keyword_or_positional 'nick', args
+  dist = distanceTo(args.nick)
+  return false unless dist?
+  return dist <= GEOLOCATION_NEAR_DISTANCE
+
+Template.registerHelper 'nickLocation', (args) ->
+  args = share.keyword_or_positional 'nick', args
+  return '' if args.nick is Session.get('nick') # that's me!
+  d = distanceTo(args.nick)
+  return '' unless d?
+  feet = d * 5280
+  return switch
+    when d > 5 then " is #{d.toFixed(0)} miles from you"
+    when d > 0.1 then " is #{d.toFixed(1)} miles from you"
+    when feet > 5 then " is #{feet.toFixed(0)} feet from you"
+    when feet > 0.5 then " is #{feet.toFixed(1)} feet from you"
+    else " is, perhaps, on your lap?"

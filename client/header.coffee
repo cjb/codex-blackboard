@@ -10,7 +10,7 @@ Meteor.startup ->
     unless error?
       Session.set 'RINGHUNTERS_FOLDER', (f or undefined)
 
-keyword_or_positional = (name, args) ->
+keyword_or_positional = share.keyword_or_positional = (name, args) ->
   return args.hash unless (not args?) or \
     (typeof(args) is 'string') or (typeof(args) is 'number')
   a = {}

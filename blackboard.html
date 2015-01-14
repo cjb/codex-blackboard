@@ -260,8 +260,8 @@
 </template>
 
 <template name="nick_presence">
-<span class="nick {{#unless foreground}}background{{/unless}}"
-      title="{{nickOrName nick}}">{{nick}}</span>
+<span class="nick {{#unless foreground}}background{{/unless}} {{#if nickNear nick}}near{{/if}}"
+      title="{{nickOrName nick}}{{nickLocation nick}}">{{nick}}</span>
 </template>
 
 <template name="blackboard_puzzle">

@@ -191,6 +191,8 @@ if Meteor.isServer
 #   _id: mongodb id
 #   name: string
 #   canon: canonicalized version of name, for searching
+#   located: timestamp
+#   located_at: object with numeric lat/lng properties
 #   tags: [ { name: "Real Name", canon: "real_name", value: "C. Scott Ananian" }, ... ]
 # valid tags include "Real Name", "Gravatar" (email address to use for photos)
 Nicks = BBCollection.nicks = new Mongo.Collection "nicks"
@@ -911,6 +913,18 @@ spread_id_to_link = (id) ->
       renameObject "nicks", args, {suppressLog:true}
     deleteNick: (args) ->
       deleteObject "nicks", args, {suppressLog:true}
+    locateNick: (args) ->
+      check args, ObjectWith
+        name: NonEmptyString
+        lat: Number
+        lng: Number
+        timestamp: Match.Optional(Number)
+      n = Nicks.findOne canon: canonical(args.name)
+      throw new Meteor.Error(400, "bad nick: #{args.name}") unless n?
+      # XXX: we will throttle these position updates in a follow-up patch.
+      Nicks.update n._id, $set:
+        located: args.timestamp ? UTCNow()
+        located_at: { lat: args.lat, lng: args.lng }
 
     newMessage: (args) ->
       check args, Object
@@ -1053,7 +1067,8 @@ spread_id_to_link = (id) ->
       now = UTCNow()
       # disallow modifications to the following fields; use other APIs for these
       for f in ['name','canon','created','created_by','solved','solved_by',
-               'tags','rounds','round_start','puzzles','incorrectAnswers']
+               'tags','rounds','round_start','puzzles','incorrectAnswers',
+               'located','located_at']
         delete args.fields[f]
       args.fields.touched = now
       args.fields.touched_by = canonical(args.who)
