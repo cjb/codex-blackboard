@@ -13,7 +13,11 @@ Meteor.publish = ((publish) ->
 Meteor.publish 'all-roundsandpuzzles', -> [
   model.RoundGroups.find(), model.Rounds.find(), model.Puzzles.find()
 ]
-Meteor.publish 'all-nicks', -> model.Nicks.find()
+Meteor.publish 'all-nicks', ->
+  model.Nicks.find {}, fields:
+    priv_located: 0
+    priv_located_at: 0
+    priv_located_order: 0
 Meteor.publish 'all-presence', ->
   # strip out unnecessary fields from presence (esp timestamp) to avoid wasted
   # updates to clients
@@ -89,7 +93,11 @@ Meteor.publish 'round-by-id', (id) -> model.Rounds.find _id: id
 Meteor.publish 'round-for-puzzle', (id) -> model.Rounds.find puzzles: id
 Meteor.publish 'roundgroup-for-round', (id) -> model.RoundGroups.find rounds: id
 
-Meteor.publish 'my-nick', (nick) -> model.Nicks.find canon: model.canonical(nick)
+Meteor.publish 'my-nick', (nick) ->
+  model.Nicks.find {canon: model.canonical(nick)}, fields:
+    priv_located: 0
+    priv_located_at: 0
+    priv_located_order: 0
 
 # get recent messages
 

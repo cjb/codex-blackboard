@@ -193,11 +193,46 @@ if Meteor.isServer
 #   canon: canonicalized version of name, for searching
 #   located: timestamp
 #   located_at: object with numeric lat/lng properties
+#   priv_located, priv_located_at: these are the same as the
+#     located/located_at properties, but they are updated more frequently.
+#     The server throttles the updates from priv_located* to located* to
+#     prevent a N^2 blowup as everyone gets updates from everyone else
+#   priv_located_order: FIFO queue for location updates
 #   tags: [ { name: "Real Name", canon: "real_name", value: "C. Scott Ananian" }, ... ]
 # valid tags include "Real Name", "Gravatar" (email address to use for photos)
 Nicks = BBCollection.nicks = new Mongo.Collection "nicks"
 if Meteor.isServer
   Nicks._ensureIndex {canon: 1}, {unique:true, dropDups:true}
+  Nicks._ensureIndex {priv_located_order: 1}, {}
+  # synchronize priv_located* with located* at a throttled rate.
+  # order by priv_located_order, which we'll clear when we apply the update
+  # this ensures nobody gets starved for updates
+  do ->
+    # limit to 10 location updates/minute
+    LOCATION_BATCH_SIZE = 10
+    LOCATION_THROTTLE = 60*1000
+    runBatch = Meteor.bindEnvironment ->
+      Nicks.find({
+        priv_located_order: { $exists: true, $ne: null }
+      }, {
+        sort: [['priv_located_order','asc']]
+        limit: LOCATION_BATCH_SIZE
+      }).forEach (n, i) ->
+        console.log "Updating location for #{n.name} (#{i})"
+        Nicks.update n._id,
+          $set:
+            located: n.priv_located
+            located_at: n.priv_located_at
+          $unset: priv_located_order: ''
+    maybeRunBatch = _.throttle(runBatch, LOCATION_THROTTLE)
+    Nicks.find({
+      priv_located_order: { $exists: true, $ne: null }
+    }, {
+      fields: priv_located_order: 1
+    }).observeChanges
+      added: (id, fields) -> maybeRunBatch()
+      # also run batch on removed: batch size might not have been big enough
+      removed: (id) -> maybeRunBatch()
 
 # Messages
 #   body: string
@@ -249,7 +284,7 @@ if Meteor.isServer
         [ prev, curr ] = [ affected[i-1], affected[i] ]
         f = computeMessageFollowup prev, curr
         if (!!curr.followup) != f
-          console.log 'Updating followup status', curr._id
+          console.log 'Updating followup status', curr._id, curr.nick
           Messages.update curr._id, $set: followup: f
     Messages.find({}).observe
       added: (msg) -> check(msg.room_name, msg.timestamp, msg)
@@ -922,10 +957,15 @@ spread_id_to_link = (id) ->
       return if this.isSimulation # server side only
       n = Nicks.findOne canon: canonical(args.nick)
       throw new Meteor.Error(400, "bad nick: #{args.nick}") unless n?
-      # XXX: we will throttle these position updates in a follow-up patch.
+      # the server transfers updates from priv_located* to located* at
+      # a throttled rate to prevent N^2 blow up.
+      # priv_located_order implements a FIFO queue for updates, but
+      # you don't lose your place if you're already in the queue
+      timestamp = UTCNow()
       Nicks.update n._id, $set:
-        located: args.timestamp ? UTCNow()
-        located_at: { lat: args.lat, lng: args.lng }
+        priv_located: args.timestamp ? timestamp
+        priv_located_at: { lat: args.lat, lng: args.lng }
+        priv_located_order: n.priv_located_order ? timestamp
 
     newMessage: (args) ->
       check args, Object
@@ -1069,7 +1109,8 @@ spread_id_to_link = (id) ->
       # disallow modifications to the following fields; use other APIs for these
       for f in ['name','canon','created','created_by','solved','solved_by',
                'tags','rounds','round_start','puzzles','incorrectAnswers',
-               'located','located_at']
+               'located','located_at',
+               'priv_located','priv_located_at','priv_located_order']
         delete args.fields[f]
       args.fields.touched = now
       args.fields.touched_by = canonical(args.who)
