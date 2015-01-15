@@ -915,12 +915,13 @@ spread_id_to_link = (id) ->
       deleteObject "nicks", args, {suppressLog:true}
     locateNick: (args) ->
       check args, ObjectWith
-        name: NonEmptyString
+        nick: NonEmptyString
         lat: Number
         lng: Number
         timestamp: Match.Optional(Number)
-      n = Nicks.findOne canon: canonical(args.name)
-      throw new Meteor.Error(400, "bad nick: #{args.name}") unless n?
+      return if this.isSimulation # server side only
+      n = Nicks.findOne canon: canonical(args.nick)
+      throw new Meteor.Error(400, "bad nick: #{args.nick}") unless n?
       # XXX: we will throttle these position updates in a follow-up patch.
       Nicks.update n._id, $set:
         located: args.timestamp ? UTCNow()

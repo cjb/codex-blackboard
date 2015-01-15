@@ -4,7 +4,7 @@ settings = share.settings # import
 
 # Geolocation-related utilities
 
-GEOLOCATION_DISTANCE_THRESHOLD = 0.002 # 0.002 is 11 feet
+GEOLOCATION_DISTANCE_THRESHOLD = 10/5280 # 10 feet
 GEOLOCATION_NEAR_DISTANCE = 1 # folks within a mile of you are "near"
 
 deg2rad = (deg) ->
@@ -25,6 +25,19 @@ distance = (one, two) ->
   d = Rmi * c # Distance in miles
   return d
 
+updateLocation = do ->
+  last = null
+  (nick, pos) ->
+    return unless pos?
+    if last?
+      return if pos.lat == last.lat and pos.lng == last.lng
+      return if distance(last, pos) < GEOLOCATION_DISTANCE_THRESHOLD
+    Tracker.nonreactive ->
+      Meteor.call 'locateNick',
+        nick: nick
+        lat: pos.lat
+        lng: pos.lng
+
 # As long as the user is logged in, stream position updates to server
 Tracker.autorun ->
   return if settings.DISABLE_GEOLOCATION
@@ -32,14 +45,8 @@ Tracker.autorun ->
   nick = Session.get 'nick'
   return unless nick?
   pos = Geolocation.latLng(enableHighAccuracy:false)
-  Session.set("position", pos) # always use most current location client-side
-  return
-  if pos?
-    # XXX possibly throttle these calls based on GEOLOCATION_DISTANCE_THRESHOLD
-    Meteor.call 'locateNick',
-      name: nick
-      lat: pos.lat
-      lng: pos.lng
+  Session.set "position", pos # always use most current location client-side
+  updateLocation nick, pos
 
 distanceTo = (nick) ->
   return null unless nick?
