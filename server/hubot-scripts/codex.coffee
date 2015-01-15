@@ -60,7 +60,7 @@ share.hubot.codex = (robot) ->
         name: name
     if not target
       msg.reply "I can't find a puzzle called \"#{name}\"."
-      return
+      return msg.finish()
     res = Meteor.call "setAnswer",
       type: target.type
       target: target.object._id
@@ -83,22 +83,47 @@ share.hubot.codex = (robot) ->
     msg.reply msg.random solution_banter
     msg.finish()
 
+  # helper function
+  objectFromRoom = (msg) ->
+    # get puzzle id from room name
+    room = msg.envelope.room
+    [type,id] = room.split('/', 2)
+    if type is "general"
+      msg.reply "You need to tell me which puzzle this is for."
+      msg.finish()
+      return
+    unless type is 'puzzles' or type is 'rounds' or type is 'roundgroups'
+      msg.reply "I don't understand the type: #{type}."
+      msg.finish()
+      return
+    object = Meteor.call "get", type, id
+    unless object
+      msg.reply "Something went wrong.  I can't look up #{room}."
+      msg.finish()
+      return
+    {type: type, object: object}
+
   # newCallIn
   robot.commands.push 'bot call in <answer> [for <puzzle>] - Updates codex blackboard'
-  robot.respond (rejoin /Call\s*in( backsolved?)?( answer)? /,thingRE,/\ for( puzzle)? /,thingRE,/$/i), (msg) ->
+  robot.respond (rejoin /Call\s*in( backsolved?)?( answer)? /,thingRE,'(?:',/\ for (?:(puzzle|round|round group) )?/,thingRE,')?',/$/i), (msg) ->
     backsolve = msg.match[1]?
     answer = strip msg.match[3]
-    name = strip msg.match[5]
+    type = if msg.match[4]? then msg.match[4].replace(/\s+/g,'')+'s'
+    name = if msg.match[5]? then strip msg.match[5]
     who = msg.envelope.user.id
-    target = Meteor.call "getByName",
-      name: name
-      optional_type: "puzzles"
-    if not target
+    if name?
       target = Meteor.call "getByName",
         name: name
-    if not target
-      msg.reply "I can't find a puzzle called \"#{name}\"."
-      return
+        optional_type: type ? "puzzles"
+      if not target and not type?
+        target = Meteor.call "getByName",
+          name: name
+      if not target
+        msg.reply "I can't find a puzzle called \"#{name}\"."
+        return msg.finish()
+    else
+      target = objectFromRoom msg
+      return unless target?
     Meteor.call "newCallIn",
       type: target.type
       target: target.object._id
@@ -106,32 +131,6 @@ share.hubot.codex = (robot) ->
       who: who
       backsolve: backsolve
     msg.reply "Okay, \"#{answer}\" for #{target.object.name} added to call-in list!"
-    msg.finish()
-  robot.respond (rejoin /Call\s*in( backsolved?)?( answer)? /,thingRE,/$/i), (msg) ->
-    backsolve = msg.match[1]?
-    answer = strip msg.match[3]
-    who = msg.envelope.user.id
-    # get puzzle id from room name
-    room = msg.envelope.room
-    [type,id] = room.split('/', 2)
-    if type is "general"
-      msg.reply "You need to tell me which puzzle this is an answer for."
-      return msg.finish()
-    unless type is 'puzzles' or type is 'rounds' or type is 'roundgroups'
-      msg.reply "I can only call in answers for puzzles/rounds/roundgroups."
-      return msg.finish()
-    object = Meteor.call "get", type, id
-    unless object
-      msg.reply "Something went wrong.  I can't look up #{room}."
-      return msg.finish()
-    Meteor.call "newCallIn",
-      type: type
-      target: object._id
-      answer: answer
-      who: who
-      notifyGeneral: true
-      backsolve: backsolve
-    msg.reply "Okay, \"#{answer}\" for #{object.name} added to call-in list!"
     msg.finish()
 
 # deleteAnswer
@@ -290,4 +289,30 @@ share.hubot.codex = (robot) ->
       text: text
       who: who
     msg.reply "Okay, added quip.  I'm naming this one \"#{quip.name}\"."
+    msg.finish()
+
+# Tags
+  robot.commands.push 'bot set <tag> [of <puzzle|round>] to <value> - Adds additional information to blackboard'
+  robot.respond (rejoin /set (?:the )?/,thingRE,'(',/\ (?:of|for) (?:(puzzle|round|round group) )?/,thingRE,')? to ',thingRE,/$/i), (msg) ->
+    tag_name = strip msg.match[1]
+    tag_value = strip msg.match[5]
+    who = msg.envelope.user.id
+    if msg.match[2]?
+      type = if msg.match[3]? then msg.match[3].replace(/\s+/g,'')+'s'
+      target = Meteor.call 'getByName',
+        name: strip msg.match[4]
+        optional_type: type
+      if not target?
+        msg.reply "I can't find a puzzle called \"#{target}\"."
+        return msg.finish()
+    else
+      target = objectFromRoom msg
+      return unless target?
+    Meteor.call 'setTag',
+      type: target.type
+      object: target.object._id
+      name: tag_name
+      value: tag_value
+      who: who
+    msg.reply "The #{tag_name} for #{target.object.name} is now \"#{tag_value}\"."
     msg.finish()
