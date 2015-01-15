@@ -48,10 +48,10 @@ okCancelEvents = (selector, callbacks) ->
   events
 
 ######### general properties of the blackboard page ###########
-Session.setDefault 'hideSolved', !!$.cookie('hideSolved')
+Session.setDefault 'hideSolved', $.cookie('hideSolved')
 Template.blackboard.helpers
   sortReverse: -> Session.get 'sortReverse'
-  hideSolved: -> if Session.get 'hideSolved' then 'checked' else ''
+  hideSolved: -> Session.get 'hideSolved'
 
 ############## groups, rounds, and puzzles ####################
 Template.blackboard.helpers
@@ -122,12 +122,8 @@ Template.blackboard.events
     reverse = $(event.currentTarget).attr('data-sortReverse') is 'true'
     Session.set 'sortReverse', reverse or undefined
   "change .bb-hide-solved input": (event, template) ->
-    hidden = !$(event.currentTarget).checked
-    if Session.get 'hideSolved'
-      $.removeCookie 'hideSolved', {path:'/'}
-    else
-      $.cookie 'hideSolved', true, {expires: 365, path: '/'}
-    Session.set 'hideSolved', !!$.cookie 'hideSolved'
+    Session.set 'hideSolved', event.target.checked
+    $.cookie 'hideSolved', event.target.checked, {expires: 365, path: '/'}
   "click .bb-add-round-group": (event, template) ->
     alertify.prompt "Name of new round group:", (e,str) ->
       return unless e # bail if cancelled
