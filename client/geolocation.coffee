@@ -63,9 +63,24 @@ Template.registerHelper 'nickNear', (args) ->
   return false unless dist?
   return dist <= GEOLOCATION_NEAR_DISTANCE
 
+CODEXBOT_LOCATIONS = [
+  'inside your computer'
+  'hanging around'
+  'solving puzzles'
+  'not amused'
+  'having fun!'
+  "Your Plastic Pal Who's Fun to Be With."
+  'fond of memes'
+  'waiting for you humans to find to coin already'
+  'muttering about his precious'
+]
+
 Template.registerHelper 'nickLocation', (args) ->
   args = share.keyword_or_positional 'nick', args
   return '' if args.nick is Session.get('nick') # that's me!
+  if args.nick is 'codexbot'
+    idx = Math.floor(Session.get('currentTime') / 10*60*1000)
+    return " is #{CODEXBOT_LOCATIONS[idx%CODEXBOT_LOCATIONS.length]}"
   d = distanceTo(args.nick)
   return '' unless d?
   feet = d * 5280
