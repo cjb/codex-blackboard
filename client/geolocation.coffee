@@ -58,6 +58,7 @@ distanceTo = (nick) ->
 
 Template.registerHelper 'nickNear', (args) ->
   args = share.keyword_or_positional 'nick', args
+  return true if args.nick is Session.get('nick') # that's me!
   dist = distanceTo(args.nick)
   return false unless dist?
   return dist <= GEOLOCATION_NEAR_DISTANCE

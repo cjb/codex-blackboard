@@ -119,6 +119,34 @@
     }
   }
 }
+
+.glyphicon {
+  display: inline-block;
+  width: 14px; height: 14px; margin-top: 1px; line-height: 14px;
+  vertical-align: text-top;
+  background-image: url("/packages/bootstrap/img/glyphicons-halflings.png");
+  background-repeat: no-repeat;
+}
+.glyphicon-white {
+  .glyphicon;
+  background-image: url("/packages/bootstrap/img/glyphicons-halflings-white.png");
+}
+.bb-message-body, .bb-chat-presence, .bb-puzzle {
+  .near {
+    /*border: 1px dashed #cc0;*/
+    &:before {
+      /* copied from bootstrap icon-map-marker, a bit of a hack */
+      .glyphicon;
+      background-position: -24px -72px;
+      content: " ";
+      opacity: 0.6;
+      margin-right: 2px;
+    }
+  }
+}
+.bb-puzzle .background.near:before { opacity: 0.2; }
+.bb-chat-presence .near:before { .glyphicon-white; }
+
 @media (max-width: 480px) {
   .bb-chat-messages {
     .media {
