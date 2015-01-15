@@ -28,6 +28,7 @@ distance = (one, two) ->
 # As long as the user is logged in, stream position updates to server
 Tracker.autorun ->
   return if settings.DISABLE_GEOLOCATION
+  Geolocation.setPaused !share.isVisible()
   nick = Session.get 'nick'
   return unless nick?
   pos = Geolocation.latLng(enableHighAccuracy:false)

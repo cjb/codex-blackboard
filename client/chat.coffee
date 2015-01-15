@@ -220,7 +220,7 @@ convertURLsToLinksAndImages = (html, id) ->
   html.replace urlRE, (url) ->
     linkOrLinkedImage url, "#{id}-#{count++}"
 
-[isVisible, registerVisibilityChange] = (->
+isVisible = share.isVisible = do ->
   hidden = "hidden"
   visibilityChange = "visibilitychange"
   if typeof document.hidden isnt "undefined"
@@ -235,26 +235,17 @@ convertURLsToLinksAndImages = (html, id) ->
   else if typeof document.webkitHidden isnt "undefined"
     hidden = "webkitHidden"
     visibilityChange = "webkitvisibilitychange"
-  callbacks = []
-  register = (cb) -> callbacks.push cb
-  isVisible = -> !(document[hidden] or false)
-  onVisibilityChange = (->
-    wasHidden = true
-    (e) ->
-      isHidden = !isVisible()
-      return  if wasHidden is isHidden
-      wasHidden = isHidden
-      for cb in callbacks
-        cb !isHidden
-  )()
-  document.addEventListener visibilityChange, onVisibilityChange, false
-  return [isVisible, register]
-)()
 
-registerVisibilityChange ->
+  _visible = new ReactiveVar()
+  onVisibilityChange = -> _visible.set !(document[hidden] or false)
+  document.addEventListener visibilityChange, onVisibilityChange, false
+  onVisibilityChange()
+  -> _visible.get()
+
+Tracker.autorun ->
   return unless Session.equals('currentPage', 'chat')
   instachat.keepalive?()
-  updateLastRead() if isVisible()
+  updateLastRead() if isVisible() and instachat.ready
 
 prettyRoomName = ->
   type = Session.get('type')
