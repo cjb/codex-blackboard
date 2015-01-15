@@ -393,6 +393,8 @@ Template.messages_input.submit = (message) ->
       args.to = args.nick
       args.action = true
       return Meteor.call 'getByName', {name: rest.trim()}, (error,result) ->
+        if (not result?) and /^ringhunters$/i.test(rest.trim())
+          result = {type:'general',object:_id:'0'}
         if error? or not result?
           args.body = "tried to join an unknown chat room"
           return Meteor.call 'newMessage', args
