@@ -71,6 +71,7 @@
     {{/if}}
       </h2>
     {{#unless compactMode}}{{>blackboard_tags}}{{/unless}}
+    {{>blackboard_link}}
   {{#if canEdit}}
   <div class="bb-roundgroup-buttons" data-bbedit="roundgroups/{{_id}}">
      <button class="btn btn-mini btn-inverse bb-add-round">
@@ -169,6 +170,9 @@
     {{#if showMeta}}
     <tr>
       <td class="puzzle-name"><div>
+        {{#unless canEdit}}
+          {{#if round.link}}<a class="pull-right" href="{{round.link}}"><i class="icon-share-alt"></i></a>{{/if}}
+        {{/unless}}
         <b>{{link id=round._id title=rX text="ROUND/META" editing=canEdit}}</b>
         {{#if canEdit}}
         <div class="bb-puzzle-add-move" data-bbedit="rounds/{{round._id}}">
@@ -182,6 +186,7 @@
         {{#unless compactMode}}
         {{#with round}}{{>blackboard_puzzle_tags}}{{/with}}
         {{/unless}}
+        {{#with round}}{{>blackboard_link}}{{/with}}
       </div></td>
       <td class="puzzle-answer bb-editable"
           data-bbedit="tags/{{round._id}}/answer/value">
@@ -294,6 +299,8 @@
              title="Delete this puzzle"></i>
           <i class="bb-edit-icon icon-pencil pull-right"
              title="Edit the name of this puzzle"></i>
+        {{else}}
+          {{#if puzzle.link}}<a class="pull-right" href="{{puzzle.link}}"><i class="icon-share-alt"></i></a>{{/if}}
         {{/if}}
         {{link id=puzzle._id title=rXpY editing=canEdit}}
       {{/if}}
@@ -312,6 +319,7 @@
       {{#unless compactMode}}
       {{#with puzzle}}{{>blackboard_puzzle_tags}}{{/with}}
       {{/unless}}
+      {{#with puzzle}}{{>blackboard_link}}{{/with}}
     </div></td>
     <td class="puzzle-answer bb-editable"
         data-bbedit="tags/{{puzzle._id}}/answer/value">
@@ -452,4 +460,28 @@
           </td>
         </tr>
       {{/each}}</tbody></table>
+</template>
+
+<template name="blackboard_link">
+{{#if canEdit}}
+  <table class="bb-tag-table"><tbody>
+        <tr>
+          <td>Hunt site link:</td>
+          <td class="bb-editable"
+              data-bbedit="link/{{_id}}">
+            {{#if editing "link" _id}}
+              <input type="text" id="link-{{_id}}"
+                     value="{{./link}}"
+                     class="input-block-level" autofocus />
+            {{else}}
+              {{#if canEdit}}
+                <i class="bb-edit-icon icon-pencil pull-right"
+                   title="Change the value of the hunt site link"></i>
+                <a href="{{./link}}">{{./link}}</a>
+              {{/if}}
+            {{/if}}
+          </td>
+        </tr>
+  </tbody></table>
+{{/if}}
 </template>

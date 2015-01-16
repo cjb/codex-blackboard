@@ -247,6 +247,13 @@ processBlackboardEdit =
           value: ''
     # set tag (overwriting previous value)
     Meteor.call 'setTag', {type:n.type, object:id, name:t.name, value:text, who:Session.get('nick')}
+  link: (text, id) ->
+    n = model.Names.findOne(id)
+    Meteor.call 'setField',
+      type: n.type
+      object: id
+      who: Session.get 'nick'
+      fields: link: text
 
 Template.blackboard_round.helpers
   hasPuzzles: -> (this.round?.puzzles?.length > 0)
