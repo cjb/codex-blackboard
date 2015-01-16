@@ -295,7 +295,7 @@ Template.blackboard_puzzle.helpers
     , sort: ["nick"]
   local_working: ->
     count = 0
-    model.Presence.find(room_name: ("rounds/"+this.round?._id)).forEach (p) ->
+    model.Presence.find(room_name: ("puzzles/"+this.puzzle?._id)).forEach (p) ->
       count++ if share.isNickNear(p.nick)
     count
   compactMode: compactMode
