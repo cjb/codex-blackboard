@@ -36,11 +36,6 @@
 .bb-no-wrap {
   white-space: nowrap;
 }
-.bb-flip-x {
-  -webkit-transform: scaleX(-1);
-     -moz-transform: scaleX(-1);
-          transform: scaleX(-1);
-}
 
 .border-radius(@radius: 5px) {
   -webkit-border-radius: @radius;
@@ -269,6 +264,12 @@ body {
           box-shadow: 0 1px 4px rgba(0,0,0,0.065);
   font-size: 93%; /* 13px for body text */
 
+  h1.bb-blackboard-h1 {
+    font-size: 200%;
+    text-decoration: underline;
+    color: #888;
+    margin-bottom: 0;
+  }
   section {
     /* Indent our sections to start underneath the chat/update log */
     padding-top: @navbar-height;
@@ -293,7 +294,8 @@ body {
     }
   }
   .bb-top-buttons {
-    margin-top: 23px;
+    margin-top: 10px;
+    margin-bottom: -2px;
   }
   .bb-roundgroup-buttons, .bb-round-buttons {
     margin-top: 5px;
@@ -380,7 +382,8 @@ body {
       width: 10%;
       &.puzzle-name   { width: 35%; }
       &.puzzle-answer { width: 25%; }
-      &.puzzle-update { width: 100px; min-width: 100px; }
+      &.puzzle-update { width: 90px; min-width: 90px; }
+      &.puzzle-working { min-width: 99px; }
     }
 
     .puzzle-working {
