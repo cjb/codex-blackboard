@@ -320,14 +320,15 @@ $(window).scroll (event) ->
   [body, html] = [document.body, document.documentElement]
   return unless html?.scrollTop? and html?.scrollHeight?
   return unless html?.clientHeight?
-  SLOP=2
+  SLOP=20
   [scrollPos, scrollMax] = [body.scrollTop+html.clientHeight, body.scrollHeight]
   atBottom = (scrollPos+SLOP >= scrollMax)
   # firefox says that the HTML element is scrolling, not the body element...
   if html.scrollTopMax?
     atBottom = (html.scrollTop+SLOP >= (html.scrollTopMax-1)) or atBottom
-  console.log 'Scroll debug:', atBottom, scrollPos, scrollMax, \
-    html.scrollTop, html.scrollTopMax
+  console.log 'Scroll debug:', 'atBottom', atBottom, 'scrollPos', scrollPos, 'scrollMax', scrollMax
+  console.log ' body scrollTop', body.scrollTop, 'scrollTopMax', body.scrollTopMax, 'scrollHeight', body.scrollHeight, 'clientHeight', body.clientHeight
+  console.log ' html scrollTop', html.scrollTop, 'scrollTopMax', html.scrollTopMax, 'scrollHeight', html.scrollHeight, 'clientHeight', html.clientHeight
   instachat.scrolledToBottom = atBottom
 
 # Form Interceptors
