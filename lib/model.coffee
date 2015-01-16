@@ -890,14 +890,16 @@ spread_id_to_link = (id) ->
         answer: callin.answer
         backsolve: callin.backsolve
         who: args.who
-      backsolve = if callin.backsolve then " [backsolved]" else ''
+      backsolve = if callin.backsolve then "[backsolved] " else ''
+      name = collection(callin.type)?.findOne(callin.target)?.name
       msg =
-        body: "reports that #{callin.answer.toUpperCase()} is CORRECT!" + \
-          backsolve
+        body: "reports that #{backsolve}#{callin.answer.toUpperCase()} is CORRECT!"
         action: true
         nick: args.who
+        room_name: "#{callin.type}/#{callin.target}"
       Meteor.call 'newMessage', msg
-      msg.room_name = "#{callin.type}/#{callin.target}"
+      delete msg.room_name
+      msg.body += " (#{name})" if name?
       Meteor.call 'newMessage', msg
 
     incorrectCallIn: (args) ->
@@ -913,12 +915,15 @@ spread_id_to_link = (id) ->
         answer: callin.answer
         backsolve: callin.backsolve
         who: args.who
+      name = collection(callin.type)?.findOne(callin.target)?.name
       msg =
         body: "sadly relays that #{callin.answer.toUpperCase()} is INCORRECT."
         action: true
         nick: args.who
+        room_name: "#{callin.type}/#{callin.target}"
       Meteor.call 'newMessage', msg
-      msg.room_name = "#{callin.type}/#{callin.target}"
+      delete msg.room_name
+      msg.body += " (#{name})" if name?
       Meteor.call 'newMessage', msg
 
     cancelCallIn: (args) ->
