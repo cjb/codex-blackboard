@@ -16,7 +16,7 @@
       {{/each}}
     </ul>
   </div>
-  <div id="bb-tables" class="span8 {{#if canEdit}}bb-canEdit{{/if}}">
+  <div id="bb-tables" class="{{#if hideStatus}}span10{{else}}span8{{/if}} {{#if canEdit}}bb-canEdit{{/if}}">
     <!-- content div -->
 <div class="btn-toolbar pull-right text-right bb-top-buttons">
     {{#if canEdit}}
@@ -93,14 +93,19 @@
     </section>
     {{/each}}
   </div><!-- bb-tables -->
-  <div id="bb-right-sidebar" class="span2">
+  {{#if hideStatus}}
+  <div class="bb-hide-status"><i class='icon-chevron-left'></i></div>
+  {{else}}
+  <div id="bb-right-sidebar" class="span2"><div>
+    <div class="bb-hide-status"><i class='icon-chevron-right'></i></div>
     {{> blackboard_status_grid}}
-  </div><!-- bb-right-sidebar -->
+  </div></div><!-- bb-right-sidebar -->
+  {{/if}}
 </div><!-- row-fluid -->
 </template>
 
 <template name="blackboard_status_grid">
-  <div class="bb-status-grid span2">
+  <div class="bb-status-grid">
     {{#each roundgroups}}
     <div class="bb-status-grid-row bb-status-{{#unless solved}}un{{/unless}}solved">{{link id=_id}}</div>
     {{#each rounds}}
@@ -109,14 +114,14 @@
         <div class="bb-status-{{#unless round.solved}}un{{/unless}}solved">
           {{link id=round._id title=round.name text=rX}}:
         </div>
-      </div>
-      {{#each puzzles}}
-      <div class="bb-status-grid-cell">
+      </div><!--
+      -->{{#each puzzles}}<!--
+      --><div class="bb-status-grid-cell">
         <div class="bb-status-{{#unless puzzle.solved}}un{{/unless}}solved">
           {{link id=puzzle._id title=puzzle.name text=puzzle_num}}
         </div>
-      </div>
-      {{/each}}
+      </div><!--
+      -->{{/each}}
     </div>
     {{/each}}
     {{/each}}
