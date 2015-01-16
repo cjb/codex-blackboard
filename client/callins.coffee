@@ -40,6 +40,8 @@ Template.callins.rendered = ->
   share.ensureNick()
 
 Template.callins.events
+  "click .bb-addquip-btn": (event, template) ->
+     share.Router.goTo "quips", "new"
   "click .bb-quip-next": (event, template) ->
     Meteor.call 'useQuip',
       id: template.get_quip_id(event)
