@@ -25,7 +25,8 @@ Template.registerHelper 'typeEquals', (arg) ->
 Template.registerHelper 'canEdit', () ->
   (Session.get 'nick') and (Session.get 'canEdit')
 Template.registerHelper 'editing', (args..., options) ->
-  return false unless (Session.get 'nick') and (Session.get 'canEdit')
+  canEdit = options?.hash?.canEdit or (Session.get 'canEdit')
+  return false unless (Session.get 'nick') and canEdit
   return Session.equals 'editing', args.join('/')
 
 Template.registerHelper 'wikiRP', (options) ->

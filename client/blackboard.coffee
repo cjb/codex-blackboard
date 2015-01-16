@@ -29,7 +29,7 @@ Meteor.startup ->
 # "blur" events on a text input (given by selector) and interprets them
 # as "ok" or "cancel".
 # (Borrowed from Meteor 'todos' example.)
-okCancelEvents = (selector, callbacks) ->
+okCancelEvents = share.okCancelEvents = (selector, callbacks) ->
   ok = callbacks.ok or (->)
   cancel = callbacks.cancel or (->)
   evspec = ("#{ev} #{selector}" for ev in ['keyup','keydown','focusout'])
@@ -102,10 +102,10 @@ Template.blackboard_status_grid.helpers
     } for id, index in this.round?.puzzles)
     return p
 
-Template.blackboard.created = ->
-  this.find_bbedit = (event) ->
-    edit = $(event.currentTarget).closest('*[data-bbedit]').attr('data-bbedit')
-    return edit.split('/')
+share.find_bbedit = (event) ->
+  edit = $(event.currentTarget).closest('*[data-bbedit]').attr('data-bbedit')
+  return edit.split('/')
+
 Template.blackboard.rendered = ->
   $("#bb-sidebar").localScroll({ duration: 400, lazy: true })
   $("body").scrollspy(target: "#bb-sidebar", offset: (NAVBAR_HEIGHT + 10))
@@ -141,7 +141,7 @@ Template.blackboard.events
       return unless e # bail if cancelled
       Meteor.call 'newRoundGroup', { name: str, who: Session.get('nick') }
   "click .bb-roundgroup-buttons .bb-add-round": (event, template) ->
-    [type, id, rest...] = template.find_bbedit(event)
+    [type, id, rest...] = share.find_bbedit(event)
     who = Session.get('nick')
     alertify.prompt "Name of new round:", (e,str) ->
       return unless e # bail if cancelled
@@ -149,7 +149,7 @@ Template.blackboard.events
         throw error if error
         Meteor.call 'addRoundToGroup', {round: r._id, group: id, who: who}
   "click .bb-round-buttons .bb-add-puzzle": (event, template) ->
-    [type, id, rest...] = template.find_bbedit(event)
+    [type, id, rest...] = share.find_bbedit(event)
     who = Session.get('nick')
     alertify.prompt "Name of new puzzle:", (e,str) ->
       return unless e # bail if cancelled
@@ -157,13 +157,13 @@ Template.blackboard.events
         throw error if error
         Meteor.call 'addPuzzleToRound', {puzzle: p._id, round: id, who: who}
   "click .bb-add-tag": (event, template) ->
-    [type, id, rest...] = template.find_bbedit(event)
+    [type, id, rest...] = share.find_bbedit(event)
     who = Session.get('nick')
     alertify.prompt "Name of new tag:", (e,str) ->
       return unless e # bail if cancelled
       Meteor.call 'setTag', {type:type, object:id, name:str, value:'', who:who}
   "click .bb-move-up, click .bb-move-down": (event, template) ->
-    [type, id, rest...] = template.find_bbedit(event)
+    [type, id, rest...] = share.find_bbedit(event)
     up = event.currentTarget.classList.contains('bb-move-up')
     # flip direction if sort order is inverted
     up = (!up) if (Session.get 'sortReverse') and type isnt 'puzzles'
@@ -171,7 +171,7 @@ Template.blackboard.events
     Meteor.call method, {type:type, id:id, who:Session.get('nick')}
   "click .bb-canEdit .bb-delete-icon": (event, template) ->
     event.stopPropagation() # keep .bb-editable from being processed!
-    [type, id, rest...] = template.find_bbedit(event)
+    [type, id, rest...] = share.find_bbedit(event)
     message = "Are you sure you want to delete "
     if (type is'tags') or (rest[0] is 'title')
       message += "this #{model.pretty_collection(type)}?"
@@ -186,7 +186,7 @@ Template.blackboard.events
   "click .bb-canEdit .bb-editable": (event, template) ->
     # note that we rely on 'blur' on old field (which triggers ok or cancel)
     # happening before 'click' on new field
-    Session.set 'editing', template.find_bbedit(event).join('/')
+    Session.set 'editing', share.find_bbedit(event).join('/')
 Template.blackboard.events okCancelEvents('.bb-editable input',
   ok: (text, evt) ->
     # find the data-bbedit specification for this field
