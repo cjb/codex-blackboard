@@ -42,7 +42,7 @@ Template.puzzle.events
     docsView = new google.picker.DocsView()\
       .setIncludeFolders(true).setParent(drive)
     new google.picker.PickerBuilder()\
-      .setAppId('365816747654.apps.googleusercontent.com')\
+      .setDeveloperKey('AIzaSyC5h171Bt3FrLlSYDur-RbvTXwgxXYgUv0')\
       .addView(docsView)\
       .enableFeature(google.picker.Feature.NAV_HIDDEN)\
       .setCallback(pickerCallback)\
