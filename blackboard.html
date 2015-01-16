@@ -34,10 +34,14 @@
           data-sortReverse="false">Oldest rounds first</button>
 </div>
     {{#unless canEdit}}<br/>
-<div class="btn-group bb-hide-solved">
-  <label class="checkbox">
+<div class="btn-group btn-group-vertical">
+  <label class="checkbox bb-hide-solved">
     <input type="checkbox" id="bb-hide-solved-input" checked="{{hideSolved}}">
     Hide solved puzzles
+  </label>
+  <label class="checkbox bb-compact-mode">
+    <input type="checkbox" id="bb-compact-mode" checked="{{compactMode}}">
+    Compact mode
   </label>
 </div>
     {{/unless}}
@@ -66,7 +70,7 @@
       {{name}}
     {{/if}}
       </h2>
-    {{>blackboard_tags}}
+    {{#unless compactMode}}{{>blackboard_tags}}{{/unless}}
   {{#if canEdit}}
   <div class="bb-roundgroup-buttons" data-bbedit="roundgroups/{{_id}}">
      <button class="btn btn-mini btn-inverse bb-add-round">
@@ -150,6 +154,7 @@
 
   {{#if hasPuzzles}}
   <table class="table table-bordered table-condensed bb-puzzle"><tbody>
+    {{#unless compactMode}}
     <tr>
       <th class="puzzle-name">Name</th>
       <th class="puzzle-answer">Solution</th>
@@ -159,6 +164,7 @@
       <th class="puzzle-update">Last update</th>
       {{/unless}}
     </tr>
+    {{/unless}}
     {{! META }}
     {{#if showMeta}}
     <tr>
@@ -173,7 +179,9 @@
         </button>
         </div>
         {{/if}}
+        {{#unless compactMode}}
         {{#with round}}{{>blackboard_puzzle_tags}}{{/with}}
+        {{/unless}}
       </div></td>
       <td class="puzzle-answer bb-editable"
           data-bbedit="tags/{{round._id}}/answer/value">
@@ -193,6 +201,7 @@
         <b>{{tag "answer"}}</b>
       {{/if}}
       </td>
+    {{#unless compactMode}}
       <td class="puzzle-status bb-editable"
         data-bbedit="tags/{{round._id}}/status/value">
       {{#if editing "tags" round._id "status" "value"}}
@@ -227,6 +236,7 @@
       {{else}}added {{pretty_ts timestamp=round.created style="brief duration"}}
       {{/if}}
     </td>
+    {{/unless}}
     {{/unless}}
     </tr>
     {{/if}}
@@ -298,7 +308,9 @@
         <button class="btn btn-link bb-move-up"><i class="icon-arrow-up"></i></button>
         </div>
       {{/if}}
+      {{#unless compactMode}}
       {{#with puzzle}}{{>blackboard_puzzle_tags}}{{/with}}
+      {{/unless}}
     </div></td>
     <td class="puzzle-answer bb-editable"
         data-bbedit="tags/{{puzzle._id}}/answer/value">
@@ -320,6 +332,7 @@
         {{/if}}
       {{/if}}
     </td>
+    {{#unless compactMode}}
     <td class="puzzle-status bb-editable"
         data-bbedit="tags/{{puzzle._id}}/status/value">
       {{#if editing "tags" puzzle._id "status" "value"}}
@@ -355,7 +368,8 @@
       {{/if}}
     </td>
     {{/unless}}
-  </tr>
+    {{/unless}}
+ </tr>
 </template>
 
 <template name="blackboard_tags">

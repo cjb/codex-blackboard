@@ -48,13 +48,16 @@ okCancelEvents = (selector, callbacks) ->
   events
 
 ######### general properties of the blackboard page ###########
-Session.setDefault 'sortReverse', $.cookie('sortReverse')
-Session.setDefault 'hideSolved', $.cookie('hideSolved')
-Session.setDefault 'hideStatus', $.cookie('hideStatus')
+['sortReverse','hideSolved','hideStatus','compactMode'].forEach (name) ->
+  Session.setDefault name, $.cookie(name)
+compactMode = ->
+  editing = (Session.get 'nick') and (Session.get 'canEdit')
+  (Session.get 'compactMode') and not editing
 Template.blackboard.helpers
   sortReverse: -> Session.get 'sortReverse'
   hideSolved: -> Session.get 'hideSolved'
   hideStatus: -> Session.get 'hideStatus'
+  compactMode: compactMode
 
 ############## groups, rounds, and puzzles ####################
 Template.blackboard.helpers
@@ -120,17 +123,19 @@ Template.blackboard.rendered = ->
   $('#bb-tables .bb-puzzle .puzzle-name > a').tooltip placement: 'left'
   # see the global 'updateScrollSpy' helper for details on how
   # we update scrollspy when the rounds list changes
+doBoolean = (name, newVal) ->
+  Session.set name, newVal
+  $.cookie name, (newVal or ''),  {expires: 365, path: '/'}
 Template.blackboard.events
   "click .bb-sort-order button": (event, template) ->
     reverse = $(event.currentTarget).attr('data-sortReverse') is 'true'
-    Session.set 'sortReverse', reverse or undefined
-    $.cookie 'sortReverse', reverse or undefined, {expires: 365, path: '/'}
+    doBoolean 'sortReverse', reverse
   "change .bb-hide-solved input": (event, template) ->
-    Session.set 'hideSolved', event.target.checked
-    $.cookie 'hideSolved', event.target.checked, {expires: 365, path: '/'}
+    doBoolean 'hideSolved', event.target.checked
+  "change .bb-compact-mode input": (event, template) ->
+    doBoolean 'compactMode', event.target.checked
   "click .bb-hide-status": (event, template) ->
-    Session.set 'hideStatus', !(Session.get 'hideStatus')
-    $.cookie 'hideStatus', (Session.get 'hideStatus') or '', {expires: 365, path: '/'}
+    doBoolean 'hideStatus', !(Session.get 'hideStatus')
   "click .bb-add-round-group": (event, template) ->
     alertify.prompt "Name of new round group:", (e,str) ->
       return unless e # bail if cancelled
@@ -267,6 +272,7 @@ Template.blackboard_round.helpers
     return model.Presence.find
       room_name: ("rounds/"+this.round?._id)
     , sort: ["nick"]
+  compactMode: compactMode
 
 Template.blackboard_puzzle.helpers
   tag: (name) ->
@@ -275,6 +281,7 @@ Template.blackboard_puzzle.helpers
     return model.Presence.find
       room_name: ("puzzles/"+this.puzzle?._id)
     , sort: ["nick"]
+  compactMode: compactMode
 
 tagHelper = (id) ->
   isRoundGroup = ('rounds' of this)

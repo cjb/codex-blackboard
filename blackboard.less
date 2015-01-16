@@ -294,15 +294,24 @@ body {
     }
   }
   .bb-top-buttons {
-    margin-top: 10px;
-    margin-bottom: -2px;
+    margin-top: 8px;
+    margin-bottom: -17px;
+    .btn-group-vertical {
+      margin-top: 2px;
+      & > .checkbox {
+        margin-bottom: 0;
+      }
+    }
+    /* ensure we can click on them */
+    position: relative;
+    z-index: 99;
   }
   .bb-roundgroup-buttons, .bb-round-buttons {
     margin-top: 5px;
   }
   .bb-rg-chat {
     font-size: 50%;
-    margin-top: 5px;
+    margin-top: 7px;
   }
   dl {
     margin: 0;
