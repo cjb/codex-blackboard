@@ -225,6 +225,7 @@
       <div class="{{#if lotsOfPeople whos_working.count}}bb-lots{{/if}}">
       <span class="bb-short">
       {{ whos_working.count }} people
+      ({{local_working}}<i class="icon-map-marker"></i>)
       </span>
       <span class="bb-long comma-list">
       {{#each whos_working}}{{> nick_presence }} {{/each}}
@@ -356,6 +357,7 @@
       <div class="{{#if lotsOfPeople whos_working.count}}bb-lots{{/if}}">
       <span class="bb-short">
       {{ whos_working.count }} people
+      ({{local_working}}<i class="icon-map-marker"></i>)
       </span>
       <span class="bb-long comma-list">
       {{#each whos_working}}{{> nick_presence }} {{/each}}

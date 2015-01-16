@@ -56,12 +56,15 @@ distanceTo = (nick) ->
   return null unless n? and n.located_at?
   return distance(n.located_at, p)
 
-Template.registerHelper 'nickNear', (args) ->
-  args = share.keyword_or_positional 'nick', args
-  return true if args.nick is Session.get('nick') # that's me!
-  dist = distanceTo(args.nick)
+isNickNear = share.isNickNear = (nick) ->
+  return true if nick is Session.get('nick') # that's me!
+  dist = distanceTo(nick)
   return false unless dist?
   return dist <= GEOLOCATION_NEAR_DISTANCE
+
+Template.registerHelper 'nickNear', (args) ->
+  args = share.keyword_or_positional 'nick', args
+  isNickNear args.nick
 
 CODEXBOT_LOCATIONS = [
   'inside your computer'

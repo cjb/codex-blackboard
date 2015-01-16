@@ -272,6 +272,11 @@ Template.blackboard_round.helpers
     return model.Presence.find
       room_name: ("rounds/"+this.round?._id)
     , sort: ["nick"]
+  local_working: ->
+    count = 0
+    model.Presence.find(room_name: ("rounds/"+this.round?._id)).forEach (p) ->
+      count++ if share.isNickNear(p.nick)
+    count
   compactMode: compactMode
 
 Template.blackboard_puzzle.helpers
@@ -281,6 +286,11 @@ Template.blackboard_puzzle.helpers
     return model.Presence.find
       room_name: ("puzzles/"+this.puzzle?._id)
     , sort: ["nick"]
+  local_working: ->
+    count = 0
+    model.Presence.find(room_name: ("rounds/"+this.round?._id)).forEach (p) ->
+      count++ if share.isNickNear(p.nick)
+    count
   compactMode: compactMode
 
 tagHelper = (id) ->
