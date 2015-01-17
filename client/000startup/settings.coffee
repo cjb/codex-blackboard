@@ -19,6 +19,9 @@ settings.HUNT_YEAR = server.huntYear ? 2014
 
 # -- Performance settings --
 
+# make fewer people subscribe to ringhunters chat.
+settings.BB_DISABLE_RINGHUNTERS_HEADER = server.disableRinghunters ? false
+
 # subscribe to all rounds/all puzzles, or try to be more granular?
 settings.BB_SUB_ALL = server.subAll ? true
 

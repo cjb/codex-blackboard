@@ -442,6 +442,7 @@ Template.header_lastchats.helpers
 
 # subscribe when this template is in use/unsubscribe when it is destroyed
 Template.header_lastchats.created = ->
+  return if settings.BB_DISABLE_RINGHUNTERS_HEADER
   this.autorun ->
     p = share.chat.pageForTimestamp 'general/0', 0, 'subscribe'
     return unless p? # wait until page info is loaded
