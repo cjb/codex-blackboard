@@ -265,6 +265,7 @@ computeMessageFollowup = (prev, curr) ->
 if Meteor.isServer
   Messages._ensureIndex {to:1, room_name:1, timestamp:-1}, {}
   Messages._ensureIndex {nick:1, room_name:1, timestamp:-1}, {}
+  Messages._ensureIndex {room_name:1, timestamp:-1}, {}
   # watch messages collection and set the followup field as appropriate
   do ->
     check = (room_name, timestamp, m) ->
