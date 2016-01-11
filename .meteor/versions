@@ -17,7 +17,7 @@ cscottnet:googleapis@0.4.7_1
 cscottnet:hubot@2.17.0
 cscottnet:mail-listener2@0.1.8
 cscottnet:random-name@1.0.1_1
-cscottnet:twitter@0.2.13
+cscottnet:twitter@1.2.5
 ddp@1.1.0
 deps@1.0.7
 ejson@1.0.6
