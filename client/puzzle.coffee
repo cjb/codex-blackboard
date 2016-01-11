@@ -14,7 +14,7 @@ Template.puzzle.helpers
     r.hunt_year = settings.HUNT_YEAR
     return r
 
-Template.puzzle.created = ->
+Template.puzzle.onCreated ->
   $('html').addClass('fullHeight')
   share.chat.startupChat()
   this.autorun =>
@@ -23,14 +23,27 @@ Template.puzzle.created = ->
     id = Session.get('id')
     name = model.collection(type)?.findOne(id)?.name or id
     $("title").text("Puzzle: "+name)
-Template.puzzle.rendered = ->
+  # presumably we also want to subscribe to the puzzle's chat room
+  # and presence information at some point.
+  this.autorun =>
+    return if settings.BB_SUB_ALL
+    return unless Session.equals("type", "puzzles")
+    puzzle_id = Session.get('id')
+    return unless puzzle_id
+    this.subscribe 'puzzle-by-id', puzzle_id
+    this.subscribe 'round-for-puzzle', puzzle_id
+    round = model.Rounds.findOne puzzles: puzzle_id
+    return unless round
+    this.subscribe 'roundgroup-for-round', round._id
+
+Template.puzzle.onRendered ->
   $('html').addClass('fullHeight')
   share.Splitter.vsize.set()
 # XXX we originally did this every time anything in the template was changed:
 #  share.Splitter.vsize.set() unless share.Splitter.vsize.manualResized
-# with the new `rendered` callback semantics this isn't possible.  Maybe we
+# with the new `onRendered` callback semantics this isn't possible.  Maybe we
 # don't really need it?
-Template.puzzle.destroyed = ->
+Template.puzzle.onDestroyed ->
   $('html').removeClass('fullHeight')
   share.chat.cleanupChat()
 
@@ -77,19 +90,6 @@ Template.puzzle_callin_modal.events
       nick: Session.get 'nick'
       room_name: "#{Session.get 'type'}/#{Session.get 'id'}"
     template.$('.modal').modal 'hide'
-
-# presumably we also want to subscribe to the puzzle's chat room
-# and presence information at some point.
-Tracker.autorun ->
-  return if settings.BB_SUB_ALL
-  return unless Session.equals("type", "puzzles")
-  puzzle_id = Session.get('id')
-  return unless puzzle_id
-  Meteor.subscribe 'puzzle-by-id', puzzle_id
-  Meteor.subscribe 'round-for-puzzle', puzzle_id
-  round = model.Rounds.findOne puzzles: puzzle_id
-  return unless round
-  Meteor.subscribe 'roundgroup-for-round', round._id
 
 # A simple callback implementation.
 pickerCallback = (data) ->

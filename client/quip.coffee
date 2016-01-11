@@ -69,7 +69,7 @@ processQuipEdit =
       who: Session.get 'nick'
       fields: text: text
 
-Tracker.autorun ->
+Template.quip.onCreated -> this.autorun =>
   return unless Session.equals("currentPage", "quip")
   $("title").text("Quips")
-  Meteor.subscribe 'quips'
+  this.subscribe 'quips'

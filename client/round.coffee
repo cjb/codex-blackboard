@@ -15,7 +15,7 @@ Template.round.helpers
     return r
   tag: (name) ->
     return (model.getTag this, name) or ''
-Template.round.created = ->
+Template.round.onCreated ->
   $('html').addClass('fullHeight')
   share.chat.startupChat()
   this.autorun =>
@@ -24,14 +24,28 @@ Template.round.created = ->
     id = Session.get('id')
     name = model.collection(type)?.findOne(id)?.name or id
     $("title").text("Round: "+name)
-Template.round.rendered = ->
+  # presumably we also want to subscribe to the round's chat room
+  # and presence information at some point.
+  this.autorun =>
+    return if settings.BB_SUB_ALL
+    return unless Session.equals("type", "rounds")
+    round_id = Session.get('id')
+    return unless round_id
+    this.subscribe 'round-by-id', round_id
+    this.subscribe 'roundgroup-for-round', round_id
+    r = model.Rounds.findOne round_id
+    return unless r
+    for p in r.puzzles
+      this.subscribe 'puzzle-by-id', p
+
+Template.round.onRendered ->
   $('html').addClass('fullHeight')
   share.Splitter.vsize.set()
 # XXX we originally did this every time anything in the template was changed:
 #  share.Splitter.vsize.set() unless share.Splitter.vsize.manualResized
-# with the new `rendered` callback semantics this isn't possible.  Maybe we
+# with the new `onRendered` callback semantics this isn't possible.  Maybe we
 # don't really need it?
-Template.round.destroyed = ->
+Template.round.onDestroyed ->
   $('html').removeClass('fullHeight')
   share.chat.cleanupChat()
 
@@ -42,20 +56,6 @@ Template.round.events
     return unless drive
     share.uploadToDriveFolder drive, (docs) -> console.log docs
   "mousedown .bb-splitter-handle": (e,t) -> share.Splitter.handleEvent(e, t)
-
-# presumably we also want to subscribe to the round's chat room
-# and presence information at some point.
-Tracker.autorun ->
-  return if settings.BB_SUB_ALL
-  return unless Session.equals("type", "rounds")
-  round_id = Session.get('id')
-  return unless round_id
-  Meteor.subscribe 'round-by-id', round_id
-  Meteor.subscribe 'roundgroup-for-round', round_id
-  r = model.Rounds.findOne round_id
-  return unless r
-  for p in r.puzzles
-    Meteor.subscribe 'puzzle-by-id', p
 
 ## Helper function for linking puzzles in rounds to the hunt-running site
 share.updateHuntLinks = (round_prefix, puzzle_prefix) ->

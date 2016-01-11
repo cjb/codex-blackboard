@@ -162,7 +162,7 @@ Template.header_loginmute.helpers
       else
         ''
 
-Template.header_loginmute.rendered = ->
+Template.header_loginmute.onRendered ->
   # tool tips
   $(this.findAll('.bb-buttonbar *[title]')).tooltip
     placement: 'bottom'
@@ -233,7 +233,7 @@ Template.header_breadcrumbs.events
         action: true
         room_name: Session.get('type')+'/'+Session.get('id')
 
-Template.header_breadcrumbs.rendered = ->
+Template.header_breadcrumbs.onRendered ->
   # tool tips
   $(this.findAll('a.bb-drive-link[title]')).tooltip placement: 'bottom'
 
@@ -267,7 +267,7 @@ Template.header_nickmodal.helpers
 
 Template.header_nickmodal_contents.helpers
   nick: -> Session.get "nick" or ''
-Template.header_nickmodal_contents.created = ->
+Template.header_nickmodal_contents.onCreated ->
   # we'd need to subscribe to 'all-nicks' here if we didn't have a permanent
   # subscription to it (in main.coffee)
   this.typeaheadSource = (query,process) =>
@@ -294,7 +294,7 @@ Template.header_nickmodal_contents.created = ->
       container.find('img').attr('src', gravatar.attr('src'))
     else
       container.append(gravatar)
-Template.header_nickmodal_contents.rendered = ->
+Template.header_nickmodal_contents.onRendered ->
   $('#nickPickModal').one 'hide', ->
     Session.set 'nickModalVisible', undefined
   $('#nickSuccess').val('false')
@@ -369,7 +369,7 @@ ensureNick = share.ensureNick = (cb=(->)) ->
 ############## confirmation dialog ########################
 Template.header_confirmmodal.helpers
   confirmModalVisible: -> !!(Session.get 'confirmModalVisible')
-Template.header_confirmmodal_contents.rendered = ->
+Template.header_confirmmodal_contents.onRendered ->
   $('#confirmModal').modal show: true
 Template.header_confirmmodal_contents.events
   "click .bb-confirm-ok": (event, template) ->
@@ -417,15 +417,15 @@ Template.header_lastupdates.helpers
     }
 
 # subscribe when this template is in use/unsubscribe when it is destroyed
-Template.header_lastupdates.created = ->
-  this.autorun ->
-    p = share.chat.pageForTimestamp 'oplog/0', 0, 'subscribe'
+Template.header_lastupdates.onCreated ->
+  this.autorun =>
+    p = share.chat.pageForTimestamp 'oplog/0', 0, {subscribe:this}
     return unless p? # wait until page info is loaded
-    Meteor.subscribe 'messages-in-range', p.room_name, p.from, p.to
+    this.subscribe 'messages-in-range', p.room_name, p.from, p.to
 # add tooltip to 'more' links
 do ->
   for t in ['header_lastupdates', 'header_lastchats']
-    Template[t].rendered = ->
+    Template[t].onRendered ->
       $(this.findAll('.right a[title]')).tooltip placement: 'left'
 
 ############## chat log in header ####################
@@ -441,13 +441,13 @@ Template.header_lastchats.helpers
     if this.bodyIsHtml then new Spacebars.SafeString(this.body) else this.body
 
 # subscribe when this template is in use/unsubscribe when it is destroyed
-Template.header_lastchats.created = ->
+Template.header_lastchats.onCreated ->
   return if settings.BB_DISABLE_RINGHUNTERS_HEADER
-  this.autorun ->
-    p = share.chat.pageForTimestamp 'general/0', 0, 'subscribe'
+  this.autorun =>
+    p = share.chat.pageForTimestamp 'general/0', 0, {subscribe:this}
     return unless p? # wait until page info is loaded
     # use autorun to ensure subscription changes if/when nick does
     nick = Session.get 'nick'
     if nick? and not settings.BB_DISABLE_PM
-      Meteor.subscribe 'messages-in-range-nick', nick, p.room_name, p.from, p.to
-    Meteor.subscribe 'messages-in-range', p.room_name, p.from, p.to
+      this.subscribe 'messages-in-range-nick', nick, p.room_name, p.from, p.to
+    this.subscribe 'messages-in-range', p.room_name, p.from, p.to

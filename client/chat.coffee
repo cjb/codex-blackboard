@@ -33,7 +33,8 @@ pageForTimestamp = (room_name, timestamp=0, subscribe=false) ->
     }
   else
     if subscribe and Tracker.active # make sure we unsubscribe if necessary!
-      Meteor.subscribe 'page-by-timestamp', room_name, timestamp
+      ctx = subscribe?.subscribe or Meteor
+      ctx.subscribe 'page-by-timestamp', room_name, timestamp
     model.Pages.findOne(room_name:room_name, to:timestamp)
 
 # helper method to filter messages to match a given page object
@@ -132,7 +133,7 @@ Template.messages.helpers
     touchSelfScroll() # ignore scroll events caused by DOM update
     maybeScrollMessagesView()
 
-Template.messages.created = ->
+Template.messages.onCreated ->
   instachat.scrolledToBottom = true
   this.autorun =>
     invalidator = =>
@@ -142,16 +143,16 @@ Template.messages.created = ->
     invalidator()
     room_name = Session.get 'room_name'
     return unless room_name
-    Meteor.subscribe 'presence-for-room', room_name
+    this.subscribe 'presence-for-room', room_name
     nick = (if settings.BB_DISABLE_PM then null else Session.get 'nick') or null
     # re-enable private messages, but just in ringhunters (for codexbot)
     if settings.BB_DISABLE_PM and room_name is "general/0"
       nick = Session.get 'nick'
     timestamp = (+Session.get('timestamp'))
-    p = pageForTimestamp room_name, timestamp, 'subscribe'
+    p = pageForTimestamp room_name, timestamp, {subscribe: this}
     return unless p? # wait until page information is loaded
     if p.next? # subscribe to the 'next' page
-      Meteor.subscribe 'page-by-id', p.next
+      this.subscribe 'page-by-id', p.next
     # load messages for this page
     ready = 0
     onReady = ->
@@ -159,11 +160,11 @@ Template.messages.created = ->
         instachat.ready = true
         Session.set 'chatReady', true
     if nick?
-      Meteor.subscribe 'messages-in-range-nick', nick, p.room_name, p.from, p.to,
+      this.subscribe 'messages-in-range-nick', nick, p.room_name, p.from, p.to,
         onReady: onReady
     else
       onReady()
-    Meteor.subscribe 'messages-in-range', p.room_name, p.from, p.to,
+    this.subscribe 'messages-in-range', p.room_name, p.from, p.to,
       onReady: onReady
     Tracker.onInvalidate invalidator
 
@@ -488,11 +489,11 @@ updateLastRead = ->
 
 hideMessageAlert = -> updateNotice 0, 0
 
-Template.chat.created = ->
+Template.chat.onCreated ->
   this.autorun =>
     $("title").text("Chat: "+prettyRoomName())
 
-Template.chat.rendered = ->
+Template.chat.onRendered ->
   $(window).resize()
   share.ensureNick ->
     type = Session.get('type')
@@ -526,7 +527,7 @@ cleanupChat = ->
       room_name: Session.get "room_name"
       present: false
 
-Template.chat.destroyed = ->
+Template.chat.onDestroyed ->
   hideMessageAlert()
   cleanupChat()
 # window.unload is a bit spotty with async stuff, but we might as well try

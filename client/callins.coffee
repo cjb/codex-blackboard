@@ -18,9 +18,15 @@ Meteor.startup ->
           newCallInSound?.play?()
     initial = false
 
-Template.callins.created = ->
+Template.callins.onCreated ->
   this.get_quip_id = (event) ->
     $(event.currentTarget).closest('*[data-bbquip]').attr('data-bbquip')
+  this.autorun =>
+    return unless Session.equals("currentPage", "callins")
+    this.subscribe 'callins'
+    this.subscribe 'quips'
+    return if settings.BB_SUB_ALL
+    this.subscribe 'all-roundsandpuzzles'
 
 Template.callins.helpers
   callins: ->
@@ -35,7 +41,7 @@ Template.callins.helpers
   quipAddUrl: ->
     share.Router.urlFor 'quips', 'new'
 
-Template.callins.rendered = ->
+Template.callins.onRendered ->
   $("title").text("Answer queue")
   share.ensureNick()
 
@@ -51,7 +57,7 @@ Template.callins.events
       id: template.get_quip_id(event)
       who: Session.get('nick')
 
-Template.callin_row.created = ->
+Template.callin_row.onCreated ->
   this.get_callin_id = (event) ->
     $(event.currentTarget).closest('*[data-bbedit]').attr('data-bbedit')
 
@@ -90,10 +96,3 @@ Template.callin_row.events
        object: template.get_callin_id(event)
        fields: submitted_to_hq: checked
        who: Session.get('nick')
-
-Tracker.autorun ->
-  return unless Session.equals("currentPage", "callins")
-  Meteor.subscribe 'callins'
-  Meteor.subscribe 'quips'
-  return if settings.BB_SUB_ALL
-  Meteor.subscribe 'all-roundsandpuzzles'

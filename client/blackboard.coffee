@@ -106,7 +106,7 @@ share.find_bbedit = (event) ->
   edit = $(event.currentTarget).closest('*[data-bbedit]').attr('data-bbedit')
   return edit.split('/')
 
-Template.blackboard.rendered = ->
+Template.blackboard.onRendered ->
   $("#bb-sidebar").localScroll({ duration: 400, lazy: true })
   $("body").scrollspy(target: "#bb-sidebar", offset: (NAVBAR_HEIGHT + 10))
   ss = $("body").data("scrollspy")
@@ -314,11 +314,11 @@ Template.blackboard_tags.helpers { tags: tagHelper }
 Template.blackboard_puzzle_tags.helpers { tags: tagHelper }
 
 # Subscribe to all group, round, and puzzle information
-Tracker.autorun ->
+Template.blackboard.onCreated -> this.autorun =>
   return unless Session.equals("currentPage", "blackboard")
-  Meteor.subscribe 'all-presence'
+  this.subscribe 'all-presence'
   return if settings.BB_SUB_ALL
-  Meteor.subscribe 'all-roundsandpuzzles'
+  this.subscribe 'all-roundsandpuzzles'
 
 # Update 'currentTime' every minute or so to allow pretty_ts to magically
 # update

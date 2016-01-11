@@ -22,19 +22,19 @@ Template.oplog.helpers
   timestamp: ->
     +Session.get('timestamp')
 
-Template.oplog.rendered = ->
+Template.oplog.onRendered ->
   $("title").text("Operation Log Archive")
   $("body").scrollTo 'max'
 
-Tracker.autorun ->
+Template.oplog.onCreated -> this.autorun =>
   return unless Session.equals("currentPage", "oplog")
   room_name = 'oplog/0'
   timestamp = +Session.get('timestamp')
-  p = chat.pageForTimestamp room_name, timestamp, 'subscribe'
+  p = chat.pageForTimestamp room_name, timestamp, {subscribe:this}
   return unless p? # wait until page info is loaded
-  Meteor.subscribe 'messages-in-range', room_name, p.from, p.to
+  this.subscribe 'messages-in-range', room_name, p.from, p.to
   # subscribe to the 'prev' and 'next' pages as well
   if p.next?
-    Meteor.subscribe 'page-by-id', p.next
+    this.subscribe 'page-by-id', p.next
   if p.prev?
-    Meteor.subscribe 'page-by-id', p.prev
+    this.subscribe 'page-by-id', p.prev
