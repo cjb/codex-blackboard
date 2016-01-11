@@ -148,7 +148,7 @@ Template.messages.onCreated ->
     nick = (if settings.BB_DISABLE_PM then null else Session.get 'nick') or null
     # re-enable private messages, but just in ringhunters (for codexbot)
     if settings.BB_DISABLE_PM and room_name is "general/0"
-      nick = Session.get 'nick'
+      nick = (Session.get 'nick') or null
     timestamp = (+Session.get('timestamp'))
     p = pageForTimestamp room_name, timestamp, {subscribe: this}
     return unless p? # wait until page information is loaded

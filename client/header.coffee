@@ -449,7 +449,7 @@ Template.header_lastchats.onCreated ->
     p = share.chat.pageForTimestamp 'general/0', 0, {subscribe:this}
     return unless p? # wait until page info is loaded
     # use autorun to ensure subscription changes if/when nick does
-    nick = Session.get 'nick'
+    nick = (Session.get 'nick') or null
     if nick? and not settings.BB_DISABLE_PM
       this.subscribe 'messages-in-range-nick', nick, p.room_name, p.from, p.to
     this.subscribe 'messages-in-range', p.room_name, p.from, p.to

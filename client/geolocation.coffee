@@ -42,14 +42,14 @@ updateLocation = do ->
 Tracker.autorun ->
   return if settings.DISABLE_GEOLOCATION
   Geolocation.setPaused !share.isVisible()
-  nick = Session.get 'nick'
+  nick = (Session.get 'nick') or null
   return unless nick?
   pos = Geolocation.latLng(enableHighAccuracy:false)
   Session.set "position", pos # always use most current location client-side
   updateLocation nick, pos
 
 distanceTo = (nick) ->
-  return null unless nick?
+  return null unless nick
   p = Session.get('position')
   return null unless p?
   n = model.Nicks.findOne canon: model.canonical(nick)
