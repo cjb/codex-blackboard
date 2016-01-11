@@ -243,11 +243,6 @@ isVisible = share.isVisible = do ->
   onVisibilityChange()
   -> _visible.get()
 
-Tracker.autorun ->
-  return unless Session.equals('currentPage', 'chat')
-  instachat.keepalive?()
-  updateLastRead() if isVisible() and instachat.ready
-
 prettyRoomName = ->
   type = Session.get('type')
   id = Session.get('id')
@@ -492,6 +487,9 @@ hideMessageAlert = -> updateNotice 0, 0
 Template.chat.onCreated ->
   this.autorun =>
     $("title").text("Chat: "+prettyRoomName())
+  this.autorun =>
+    instachat.keepalive?()
+    updateLastRead() if isVisible() and instachat.ready
 
 Template.chat.onRendered ->
   $(window).resize()

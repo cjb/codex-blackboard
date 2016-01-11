@@ -315,7 +315,6 @@ Template.blackboard_puzzle_tags.helpers { tags: tagHelper }
 
 # Subscribe to all group, round, and puzzle information
 Template.blackboard.onCreated -> this.autorun =>
-  return unless Session.equals("currentPage", "blackboard")
   this.subscribe 'all-presence'
   return if settings.BB_SUB_ALL
   this.subscribe 'all-roundsandpuzzles'

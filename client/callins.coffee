@@ -21,12 +21,10 @@ Meteor.startup ->
 Template.callins.onCreated ->
   this.get_quip_id = (event) ->
     $(event.currentTarget).closest('*[data-bbquip]').attr('data-bbquip')
-  this.autorun =>
-    return unless Session.equals("currentPage", "callins")
-    this.subscribe 'callins'
-    this.subscribe 'quips'
-    return if settings.BB_SUB_ALL
-    this.subscribe 'all-roundsandpuzzles'
+  this.subscribe 'callins'
+  this.subscribe 'quips'
+  return if settings.BB_SUB_ALL
+  this.subscribe 'all-roundsandpuzzles'
 
 Template.callins.helpers
   callins: ->

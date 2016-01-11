@@ -70,6 +70,5 @@ processQuipEdit =
       fields: text: text
 
 Template.quip.onCreated -> this.autorun =>
-  return unless Session.equals("currentPage", "quip")
   $("title").text("Quips")
   this.subscribe 'quips'

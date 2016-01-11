@@ -27,7 +27,6 @@ Template.oplog.onRendered ->
   $("body").scrollTo 'max'
 
 Template.oplog.onCreated -> this.autorun =>
-  return unless Session.equals("currentPage", "oplog")
   room_name = 'oplog/0'
   timestamp = +Session.get('timestamp')
   p = chat.pageForTimestamp room_name, timestamp, {subscribe:this}
