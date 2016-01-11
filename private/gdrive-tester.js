@@ -24,8 +24,9 @@
 var _private = {};
 _private.TOP = __dirname + "/.."
 _private.NODE_MODULES_PATH = [
+    _private.TOP + "/private/node_modules",
     _private.TOP + "/.meteor/local/build/programs/server/node_modules",
-    _private.TOP + "/packages/googleapis/.build/npm/node_modules"
+    _private.TOP + "/packages/cscottnet:googleapis/.build.cscottnet:googleapis/npm/node_modules"
 ];
 _private.fs = require('fs');
 
@@ -83,7 +84,7 @@ var Assets = {
 _private.Fiber(function() {
 // Load the Google module.
 var Gapi;
-_private.filename = _private.TOP + "/packages/googleapis/googleapis.js";
+_private.filename = _private.TOP + "/packages/cscottnet:googleapis/googleapis.js";
 _private.f = _private.fs.readFileSync(_private.filename, "utf8");
 _private.f = '(function() {' + _private.f + '})();';
 eval(_private.f);

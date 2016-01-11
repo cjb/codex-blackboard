@@ -41,7 +41,7 @@ wrapCheck = (f, type) ->
 
 ensureFolder = (name, parent) ->
   # check to see if the folder already exists
-  resp = Gapi.exec drive.children.list
+  resp = Gapi.exec drive.children, 'list',
     folderId: parent or 'root'
     q: "title=#{quote name}"
     maxResults: 1
@@ -53,7 +53,8 @@ ensureFolder = (name, parent) ->
       title: name
       mimeType: GDRIVE_FOLDER_MIME_TYPE
     resource.parents = [id: parent] if parent
-    resource = Gapi.exec drive.files.insert resource
+    resource = Gapi.exec drive.files, 'insert',
+      resource: resource
   # give the new folder the right permissions
   ensurePermissions(resource.id)
   resource
@@ -85,18 +86,20 @@ ensurePermissions = (id) ->
     role: 'writer'
     type: 'anyone'
   ]
-  resp = Gapi.exec drive.permissions.list(fileId: id)
+  resp = Gapi.exec drive.permissions, 'list', (fileId: id)
   perms.forEach (p) ->
     # does this permission already exist?
     exists = resp.items.some (pp) -> samePerm(p, pp)
     unless exists
-      Gapi.exec drive.permissions.insert({fileId:id}, p)
+      Gapi.exec drive.permissions, 'insert',
+        fileId: id
+        resource: p
   'ok'
 
 createPuzzle = (name) ->
   folder = ensureFolder name, rootFolder
   # is the spreadsheet already there?
-  spreadsheet = (Gapi.exec drive.children.list
+  spreadsheet = (Gapi.exec drive.children, 'list',
     folderId: folder.id
     q: "title=#{quote WORKSHEET_NAME name} and mimeType=#{quote GDRIVE_SPREADSHEET_MIME_TYPE}"
     maxResults: 1
@@ -107,10 +110,13 @@ createPuzzle = (name) ->
       title: WORKSHEET_NAME name
       mimeType: XLSX_MIME_TYPE
       parents: [id: folder.id]
-    spreadsheet = Gapi.exec(drive.files.insert(
+    spreadsheet = Gapi.exec drive.files, 'insert',
       convert: true
       body: spreadsheet # this is only necessary due to bug in gapi, afaict
-    , spreadsheet).withMedia(XLSX_MIME_TYPE, SPREADSHEET_TEMPLATE))
+      resource: spreadsheet
+      media:
+        mimeType: XLSX_MIME_TYPE
+        body: SPREADSHEET_TEMPLATE
   ensurePermissions(spreadsheet.id)
   return {
     id: folder.id
@@ -118,14 +124,14 @@ createPuzzle = (name) ->
   }
 
 findPuzzle = (name) ->
-  resp = Gapi.exec drive.children.list
+  resp = Gapi.exec drive.children, 'list',
     folderId: rootFolder
     q: "title=#{quote name} and mimeType=#{quote GDRIVE_FOLDER_MIME_TYPE}"
     maxResults: 1
   folder = resp.items[0]
   return null unless folder?
   # look for spreadsheet
-  resp = Gapi.exec drive.children.list
+  resp = Gapi.exec drive.children, 'list',
     folderId: folder.id
     q: "title=#{quote WORKSHEET_NAME name}"
     maxResults: 1
@@ -138,7 +144,7 @@ listPuzzles = ->
   results = []
   resp = {}
   loop
-    resp = Gapi.exec drive.children.list
+    resp = Gapi.exec drive.children, 'list',
       folderId: rootFolder
       q: "mimeType=#{quote GDRIVE_FOLDER_MIME_TYPE}"
       maxResults: MAX_RESULTS
@@ -148,11 +154,15 @@ listPuzzles = ->
   results
 
 renamePuzzle = (name, id, spreadId) ->
-  Gapi.exec drive.files.patch({fileId: id}, {title: name})
+  Gapi.exec drive.files, 'patch',
+    fileId: id
+    resource:
+      title: name
   if spreadId?
-    Gapi.exec drive.files.patch(
-        {fileId: spreadId}, {title: WORKSHEET_NAME name}
-    )
+    Gapi.exec drive.files, 'patch',
+      fileId: spreadId
+      resource:
+        title: (WORKSHEET_NAME name)
   'ok'
 
 rmrfFolder = (id) ->
@@ -160,7 +170,7 @@ rmrfFolder = (id) ->
     resp = {}
     loop
       # delete subfolders
-      resp = Gapi.exec drive.children.list
+      resp = Gapi.exec drive.children, 'list',
         folderId: id
         q: "mimeType=#{quote GDRIVE_FOLDER_MIME_TYPE}"
         maxResults: MAX_RESULTS
@@ -170,22 +180,22 @@ rmrfFolder = (id) ->
       break unless resp.nextPageToken?
     loop
       # delete non-folder stuff
-      resp = Gapi.exec drive.children.list
+      resp = Gapi.exec drive.children, 'list',
         folderId: id
         q: "mimeType!=#{quote GDRIVE_FOLDER_MIME_TYPE}"
         maxResults: MAX_RESULTS
         pageToken: resp.nextPageToken
       resp.items.forEach (item) ->
-        Gapi.exec drive.files.delete(fileId: item.id)
+        Gapi.exec drive.files, 'delete', (fileId: item.id)
       break unless resp.nextPageToken?
     # are we done? look for remaining items owned by us
-    resp = Gapi.exec drive.children.list
+    resp = Gapi.exec drive.children, 'list',
       folderId: id
       q: "#{quote EMAIL} in owners"
       maxResults: 1
     break if resp.items.length is 0
   # folder empty; delete the folder and we're done
-  Gapi.exec drive.files.delete(fileId: id)
+  Gapi.exec drive.files, 'delete', (fileId: id)
   'ok'
 
 deletePuzzle = (id) -> rmrfFolder(id)
@@ -200,9 +210,8 @@ do ->
       throw "INVALID GOOGLE DRIVE KEY OR PASSWORD"
     jwt = new Gapi.apis.auth.JWT(EMAIL, null, KEY, SCOPES)
     jwt.credentials = Gapi.authorize(jwt);
-    client = Gapi.exec Gapi.apis.discover('drive', 'v2')
     # record the API and auth info
-    drive = client.drive
+    drive = Gapi.apis.drive('v2')
     Gapi.registerAuth jwt
     # Look up the root folder
     resource = ensureFolder ROOT_FOLDER_NAME

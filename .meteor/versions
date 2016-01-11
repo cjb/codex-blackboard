@@ -13,7 +13,7 @@ coffeescript@1.0.6
 cscottnet:alertify-bootstrap@0.3.11
 cscottnet:es5-shim@4.4.1
 cscottnet:geolocation@1.0.4
-cscottnet:googleapis@0.4.7_1
+cscottnet:googleapis@2.1.7_1
 cscottnet:hubot@2.17.0
 cscottnet:mail-listener2@0.1.8
 cscottnet:random-name@1.0.1_1
