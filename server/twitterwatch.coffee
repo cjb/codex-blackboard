@@ -41,7 +41,8 @@ linkify = do ->
       when username? then "#{sp}<a href='https://twitter.com/#{encodeURIComponent username.slice(1)}' target='_blank'>#{username}</a>"
       else text # shouldn't really ever reach here
 
-hashtag = '#mysteryhunt'
+# See https://dev.twitter.com/streaming/overview/request-parameters#track
+hashtag = 'mysteryhunt,mitmysteryhunt'
 twit.stream 'statuses/filter', {track: hashtag}, (stream) ->
   console.log "Listening to #{hashtag} on twitter"
   stream.on 'data', (data) ->
