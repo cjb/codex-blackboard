@@ -175,10 +175,11 @@ Template.header_loginmute.events
   "click .bb-logout": (event, template) ->
     event.preventDefault()
     share.chat.cleanupChat() if Session.equals('currentPage', 'chat')
-    Session.set 'nick', undefined
     $.removeCookie 'nick', {path:'/'}
-    Session.set 'canEdit', undefined
-    Session.set 'editing', undefined
+    Session.set
+      nick: undefined
+      canEdit: undefined
+      editing: undefined
     if Session.equals('currentPage', 'chat')
       ensureNick -> # login again immediately
         share.chat.joinRoom Session.get('type'), Session.get('id')
@@ -186,8 +187,9 @@ Template.header_loginmute.events
     target = event.currentTarget
     ensureNick ->
       canEdit = $(target).attr('data-canEdit') is 'true'
-      Session.set 'canEdit', canEdit or undefined
-      Session.set 'editing', undefined # abort current edit, whatever it is
+      Session.set
+        canEdit: (canEdit or undefined)
+        editing: undefined # abort current edit, whatever it is
 
 ############## breadcrumbs #######################
 Template.header_breadcrumbs.helpers

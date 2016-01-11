@@ -114,10 +114,11 @@ BlackboardRouter = Backbone.Router.extend
     cb(r) if r? # immediately navigate if method is synchronous
 
   Page: (page, type, id) ->
-    Session.set "currentPage", page
-    Session.set "type", type
-    Session.set "id", id
-    Session.set "room_name", (type+'/'+id)
+    Session.set
+      currentPage: page
+      type: type
+      id: id
+      room_name: (type+'/'+id)
     # cancel modals if they were active
     $('#nickPickModal').modal 'hide'
     $('#confirmModal').modal 'hide'

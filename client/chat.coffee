@@ -4,14 +4,15 @@ settings = share.settings # import
 
 GENERAL_ROOM = 'Ringhunters'
 
-Session.setDefault 'room_name', "general/0"
-Session.setDefault 'nick'     , ($.cookie("nick") || "")
-Session.setDefault 'mute'     , !!$.cookie("mute")
-Session.setDefault 'nobot'    , !!$.cookie("nobot")
-Session.setDefault 'type'     , 'general'
-Session.setDefault 'id'       , '0'
-Session.setDefault 'timestamp', 0
-Session.setDefault 'chatReady', false
+Session.setDefault
+  room_name: 'general/0'
+  nick:      ($.cookie("nick") || "")
+  mute:      !!$.cookie("mute")
+  nobot:     !!$.cookie("nobot")
+  type:      'general'
+  id:        '0'
+  timestamp: 0
+  chatReady: false
 
 # Chat/pagination helpers!
 
