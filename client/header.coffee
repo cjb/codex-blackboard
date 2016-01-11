@@ -240,7 +240,11 @@ Template.header_breadcrumbs.onRendered ->
   $(this.findAll('a.bb-drive-link[title]')).tooltip placement: 'bottom'
 
 uploadToDriveFolder = share.uploadToDriveFolder = (folder, callback) ->
-  return unless google?
+  google = window?.google
+  gapi = window?.gapi
+  unless google? and gapi?
+    console.warn 'Google APIs not loaded; Google Drive disabled.'
+    return
   uploadView = new google.picker.DocsUploadView()\
     .setParent(folder)
   pickerCallback = (data) ->
@@ -253,14 +257,25 @@ uploadToDriveFolder = share.uploadToDriveFolder = (folder, callback) ->
         callback data[google.picker.Response.DOCUMENTS]
       else
         console.log 'Unexpected action:', data
-  new google.picker.PickerBuilder()\
-    .setAppId('365816747654.apps.googleusercontent.com')\
-    .setTitle('Upload Item')\
-    .addView(uploadView)\
-    .enableFeature(google.picker.Feature.NAV_HIDDEN)\
-    .enableFeature(google.picker.Feature.MULTISELECT_ENABLED)\
-    .setCallback(pickerCallback)\
-    .build().setVisible true
+  gapi.auth.authorize
+    client_id: '571639156428-60p46e0himfh5flqducjd4komitga1d4.apps.googleusercontent.com'
+    scope: ['https://www.googleapis.com/auth/drive']
+    immediate: false
+  , (authResult) ->
+    oauthToken = authResult?.access_token
+    if authResult?.error or !oauthToken
+      console.log 'Authentication failed', authResult
+      return
+    new google.picker.PickerBuilder()\
+      .setAppId('365816747654.apps.googleusercontent.com')\
+      .setDeveloperKey('AIzaSyC5h171Bt3FrLlSYDur-RbvTXwgxXYgUv0')\
+      .setOAuthToken(oauthToken)\
+      .setTitle('Upload Item')\
+      .addView(uploadView)\
+      .enableFeature(google.picker.Feature.NAV_HIDDEN)\
+      .enableFeature(google.picker.Feature.MULTISELECT_ENABLED)\
+      .setCallback(pickerCallback)\
+      .build().setVisible true
 
 
 ############## nick selection ####################

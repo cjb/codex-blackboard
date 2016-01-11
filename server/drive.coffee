@@ -11,6 +11,7 @@ SCOPES = ['https://www.googleapis.com/auth/drive']
 # Drive folder settings
 ROOT_FOLDER_NAME = Meteor.settings.folder or "MIT Mystery Hunt 2014"
 CODEX_ACCOUNT = 'zouchenuttall@gmail.com'
+# FYI: password for CODEX_ACCOUNT is Meteor.settings.password
 WORKSHEET_NAME = (name) -> "Worksheet: #{name}"
 
 # Constants
