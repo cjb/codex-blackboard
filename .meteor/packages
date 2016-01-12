@@ -11,7 +11,6 @@ bootstrap
 http
 random
 check
-meteor-platform
 facts
 cscottnet:googleapis
 cscottnet:twitter
@@ -23,3 +22,15 @@ codex-blackboard-hubot-scripts
 cscottnet:random-name
 cscottnet:geolocation
 reactive-var
+standard-minifiers
+meteor-base
+mobile-experience
+mongo
+blaze-html-templates
+session
+jquery
+tracker
+logging
+reload
+ejson
+spacebars
