@@ -15,6 +15,31 @@ NOT_A_TIMESTAMP = -9999
 # migrate old documents with different 'answer' representation
 MIGRATE_ANSWERS = false
 
+# helper function: like _.throttle, but always ensures `wait` of idle time
+# between invocations.  This ensures that we stay chill even if a single
+# execution of the function starts to exceed `wait`.
+throttle = (func, wait = 0) ->
+  [context, args, running, pending] = [null, null, false, false]
+  later = ->
+    if pending
+      run()
+    else
+      running = false
+  run = ->
+    [running, pending] = [true, false]
+    try
+      func.apply(context, args)
+    # Note that the timeout doesn't start until the function has completed.
+    Meteor.setTimeout(later, wait)
+  (a...) ->
+    return if pending
+    [context, args] = [this, a]
+    if running
+      pending = true
+    else
+      running = true
+      Meteor.setTimeout(run, 0)
+
 BBCollection = Object.create(null) # create new object w/o any inherited cruft
 
 # Names is a synthetic collection created by the server which indexes
@@ -62,20 +87,12 @@ if Meteor.isServer
       if rg.round_start isnt round_start
         RoundGroups.update rg._id, $set: round_start: round_start
       round_start += rg.rounds.length
-  queueUpdateRoundStart = do ->
-    pending = false
-    return ->
-      if not pending
-        pending = true
-        # this should be `Tracker.afterFlush`, but see
-        # https://github.com/meteor/meteor/issues/3293
-        # workaround with Meteor.setTimeout -- we want to ensure that
-        # we give all the observeChanges time to fire before we do
-        # the update
-        Meteor.setTimeout ->
-          pending = false
-          updateRoundStart()
-        , 0
+  # Note that throttle uses Meteor.setTimeout here even if a call isn't
+  # yet pending -- we want to ensure that we give all the observeChanges
+  # time to fire before we do the update.
+  # In theory we could use `Tracker.afterFlush`, but see
+  # https://github.com/meteor/meteor/issues/3293
+  queueUpdateRoundStart = throttle(updateRoundStart, 100)
   # observe changes to the rounds field and update round_start
   queueUpdateRoundStart()
   RoundGroups.find({}).observeChanges
@@ -211,7 +228,7 @@ if Meteor.isServer
     # limit to 10 location updates/minute
     LOCATION_BATCH_SIZE = 10
     LOCATION_THROTTLE = 60*1000
-    runBatch = Meteor.bindEnvironment ->
+    runBatch = ->
       Nicks.find({
         priv_located_order: { $exists: true, $ne: null }
       }, {
@@ -224,7 +241,7 @@ if Meteor.isServer
             located: n.priv_located
             located_at: n.priv_located_at
           $unset: priv_located_order: ''
-    maybeRunBatch = _.throttle(runBatch, LOCATION_THROTTLE)
+    maybeRunBatch = throttle(runBatch, LOCATION_THROTTLE)
     Nicks.find({
       priv_located_order: { $exists: true, $ne: null }
     }, {
