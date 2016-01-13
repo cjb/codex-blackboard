@@ -108,30 +108,32 @@ Meteor.publish 'page-by-id', (id) -> model.Pages.find _id: id
 Meteor.publish 'page-by-timestamp', (room_name, timestamp) ->
   model.Pages.find room_name: room_name, to: timestamp
 
-# paged messages.  client is responsible for giving a reasonable
-# range, which is a bit of an issue.  Once limit is supported in oplog
-# we could probably add a limit here to be a little safer.
-Meteor.publish 'messages-in-range', (room_name, from, to=0) ->
-  # XXX this observe polls on 0.7.0.1
-  # (but not on the meteor oplog-with-operators branch)
-  cond = $gte: +from, $lt: +to
-  delete cond.$lt if cond.$lt is 0
-  model.Messages.find
-    room_name: room_name
-    timestamp: cond
-    to: null # no pms
+for messages in [ 'messages', 'oldmessages' ]
+  do (messages) ->
+    # paged messages.  client is responsible for giving a reasonable
+    # range, which is a bit of an issue.  Once limit is supported in oplog
+    # we could probably add a limit here to be a little safer.
+    Meteor.publish "#{messages}-in-range", (room_name, from, to=0) ->
+      # XXX this observe polls on 0.7.0.1
+      # (but not on the meteor oplog-with-operators branch)
+      cond = $gte: +from, $lt: +to
+      delete cond.$lt if cond.$lt is 0
+      model.collection(messages).find
+        room_name: room_name
+        timestamp: cond
+        to: null # no pms
 
-# same thing, but nick-specific.  This allows us to share the big query;
-# paged-messages-nick should be small/light-weight.
-Meteor.publish 'messages-in-range-nick', (nick, room_name, from, to=0) ->
-  nick = model.canonical(nick or '') or null
-  cond = $gte: +from, $lt: +to
-  delete cond.$lt if cond.$lt is 0
-  cond = model.NOT_A_TIMESTAMP unless nick? # force 0 results
-  model.Messages.find
-    room_name: room_name
-    timestamp: cond
-    $or: [ { nick: nick }, { to: nick } ]
+    # same thing, but nick-specific.  This allows us to share the big query;
+    # paged-messages-nick should be small/light-weight.
+    Meteor.publish "#{messages}-in-range-nick", (nick, room_name, from, to=0) ->
+      nick = model.canonical(nick or '') or null
+      cond = $gte: +from, $lt: +to
+      delete cond.$lt if cond.$lt is 0
+      cond = model.NOT_A_TIMESTAMP unless nick? # force 0 results
+      model.collection(messages).find
+        room_name: room_name
+        timestamp: cond
+        $or: [ { nick: nick }, { to: nick } ]
 
 Meteor.publish 'callins', ->
   model.CallIns.find {},

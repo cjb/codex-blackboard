@@ -42,9 +42,10 @@ pageForTimestamp = (room_name, timestamp=0, subscribe=false) ->
 messagesForPage = (p, opts={}) ->
   unless p? # return empty cursor unless p is non-null
     return model.Messages.find(timestamp:model.NOT_A_TIMESTAMP)
+  messages = if p.archived then "oldmessages" else "messages"
   cond = $gte: +p.from, $lt: +p.to
   delete cond.$lt if cond.$lt is 0
-  model.Messages.find
+  model.collection(messages).find
     room_name: p.room_name
     timestamp: cond
   , opts
@@ -152,6 +153,7 @@ Template.messages.onCreated ->
     timestamp = (+Session.get('timestamp'))
     p = pageForTimestamp room_name, timestamp, {subscribe: this}
     return unless p? # wait until page information is loaded
+    messages = if p.archived then "oldmessages" else "messages"
     if p.next? # subscribe to the 'next' page
       this.subscribe 'page-by-id', p.next
     # load messages for this page
@@ -161,11 +163,11 @@ Template.messages.onCreated ->
         instachat.ready = true
         Session.set 'chatReady', true
     if nick?
-      this.subscribe 'messages-in-range-nick', nick, p.room_name, p.from, p.to,
+      this.subscribe "#{messages}-in-range-nick", nick, p.room_name, p.from, p.to,
         onReady: onReady
     else
       onReady()
-    this.subscribe 'messages-in-range', p.room_name, p.from, p.to,
+    this.subscribe "#{messages}-in-range", p.room_name, p.from, p.to,
       onReady: onReady
     Tracker.onInvalidate invalidator
 

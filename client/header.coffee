@@ -439,7 +439,8 @@ Template.header_lastupdates.onCreated ->
   this.autorun =>
     p = share.chat.pageForTimestamp 'oplog/0', 0, {subscribe:this}
     return unless p? # wait until page info is loaded
-    this.subscribe 'messages-in-range', p.room_name, p.from, p.to
+    messages = if p.archived then "oldmessages" else "messages"
+    this.subscribe "#{messages}-in-range", p.room_name, p.from, p.to
 # add tooltip to 'more' links
 do ->
   for t in ['header_lastupdates', 'header_lastchats']
@@ -464,8 +465,9 @@ Template.header_lastchats.onCreated ->
   this.autorun =>
     p = share.chat.pageForTimestamp 'general/0', 0, {subscribe:this}
     return unless p? # wait until page info is loaded
+    messages = if p.archived then "oldmessages" else "messages"
     # use autorun to ensure subscription changes if/when nick does
     nick = (Session.get 'nick') or null
     if nick? and not settings.BB_DISABLE_PM
-      this.subscribe 'messages-in-range-nick', nick, p.room_name, p.from, p.to
-    this.subscribe 'messages-in-range', p.room_name, p.from, p.to
+      this.subscribe "#{messages}-in-range-nick", nick, p.room_name, p.from, p.to
+    this.subscribe "#{messages}-in-range", p.room_name, p.from, p.to

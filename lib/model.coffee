@@ -256,6 +256,7 @@ if Meteor.isServer
 # `type` and `id`, which give a mongodb reference to the object
 # modified so we can hyperlink to it.
 Messages = BBCollection.messages = new Mongo.Collection "messages"
+OldMessages = BBCollection.oldmessages = new Mongo.Collection "oldmessages"
 computeMessageFollowup = (prev, curr) ->
   (prev.system == curr.system and
    prev.action == curr.action and
@@ -263,10 +264,13 @@ computeMessageFollowup = (prev, curr) ->
    prev.nick == curr.nick and
    prev.to == curr.to)
 if Meteor.isServer
-  Messages._ensureIndex {to:1, room_name:1, timestamp:-1}, {}
-  Messages._ensureIndex {nick:1, room_name:1, timestamp:-1}, {}
-  Messages._ensureIndex {room_name:1, timestamp:-1}, {}
+  for M in [ Messages, OldMessages ]
+    M._ensureIndex {to:1, room_name:1, timestamp:-1}, {}
+    M._ensureIndex {nick:1, room_name:1, timestamp:-1}, {}
+    M._ensureIndex {room_name:1, timestamp:-1}, {}
   # watch messages collection and set the followup field as appropriate
+  # (followup field should already be set properly when the field is
+  #  archived into the OldMessages collection)
   do ->
     check = (room_name, timestamp, m) ->
       prev = Messages.find(
@@ -300,6 +304,7 @@ if Meteor.isServer
 #   room_name: corresponds to room_name in Messages collection.
 #   prev: id of previous page for this room_name, or null
 #   next: id of next page for this room_name, or null
+#   archived: boolean (true iff this page is in oldmessages)
 # Messages with from <= timestamp < to are included in a specific page.
 Pages = BBCollection.pages = new Mongo.Collection "pages"
 if Meteor.isServer
@@ -341,6 +346,7 @@ if Meteor.isServer
           to: 1 + m[m.length-1].timestamp
           prev: p._id
           next: null
+          archived: false
         if p._id?
           Pages.update p._id, $set: next: pid
         unpaged[room_name] = 0
@@ -425,6 +431,7 @@ pretty_collection = (type) ->
   switch type
     when "oplogs" then "operation log"
     when "roundgroups" then "round group"
+    when "oldmessages" then "old message"
     else type.replace(/s$/, '')
 
 getTag = (object, name) ->
@@ -1342,6 +1349,7 @@ share.model =
   Puzzles: Puzzles
   Nicks: Nicks
   Messages: Messages
+  OldMessages: OldMessages
   Pages: Pages
   LastRead: LastRead
   Presence: Presence
