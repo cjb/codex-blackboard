@@ -31,11 +31,11 @@ Template.registerHelper 'editing', (args..., options) ->
 
 Template.registerHelper 'wikiRP', (options) ->
   [r,p] = [options.hash?.r, options.hash?.p]
-  "#{settings.WIKI_HOST}/index.php?title=#{settings.HUNT_YEAR}_R#{r}P#{p}"
+  "#{settings.WIKI_HOST}/wiki/#{settings.HUNT_YEAR}_R#{r}P#{p}"
 Template.registerHelper 'wiki', (options) ->
   title = options.hash?.title
   return settings.WIKI_HOST unless title
-  "#{settings.WIKI_HOST}/index.php?title=#{title}"
+  "#{settings.WIKI_HOST}/wiki/#{title}"
 
 Template.registerHelper 'linkify', (contents) ->
   contents = chat.convertURLsToLinksAndImages(UI._escape(contents))

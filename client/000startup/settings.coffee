@@ -12,7 +12,7 @@ settings.CLIENT_UUID = Random.id()
 settings.DEFAULT_HOST = server.defaultHost ? 'codexian.us'
 
 # used for wiki links
-settings.WIKI_HOST = server.wikiHost ? 'http://wiki.codexian.us'
+settings.WIKI_HOST = server.wikiHost ? 'https://wiki.codexian.us'
 
 # hunt year, used to make wiki links
 settings.HUNT_YEAR = server.huntYear ? 2014
