@@ -13,7 +13,7 @@ MESSAGE_PAGE = 100
 NOT_A_TIMESTAMP = -9999
 
 # migrate old documents with different 'answer' representation
-MIGRATE_ANSWERS = true
+MIGRATE_ANSWERS = false
 
 BBCollection = Object.create(null) # create new object w/o any inherited cruft
 
