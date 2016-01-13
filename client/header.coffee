@@ -306,6 +306,7 @@ Template.header_nickmodal_contents.onCreated ->
     gravatar = $.gravatar email,
       image: 'wavatar' # 'monsterid'
       classes: 'img-polaroid'
+      secure: true
     container = $(this.find('.gravatar'))
     if container.find('img').length
       container.find('img').attr('src', gravatar.attr('src'))
