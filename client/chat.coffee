@@ -69,7 +69,8 @@ Meteor.startup ->
 Template.messages.helpers
   room_name: -> Session.get('room_name')
   timestamp: -> +Session.get('timestamp')
-  ready: -> Session.equals('chatReady', true)
+  ready: -> Session.equals('chatReady', true) and \
+            Template.instance().subscriptionsReady()
   isLastRead: (ts) -> Session.equals('lastread', +ts)
   prevTimestamp: ->
     p = pageForTimestamp Session.get('room_name'), +Session.get('timestamp')
