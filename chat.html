@@ -1,9 +1,12 @@
 <template name="chat">
 
-
   {{> messages}}
 
   <div class="navbar navbar-inverse navbar-fixed-bottom bb-chat-footer">
+    <div class="pull-right navbar-controls">
+      {{#if puzzle.solved}}Solved
+      {{else}}{{> puzzle_callin_modal}}{{/if}}
+    </div>
     <div class="navbar-inner">
       {{> messages_input}}
     </div>
