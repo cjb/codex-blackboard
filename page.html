@@ -31,7 +31,9 @@ function onGoogleApiLoad() {
 <!-- DEBUGGING: currentPage: "{{currentPage}}" -->
 
 <!-- common header -->
+  {{#unless currentPageEquals "chat"}}
   {{> header }}
+  {{/unless}}
 
 <!-- page contents -->
   {{#if currentPageEquals "blackboard"}}

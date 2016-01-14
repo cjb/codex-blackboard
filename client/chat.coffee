@@ -64,10 +64,12 @@ Meteor.startup ->
     animation: 'slide'
     fontFamily: 'Droid Sans'
     fontStyle: '700'
-    
+
 Template.chat.helpers
-  data: ->
-    puzzle = model.Puzzles.findOne Session.get("id")
+  ready: ->
+    (model.collection(Session.get 'type')?.findOne Session.get("id"))?
+  solved: ->
+    (model.collection(Session.get 'type')?.findOne Session.get("id"))?.solved
 
 # Template Binding
 Template.messages.helpers

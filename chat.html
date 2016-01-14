@@ -2,11 +2,13 @@
 
   {{> messages}}
 
+  {{#if ready}}
+  <div class="bb-chat-callin {{#if solved}}solved{{/if}}">
+    {{#if solved}}Solved
+    {{else}}{{> puzzle_callin_modal}}{{/if}}
+  </div>
+  {{/if}}
   <div class="navbar navbar-inverse navbar-fixed-bottom bb-chat-footer">
-    <div class="pull-right navbar-controls">
-      {{#if puzzle.solved}}Solved
-      {{else}}{{> puzzle_callin_modal}}{{/if}}
-    </div>
     <div class="navbar-inner">
       {{> messages_input}}
     </div>
