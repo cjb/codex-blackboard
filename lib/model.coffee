@@ -15,6 +15,9 @@ NOT_A_TIMESTAMP = -9999
 # migrate old documents with different 'answer' representation
 MIGRATE_ANSWERS = false
 
+# move pages of messages to oldmessages collection
+MOVE_OLD_PAGES = true
+
 # helper function: like _.throttle, but always ensures `wait` of idle time
 # between invocations.  This ensures that we stay chill even if a single
 # execution of the function starts to exceed `wait`.
@@ -329,6 +332,26 @@ if Meteor.isServer
   Pages._ensureIndex {room_name:1, to:-1}, {unique:true}
   # used in the publish method
   Pages._ensureIndex {next: 1, room_name:1}, {}
+  # used for archiving
+  Pages._ensureIndex {archived:1, next:1, to:1}, {}
+  # ensure old pages have the `archived` field
+  Meteor.startup ->
+    Pages.find(archived: $exists: false).forEach (p) ->
+      Pages.update p._id, $set: archived: false
+  # move messages to oldmessages collection
+  queueMessageArchive = throttle ->
+    p = Pages.findOne({archived: false, next: $ne: null}, {sort:[['to','asc']]})
+    return unless p?
+    limit = 2 * MESSAGE_PAGE
+    loop
+      msgs = Messages.find({room_name: p.room_name, timestamp: $lt: p.to}, \
+        {sort:[['to','asc']], limit: limit, reactive: false}).fetch()
+      OldMessages.upsert(m._id, m) for m in msgs
+      Pages.update(p._id, $set: archived: true) if msgs.length < limit
+      Messages.remove(m._id) for m in msgs
+      break if msgs.length < limit
+    queueMessageArchive()
+  , 60*1000 # no more than once a minute
   # watch messages collection and create pages as necessary
   do ->
     unpaged = Object.create(null)
@@ -367,6 +390,9 @@ if Meteor.isServer
         if p._id?
           Pages.update p._id, $set: next: pid
         unpaged[room_name] = 0
+        queueMessageArchive() if MOVE_OLD_PAGES
+  # migrate messages to old messages collection
+  (Meteor.startup queueMessageArchive) if MOVE_OLD_PAGES
 
 # Last read message for a user in a particular chat room
 #   nick: canonicalized string, as in Messages
