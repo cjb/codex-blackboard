@@ -946,12 +946,13 @@ spread_id_to_link = (id) ->
       check args, ObjectWith
         id: NonEmptyString
         who: NonEmptyString
+        punted: Match.Optional(Boolean)
       quip = Quips.findOne args.id
       throw new Meteor.Error(400, "bad quip id") unless quip
       now = UTCNow()
       Quips.update args.id,
         $set: {last_used: now, touched: now, touched_by: canonical(args.who)}
-        $inc: use_count: 1
+        $inc: use_count: (if args.punted then 0 else 1)
       quipAddUrl = # see Router.urlFor
         Meteor._relativeToSiteRootUrl "/quips/new"
       Meteor.call 'newMessage',

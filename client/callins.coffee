@@ -50,6 +50,11 @@ Template.callins.events
     Meteor.call 'useQuip',
       id: template.get_quip_id(event)
       who: Session.get('nick')
+  "click .bb-quip-punt": (event, template) ->
+    Meteor.call 'useQuip',
+      id: template.get_quip_id(event)
+      who: Session.get('nick')
+      punted: true
   "click .bb-quip-remove": (event, template) ->
     Meteor.call 'removeQuip',
       id: template.get_quip_id(event)
