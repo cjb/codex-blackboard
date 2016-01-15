@@ -38,7 +38,7 @@
 
 <template name="callin_row">
         <tr data-bbedit="{{_id}}">
-            <td>{{link target}}{{#if hunt_link type target}}
+            <td>{{link id=target title="Chat room" chat=true icon="icon-comment" class="pull-right"}}{{link target}}{{#if hunt_link type target}}
             <br/><small>&nbsp;↦&nbsp;<a href="{{hunt_link type target}}"
                     target="_blank">on&nbsp;hunt&nbsp;site</a></small>
             {{/if}}</td>
