@@ -486,9 +486,10 @@ updateLastRead = ->
     room_name: Session.get 'room_name'
   ,
     sort: [['timestamp','desc']]
-  return unless lastMessage
+  nick = Session.get 'nick'
+  return unless lastMessage and nick
   Meteor.call 'updateLastRead',
-    nick: Session.get 'nick'
+    nick: nick
     room_name: Session.get 'room_name'
     timestamp: lastMessage.timestamp
 
