@@ -33,7 +33,6 @@ diff-sequence@1.0.2-modules.4
 ecmascript@0.3.1-modules.4
 ecmascript-runtime@0.2.7-modules.4
 ejson@1.0.8-modules.4
-facts@1.0.5
 fastclick@1.0.8-modules.4
 geojson-utils@1.0.5-modules.4
 hot-code-push@1.0.1-modules.4
