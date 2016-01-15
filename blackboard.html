@@ -65,7 +65,7 @@
         <i class="bb-edit-icon icon-pencil pull-right"
            title="Edit the name of this round group"></i>
       {{else}}
-        {{link id=_id text="[chat]" class="pull-right bb-rg-chat"}}
+        {{link id=_id title="Chat room for round group" chat=true icon="icon-comment" class="pull-right bb-rg-chat"}}
       {{/if}}
       {{name}}
     {{/if}}
@@ -171,7 +171,9 @@
     <tr>
       <td class="puzzle-name"><div>
         {{#unless canEdit}}
-          {{#if round.link}}<a class="pull-right" href="{{round.link}}"><i class="icon-share-alt"></i></a>{{/if}}
+          <a href="{{spread_link round.spreadsheet}}" title="Spreadsheet for round" class="pull-right"><i class="icon-th"></i></a>
+          {{link id=round._id title="Chat room for round" chat=true class="pull-right" icon="icon-comment"}}
+          {{#if round.link}}<a class="pull-right" href="{{round.link}}" title="Link to hunt site"><i class="icon-share-alt"></i></a>{{/if}}
         {{/unless}}
         <b>{{link id=round._id title=rX text="ROUND/META" editing=canEdit}}</b>
         {{#if canEdit}}
@@ -300,7 +302,9 @@
           <i class="bb-edit-icon icon-pencil pull-right"
              title="Edit the name of this puzzle"></i>
         {{else}}
-          {{#if puzzle.link}}<a class="pull-right" href="{{puzzle.link}}"><i class="icon-share-alt"></i></a>{{/if}}
+          <a href="{{spread_link puzzle.spreadsheet}}" title="Spreadsheet for puzzle" class="pull-right"><i class="icon-th"></i></a>
+          {{link id=puzzle._id title="Chat room for puzzle" chat=true class="pull-right" icon="icon-comment"}}
+          {{#if puzzle.link}}<a class="pull-right" href="{{puzzle.link}}" title="Link to hunt site"><i class="icon-share-alt"></i></a>{{/if}}
         {{/if}}
         {{link id=puzzle._id title=rXpY editing=canEdit}}
       {{/if}}

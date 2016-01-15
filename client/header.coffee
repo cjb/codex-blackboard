@@ -29,8 +29,13 @@ Template.registerHelper 'link', (args) ->
   if args.title?
     title = ' title="' + \
       args.title.replace(/[&\"]/g, (c) -> '&#' + c.charCodeAt(0) + ';') + '"'
-  link = "<a href='/#{n.type}/#{n._id}' class='#{n.type}-link#{extraclasses}' #{title}>"
-  link += UI._escape('' + (args.text ? n.name))
+  prefix = if args.chat then '/chat' else ''
+  type = if args.chat then 'chat' else n.type
+  link = "<a href='#{prefix}/#{n.type}/#{n._id}' class='#{type}-link#{extraclasses}' #{title}>"
+  if args.icon
+    link += "<i class='#{args.icon}'></i>"
+  else
+    link += UI._escape('' + (args.text ? n.name))
   link += '</a>'
   return new Spacebars.SafeString(link)
 
