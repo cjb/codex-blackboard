@@ -105,8 +105,9 @@ share.hubot.codex = (robot) ->
 
   # newCallIn
   robot.commands.push 'bot call in <answer> [for <puzzle>] - Updates codex blackboard'
-  robot.respond (rejoin /Call\s*in( backsolved?)?( answer)? /,thingRE,'(?:',/\ for (?:(puzzle|round|round group) )?/,thingRE,')?',/$/i), (msg) ->
-    backsolve = msg.match[1]?
+  robot.respond (rejoin /Call\s*in((?: (?:backsolved?|provided))*)( answer)? /,thingRE,'(?:',/\ for (?:(puzzle|round|round group) )?/,thingRE,')?',/$/i), (msg) ->
+    backsolve = /backsolve/.test(msg.match[1])
+    provided = /provided/.test(msg.match[1])
     answer = strip msg.match[3]
     type = if msg.match[4]? then msg.match[4].replace(/\s+/g,'')+'s'
     name = if msg.match[5]? then strip msg.match[5]
@@ -130,6 +131,7 @@ share.hubot.codex = (robot) ->
       answer: answer
       who: who
       backsolve: backsolve
+      provided: provided
     msg.reply "Okay, \"#{answer}\" for #{target.object.name} added to call-in list!"
     msg.finish()
 

@@ -81,9 +81,13 @@ Template.puzzle_callin_modal.events
     answer = template.$('.bb-callin-answer').val()
     return unless answer
     backsolve = ''
-    if template.$('input:checked').val() is 'backsolve'
-      backsolve = "backsolve "
-    if /answer|backsolve|for|puzzle|^[\'\"]/i.test(answer)
+    if template.$('input:checked[value="provided"]').val() is 'provided'
+      backsolve += "provided "
+    if template.$('input:checked[value="backsolve"]').val() is 'backsolve'
+      backsolve += "backsolved "
+    if backsolve
+      backsolve += "answer "
+    if /answer|backsolve|provided|for|puzzle|^[\'\"]/i.test(answer)
       answer = '"' + answer.replace(/\"/g,'\\"') + '"'
     Meteor.call "newMessage",
       body: "bot: call in #{backsolve}#{answer.toUpperCase()}"
