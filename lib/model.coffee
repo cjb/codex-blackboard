@@ -292,7 +292,11 @@ if Meteor.isServer
   # (followup field should already be set properly when the field is
   #  archived into the OldMessages collection)
   do ->
+    # defer (and then throttle) this computation on startup, so
+    # startup doesn't take forever.
+    initiallyDefer = true
     check = (room_name, timestamp, m) ->
+      return if initiallyDefer
       prev = Messages.find(
         {room_name: room_name, timestamp: $lt: +timestamp},
         {sort:[['timestamp','desc']], limit: 1 }).fetch()
@@ -317,6 +321,33 @@ if Meteor.isServer
       changed: (nmsg, omsg) ->
         check(omsg.room_name, omsg.timestamp)
         check(nmsg.room_name, nmsg.timestamp, nmsg)
+    initiallyDefer = false
+    # ok, now we're going to (slowly) check all the messages, in chunks,
+    # at startup. We're throttling this so we don't hose the server on
+    # restart.
+    [checked,alleq] = [0,false]
+    CHUNK_SIZE = 50 # messages
+    CHUNK_PACE = 10 # seconds
+    checkChunk = throttle ->
+      cur = if alleq
+        Messages.find(timestamp: checked)
+      else
+        Messages.find({timestamp: $gt: checked},{sort:[['timestamp','asc']], limit: CHUNK_SIZE})
+      lastTimestamp = null
+      cur.forEach (msg) ->
+        lastTimestamp = msg.timestamp
+        check(msg.room_name, msg.timestamp, msg)
+      if alleq
+        alleq = false
+        checkChunk()
+      else if lastTimestamp?
+        checked = lastTimestamp
+        alleq = true
+        checkChunk()
+      else
+        console.log 'Done checking followups.'
+    , CHUNK_PACE*1000
+    checkChunk()
 
 # Pages -- paging metadata for Messages collection
 #   from: timestamp (first page has from==0)
