@@ -99,7 +99,7 @@ Open spreadsheet in new window</a>
 </template>
 
 <template name="puzzle_callin_modal">
-<button class="btn btn-small bb-callin-btn">Request Call-In</button>
+<button class="btn btn-small bb-callin-btn {{#if currentPageEquals "chat"}}btn-inverse{{/if}}">Request Call-In</button>
 <div class="modal">
   <div class="modal-header">
     <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>

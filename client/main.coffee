@@ -41,6 +41,9 @@ Template.registerHelper 'linkify', (contents) ->
   contents = chat.convertURLsToLinksAndImages(UI._escape(contents))
   return new Spacebars.SafeString(contents)
 
+Template.registerHelper 'compactHeader', () ->
+  (Session.equals 'currentPage', 'chat')
+
 # subscribe to the all-names feed all the time
 Meteor.subscribe 'all-names'
 # subscribe to all nicks all the time

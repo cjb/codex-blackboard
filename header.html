@@ -3,8 +3,10 @@
 <div class="navbar navbar-inverse navbar-fixed-top bb-topbar">
   <div class="navbar-inner">
     {{> header_loginmute}}
+    {{#unless compactHeader}}
     {{> header_lastupdates}}
     {{> header_lastchats}}
+    {{/unless}}
     {{> header_breadcrumbs}}
   </div>
 </div>
@@ -66,10 +68,10 @@
 
 <template name="header_loginmute">
 <!-- login/mute buttons -->
-  <div class="bb-buttonbar pull-right">
+  <div class="bb-buttonbar {{#unless compactHeader}}pull-right{{/unless}}">
    <div>
     {{#if sessionNick}}
-     <div class="btn-group">
+     <div class="btn-group {{#if compactHeader}}pull-right{{/if}}">
       <a class="btn btn-small btn-inverse dropdown-toggle"
          data-toggle="dropdown" href="#">
        {{#if sessionNick.gravatar}}

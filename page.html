@@ -19,21 +19,18 @@ function onGoogleApiLoad() {
 
 <body>
   <div id="bb-body">
-    <div id="bb-content" class="container-fluid">
       {{> page }}
-    </div>
   </div>
   {{> header_nickmodal}}
   {{> header_confirmmodal}}
 </body>
 
 <template name="page">
+<div id="bb-content" class="container-fluid {{#if compactHeader}}compactHeader{{/if}}">
 <!-- DEBUGGING: currentPage: "{{currentPage}}" -->
 
 <!-- common header -->
-  {{#unless currentPageEquals "chat"}}
   {{> header }}
-  {{/unless}}
 
 <!-- page contents -->
   {{#if currentPageEquals "blackboard"}}
@@ -62,4 +59,5 @@ function onGoogleApiLoad() {
   {{/if}}
 
 <!-- add footer here? -->
+</div>
 </template>

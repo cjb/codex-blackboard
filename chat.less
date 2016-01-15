@@ -3,13 +3,13 @@
 }
 
 .bb-chat-callin {
-    position: fixed; top: 2px; right: 2px;
+    position: fixed; top: 5px; left: 10px; z-index: 1050;
     &.solved {
-      top: 0; right: 0;
+      top: 0; left: 0;
       background: white;
-      padding-left: 2px; padding-right: 4px;
+      padding-left: 15px; padding-right: 8px; padding-bottom: 1px;
       border: 1px solid #888;
-      border-bottom-left-radius: 5px;
+      border-bottom-right-radius: 5px;
     }
 }
 
@@ -19,6 +19,9 @@
 }
 .bb-puzzleround {
   .bb-content-area;
+}
+.compactHeader .bb-chat-messages {
+  padding-top: 3px;
 }
 .bb-chat-messages {
   @chat-arrow-size: 6px;
