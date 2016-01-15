@@ -305,7 +305,7 @@ share.hubot.codex = (robot) ->
         name: strip msg.match[4]
         optional_type: type
       if not target?
-        msg.reply "I can't find a puzzle called \"#{target}\"."
+        msg.reply "I can't find a puzzle called \"#{strip msg.match[4]}\"."
         return msg.finish()
     else
       target = objectFromRoom msg
