@@ -70,6 +70,7 @@ Template.registerHelper 'lotsOfPeople', (args) ->
 # gravatars
 Template.registerHelper 'gravatar', (args) ->
   args = keyword_or_positional 'id', args
+  args.secure = true
   g = $.gravatar(args.id, args)
   # hacky cross-platform version of 'outerHTML'
   html = $('<div>').append( g.eq(0).clone() ).html()
