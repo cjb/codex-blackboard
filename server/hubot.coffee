@@ -160,15 +160,15 @@ Meteor.startup ->
   Meteor.setInterval keepalive, 30*1000 # every 30s refresh presence
   # listen to the chat room, ignoring messages sent before we startup
   startup = true
-  model.Messages.find({}).observe
-    added: (msg) ->
+  model.Messages.find({}).observeChanges
+    added: (id, msg) ->
       return if startup
       return if msg.nick is "codexbot" or msg.nick is ""
       return if msg.system or msg.action or msg.oplog or msg.bodyIsHtml
       console.log "Received from #{msg.nick} in #{msg.room_name}: #{msg.body}"\
         if DEBUG
       user = new Hubot.User(msg.nick, room: msg.room_name)
-      tm = new Hubot.TextMessage(user, msg.body, msg._id)
+      tm = new Hubot.TextMessage(user, msg.body, id)
       tm.private = msg.to?
       # if private, ensure it's treated as a direct address
       if tm.private and not mynameRE.test(tm.text)
