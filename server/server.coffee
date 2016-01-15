@@ -167,5 +167,5 @@ Meteor.publish 'all-names', ->
   self.onStop ->
     handles.map (h) -> h.stop()
 
-# Publish the 'facts' collection to all users
-Facts.setUserIdFilter -> true
+## Publish the 'facts' collection to all users
+#Facts.setUserIdFilter -> true
