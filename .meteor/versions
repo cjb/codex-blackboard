@@ -14,7 +14,7 @@ caching-compiler@1.0.1-modules.4
 caching-html-compiler@1.0.3-modules.4
 callback-hook@1.0.5-modules.4
 check@1.1.1-modules.4
-codex-blackboard-hubot-scripts@1.0.0
+codex-blackboard-hubot-scripts@2.0.0
 coffeescript@1.0.12-modules.4
 cscottnet:alertify-bootstrap@0.3.11
 cscottnet:es5-shim@4.4.1
