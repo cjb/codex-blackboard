@@ -67,9 +67,13 @@ Meteor.startup ->
 
 Template.chat.helpers
   ready: ->
-    (model.collection(Session.get 'type')?.findOne Session.get("id"))?
+    type = Session.get 'type'
+    type is 'general' or \
+      (model.collection(type)?.findOne Session.get("id"))?
   solved: ->
-    (model.collection(Session.get 'type')?.findOne Session.get("id"))?.solved
+    type = Session.get 'type'
+    type isnt 'general' and \
+      (model.collection(type)?.findOne Session.get("id"))?.solved
 
 # Template Binding
 Template.messages.helpers
