@@ -78,6 +78,7 @@ Template.puzzle_callin_modal.events
       template.$('.modal').modal show: true
       template.$('input:text').focus()
   "click .bb-callin-submit": (event, template) ->
+    event.preventDefault() # don't reload page
     answer = template.$('.bb-callin-answer').val()
     return unless answer
     backsolve = ''
