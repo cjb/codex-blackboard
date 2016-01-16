@@ -12,7 +12,7 @@
 {{#unless round.solved}}{{> puzzle_callin_modal}}{{/unless}}
 <h1>Round <small>{{round.name}}
   (<a class="bb-wiki" href="{{wikiRP r=round_num p=0}}">wiki r{{round_num}}p0</a>)
-  {{#if round.link}}(<a href="{{round.link}}" target="_blank">puzzle link</a>){{/if}}
+  {{#if round.link}}(<a href="{{round.link}}" target="_blank">puzzle link <i class="icon-share-alt"></i></a>){{/if}}
 </small></h1>
 
 {{#with round}}{{> blackboard_tags }}{{/with}}

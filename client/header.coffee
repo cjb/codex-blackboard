@@ -223,6 +223,10 @@ Template.header_breadcrumbs.helpers
       model.collection(Session.get('type'))?.findOne(Session.get('id'))?.drive
 
 Template.header_breadcrumbs.events
+  "click .fake-link[data-href]": (event, template) ->
+    event.preventDefault()
+    href = $(event.currentTarget).attr('data-href')
+    window.location = href
   "click .bb-upload-file": (event, template) ->
     folder = switch Session.get('type')
       when 'general'
