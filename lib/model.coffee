@@ -541,6 +541,16 @@ spread_id_to_link = (id) ->
       touched_by: tag.touched_by ? canonical(who)
     } for tag in tags)
 
+  huntPrefix = (type) ->
+    # this is a huge hack, it's too hard to find the correct
+    # round group to use.  But this helps avoid reloading the hunt software
+    # every time the hunt domain changes.
+    rg = RoundGroups.findOne({}, sort: ['created'])
+    if rg?.link
+      return rg.link.replace(/\/+$/, '') + '/' + type + '/'
+    else
+      return Meteor.settings?[type+'_prefix']
+
   NonEmptyString = Match.Where (x) ->
     check x, String
     return x.length > 0
@@ -808,15 +818,16 @@ spread_id_to_link = (id) ->
       deleteObject "roundgroups", args
 
     newRound: (args) ->
-      link = if Meteor.settings?.round_prefix
-        "#{Meteor.settings.round_prefix}#{canonical(args.name)}"
+      round_prefix = huntPrefix 'round'
+      link = if round_prefix
+        "#{round_prefix}#{canonical(args.name)}"
       r = newObject "rounds", args,
         incorrectAnswers: []
         solved: null
         solved_by: null
         puzzles: args.puzzles or []
         drive: args.drive or null
-        link: link
+        link: args.link or link
       newDriveFolder "rounds", r._id, r.name
       return r
     renameRound: (args) ->
@@ -854,15 +865,16 @@ spread_id_to_link = (id) ->
       return r
 
     newPuzzle: (args) ->
-      link = if Meteor.settings?.puzzle_prefix
-        "#{Meteor.settings.puzzle_prefix}#{canonical(args.name)}"
+      puzzle_prefix = huntPrefix 'puzzle'
+      link = if puzzle_prefix
+        "#{puzzle_prefix}#{canonical(args.name)}"
       p = newObject "puzzles", args,
         incorrectAnswers: []
         solved: null
         solved_by: null
         drive: args.drive or null
         spreadsheet: args.spreadsheet or null
-        link: link
+        link: args.link or link
       # create google drive folder (server only)
       newDriveFolder "puzzles", p._id, p.name
       return p
