@@ -953,6 +953,7 @@ spread_id_to_link = (id) ->
       Quips.update args.id,
         $set: {last_used: now, touched: now, touched_by: canonical(args.who)}
         $inc: use_count: (if args.punted then 0 else 1)
+      return if args.punted
       quipAddUrl = # see Router.urlFor
         Meteor._relativeToSiteRootUrl "/quips/new"
       Meteor.call 'newMessage',
