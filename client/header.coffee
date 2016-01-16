@@ -42,6 +42,7 @@ Template.registerHelper 'link', (args) ->
 $(document).on 'click', 'a.puzzles-link, a.rounds-link, a.chat-link, a.home-link, a.oplogs-link, a.quips-link', (event) ->
   return unless event.button is 0 # check right-click
   return if event.ctrlKey or event.shiftKey or event.altKey # check alt/ctrl/shift clicks
+  return if /^https?:/.test($(event.currentTarget).attr('href'))
   event.preventDefault()
   if $(this).hasClass('bb-pop-out')
     window.open $(event.currentTarget).attr('href'), 'Pop out', \
@@ -223,10 +224,13 @@ Template.header_breadcrumbs.helpers
       model.collection(Session.get('type'))?.findOne(Session.get('id'))?.drive
 
 Template.header_breadcrumbs.events
-  "click .fake-link[data-href]": (event, template) ->
-    event.preventDefault()
+  "mouseup .fake-link[data-href]": (event, template) ->
+    # we work hard to try to make middle-click, shift-click, etc still work.
+    a = $(event.currentTarget).closest('a')
     href = $(event.currentTarget).attr('data-href')
-    window.location = href
+    oldhref = a.attr('href')
+    a.attr('href', href)
+    Meteor.setTimeout (-> a.attr('href', oldhref)), 100
   "click .bb-upload-file": (event, template) ->
     folder = switch Session.get('type')
       when 'general'
