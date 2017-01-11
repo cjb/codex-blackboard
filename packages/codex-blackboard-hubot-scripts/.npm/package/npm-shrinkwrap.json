@@ -3,9 +3,6 @@
     "codex-blackboard-hubot-scripts": {
       "version": "https://github.com/cscott/codex-blackboard-hubot-scripts/tarball/62d35c1a0134fc59916cc4c8521f4837cb3135a0",
       "dependencies": {
-        "coffee-script": {
-          "version": "1.10.0"
-        },
         "hubot-calculator": {
           "version": "0.4.0",
           "dependencies": {

@@ -25,7 +25,7 @@ will wipe the old database and start afresh.
 
 ## Installing Meteor
 
-Our blackboard app currently requires Meteor 1.0.
+Our blackboard app currently requires Meteor 1.3.
 
 At the moment the two ways to install Meteor are:
 
@@ -34,7 +34,7 @@ At the moment the two ways to install Meteor are:
 
 The latter option is easier, and automatically downloads the correct
 version of meteor and all its dependencies, based on the contents of
-`codex-blackboard/.meteor/release`.  Simply cross your finger, trust
+`codex-blackboard/.meteor/release`.  Simply cross your fingers, trust
 in the meteor devs, and do:
 
     $ curl https://install.meteor.com | /bin/sh
@@ -43,7 +43,7 @@ You can read the script and manually install meteor this way as well;
 it just involves downloading a binary distribution and installing it
 in `~/.meteor`.
 
-If piping stuff from the internet directly to /bin/sh gives you the
+If piping stuff from the internet directly to `/bin/sh` gives you the
 willies, then you can also run from a git checkout.  Something like:
 
     $ cd ~/3rdParty
