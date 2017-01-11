@@ -21,7 +21,6 @@ codex-blackboard-hubot-scripts
 cscottnet:random-name
 cscottnet:geolocation
 reactive-var
-standard-minifiers
 meteor-base
 mobile-experience
 mongo
@@ -33,3 +32,5 @@ logging
 reload
 ejson
 spacebars
+standard-minifier-css
+standard-minifier-js
