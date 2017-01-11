@@ -132,6 +132,10 @@ x move last read marker to a session variable, then use Session.equals
   - use model query to ensure timestamp exactly matches a message?
 ---
 . Experiment with mobile app support.
-. Upgrade googleapis package to 1.0.
+x Upgrade googleapis package to 1.0.
 . Write test suite.
 x Merge Jeff's twitter linkification patch.
+---
+- Update google drive to v3 API.
+- icon links to chat/spreadsheet from blackboard
+- turn off certain panes in paned view?
