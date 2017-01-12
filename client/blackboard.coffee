@@ -265,7 +265,6 @@ Template.blackboard_round.helpers
     return (!Session.get 'hideSolved') or (!this.round?.solved?) or
     ((model.Puzzles.findOne(id) for id, index in this.round?.puzzles ? []).
       filter (p) -> !p?.solved?).length > 0
-
   showMeta: -> (!Session.get 'hideSolved') or (!this.round?.solved?)
   # the following is a map() instead of a direct find() to preserve order
   puzzles: ->
