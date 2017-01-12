@@ -4,7 +4,7 @@
 # but you can also edit it by hand.
 
 insecure@1.0.7
-coffeescript@1.2.4
+coffeescript@1.2.4_1
 backbone
 less@2.7.5
 bootstrap
@@ -23,7 +23,7 @@ cscottnet:geolocation
 reactive-var@1.0.10
 meteor-base@1.0.4
 mobile-experience@1.0.4
-mongo@1.1.11
+mongo@1.1.12
 blaze-html-templates@1.0.4
 session@1.1.6
 jquery@1.11.9
@@ -35,4 +35,4 @@ spacebars@1.0.12
 standard-minifier-css@1.2.0
 standard-minifier-js@1.2.0
 modules@0.7.6
-shell-server
+shell-server@0.2.1
