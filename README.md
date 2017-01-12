@@ -23,9 +23,13 @@ In those cases:
 
 will wipe the old database and start afresh.
 
+Note that MongoDB changed its default database format between meteor 1.3.x
+and 1.4.x.  See the "Database upgrade" section below to learn about
+migrating the meteor database if you are doing an upgrade.
+
 ## Installing Meteor
 
-Our blackboard app currently requires Meteor 1.3.
+Our blackboard app currently requires Meteor 1.4.
 
 At the moment the two ways to install Meteor are:
 
@@ -82,6 +86,23 @@ folder.  For example:
     {"password":"<password here>","folder":"My Dev Test Folder"}
 
 [gapitoken]: https://npmjs.org/package/gapitoken
+
+## Database upgrade
+MongoDB changed its default database format to "WiredTiger" between
+meteor 1.3.x and 1.4.x.  See:
+https://docs.meteor.com/changelog.html#v14
+
+To migrate the meteor database format, first ensure that you have
+`mongodump` installed (`apt-get install mongo-tools` if necessary).
+
+Ensure meteor is running your app before starting the dump:
+    $ meteor --settings private/settings.json
+In another shell:
+    $ mongodump -h 127.0.0.1 --port 3001 -d meteor
+Then stop meteor and reset the DB (which will create a DB of the new type):
+    $ meteor reset
+And restore the DB into the new storage engine:
+    $ mongorestore --maintainInsertionOrder -h 127.0.0.1 --port 3001 -d meteor --drop dump/meteor
 
 ## Goals, etc.
 
