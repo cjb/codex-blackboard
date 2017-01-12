@@ -48,7 +48,7 @@ okCancelEvents = share.okCancelEvents = (selector, callbacks) ->
   events
 
 ######### general properties of the blackboard page ###########
-['sortReverse','hideSolved','hideStatus','compactMode'].forEach (name) ->
+['sortReverse','hideSolved','hideRoundsSolvedMeta','hideStatus','compactMode'].forEach (name) ->
   Session.setDefault name, $.cookie(name)
 compactMode = ->
   editing = (Session.get 'nick') and (Session.get 'canEdit')
@@ -56,6 +56,7 @@ compactMode = ->
 Template.blackboard.helpers
   sortReverse: -> Session.get 'sortReverse'
   hideSolved: -> Session.get 'hideSolved'
+  hideRoundsSolvedMeta: -> Session.get 'hideRoundsSolvedMeta'
   hideStatus: -> Session.get 'hideStatus'
   compactMode: compactMode
 
@@ -132,6 +133,8 @@ Template.blackboard.events
     doBoolean 'sortReverse', reverse
   "change .bb-hide-solved input": (event, template) ->
     doBoolean 'hideSolved', event.target.checked
+  "change .bb-hide-rounds-solved-meta input": (event, template) ->
+    doBoolean 'hideRoundsSolvedMeta', event.target.checked
   "change .bb-compact-mode input": (event, template) ->
     doBoolean 'compactMode', event.target.checked
   "click .bb-hide-status": (event, template) ->
@@ -257,9 +260,12 @@ processBlackboardEdit =
 
 Template.blackboard_round.helpers
   hasPuzzles: -> (this.round?.puzzles?.length > 0)
-  showRound: -> (!Session.get 'hideSolved') or (!this.round?.solved?) or \
-    ((model.Puzzles.findOne(id) for id, index in this.round?.puzzles ? []).\
+  showRound: ->
+    return false if (Session.get 'hideRoundsSolvedMeta') and (this.round?.solved?)
+    return (!Session.get 'hideSolved') or (!this.round?.solved?) or
+    ((model.Puzzles.findOne(id) for id, index in this.round?.puzzles ? []).
       filter (p) -> !p?.solved?).length > 0
+
   showMeta: -> (!Session.get 'hideSolved') or (!this.round?.solved?)
   # the following is a map() instead of a direct find() to preserve order
   puzzles: ->
