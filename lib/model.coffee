@@ -968,6 +968,7 @@ spread_id_to_link = (id) ->
       return if args.punted
       quipAddUrl = # see Router.urlFor
         Meteor._relativeToSiteRootUrl "/quips/new"
+
       Meteor.call 'newMessage',
         body: "<span class=\"bb-quip-action\">#{UI._escape(quip.text)} <a class='quips-link' href=\"#{quipAddUrl}\"></a></span>"
         action: true
@@ -999,10 +1000,20 @@ spread_id_to_link = (id) ->
         action: true
         nick: args.who
         room_name: "#{callin.type}/#{callin.target}"
+
+      # one message to the puzzle chat
       Meteor.call 'newMessage', msg
+
+      # one message to the general chat
       delete msg.room_name
       msg.body += " (#{name})" if name?
       Meteor.call 'newMessage', msg
+
+      # one message to the round chat for metasolvers
+      round = Rounds.findOne({puzzles: callin.target})
+      if round?
+        msg.room_name = "rounds/#{round._id}"
+        Meteor.call 'newMessage', msg
 
     incorrectCallIn: (args) ->
       check args, ObjectWith
