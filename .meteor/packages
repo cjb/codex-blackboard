@@ -4,11 +4,11 @@
 # but you can also edit it by hand.
 
 insecure@1.0.7
-coffeescript@1.2.4_1
+coffeescript@1.2.4_2
 backbone
-less@2.7.5
+less@2.7.5_1
 bootstrap
-http@1.2.9
+http@1.2.9_1
 random@1.0.10
 check@1.2.3
 cscottnet:googleapis
@@ -23,16 +23,16 @@ cscottnet:geolocation
 reactive-var@1.0.10
 meteor-base@1.0.4
 mobile-experience@1.0.4
-mongo@1.1.12
+mongo@1.1.12_1
 blaze-html-templates@1.0.4
 session@1.1.6
 jquery@1.11.9
 tracker@1.1.0
-logging@1.1.15
+logging@1.1.15_1
 reload@1.1.10
 ejson@1.0.12
 spacebars@1.0.12
-standard-minifier-css@1.2.0
-standard-minifier-js@1.2.0
-modules@0.7.6
+standard-minifier-css@1.2.0_1
+standard-minifier-js@1.2.0_1
+modules@0.7.6_1
 shell-server@0.2.1
