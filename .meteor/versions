@@ -1,7 +1,7 @@
 allow-deny@1.0.5
 autoupdate@1.2.11
 babel-compiler@6.13.0
-babel-runtime@0.1.12
+babel-runtime@1.0.1
 backbone@1.0.0
 base64@1.0.10
 binary-heap@1.0.10
@@ -10,12 +10,12 @@ blaze-html-templates@1.0.4
 blaze-tools@1.0.9
 boilerplate-generator@1.0.11
 bootstrap@1.0.1
-caching-compiler@1.1.8
+caching-compiler@1.1.9
 caching-html-compiler@1.0.6
 callback-hook@1.0.10
 check@1.2.4
 codex-blackboard-hubot-scripts@2.0.0
-coffeescript@1.11.1_2
+coffeescript@1.11.1_3
 cscottnet:alertify-bootstrap@0.3.11
 cscottnet:es5-shim@4.4.1
 cscottnet:geolocation@1.0.4
@@ -30,7 +30,7 @@ ddp-common@1.2.6
 ddp-server@1.2.10
 deps@1.0.12
 diff-sequence@1.0.7
-ecmascript@0.5.9
+ecmascript@0.6.0
 ecmascript-runtime@0.3.15
 ejson@1.0.13
 fastclick@1.0.12
@@ -44,7 +44,7 @@ insecure@1.0.7
 jquery@1.11.10
 json@1.0.3
 launch-screen@1.0.12
-less@2.7.6
+less@2.7.7
 livedata@1.0.18
 logging@1.1.16
 meteor@1.6.0
