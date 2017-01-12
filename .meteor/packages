@@ -23,7 +23,7 @@ cscottnet:geolocation
 reactive-var@1.0.10
 meteor-base@1.0.4
 mobile-experience@1.0.4
-mongo@1.1.12_1
+mongo@1.1.13
 blaze-html-templates@1.0.4
 session@1.1.6
 jquery@1.11.9
