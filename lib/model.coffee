@@ -261,6 +261,7 @@ if Meteor.isServer
 #   system: boolean (true for system messages, false for user messages)
 #   action: boolean (true for /me commands)
 #   oplog:  boolean (true for semi-automatic operation log message)
+#   presence: optional string ('join'/'part' for presence-change only)
 #   to:   destination of pm (optional)
 #   room_name: "<type>/<id>", ie "puzzle/1", "round/1".
 #                             "general/0" for main chat.
@@ -467,8 +468,9 @@ if Meteor.isServer
       return if presence.room_name is 'oplog/0'
       Messages.insert
         system: true
-        nick: ''
+        nick: presence.nick
         to: null
+        presence: 'join'
         body: "#{name} joined the room."
         bodyIsHtml: false
         room_name: presence.room_name
@@ -482,8 +484,9 @@ if Meteor.isServer
       return if presence.room_name is 'oplog/0'
       Messages.insert
         system: true
-        nick: ''
+        nick: presence.nick
         to: null
+        presence: 'part'
         body: "#{name} left the room."
         bodyIsHtml: false
         room_name: presence.room_name

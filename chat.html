@@ -57,7 +57,11 @@
       <p align="center">Start of chat log.</p>
     {{/if}}{{/if}}{{/if}}
     {{#each messages}}{{scrollHack}}
-      {{#if message.system}}
+      {{#if message.presence}}
+<div class="bb-message-presence {{message.presence}}" title={{body}}>
+  {{gravatar id=email image="wavatar" size=14 }}{{message.nick}}
+</div>
+      {{else}}{{#if message.system}}
 <div class="bb-message-system">
    <div class="pull-right timestamp">{{pretty_ts message.timestamp}}</div>
      {{body}}
@@ -81,7 +85,7 @@
     {{body}}
   </div>
 </div>
-      {{/if}}{{/if}}
+      {{/if}}{{/if}}{{/if}}
       {{#if isLastRead message.timestamp}}
 <div class="bb-message-last-read">read</div>
       {{/if}}
