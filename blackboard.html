@@ -410,20 +410,16 @@
         <input type="text" id="tags-{{id}}-{{canon}}-value"
                value="{{value}}"
                class="input-block-level" autofocus />
+      {{else if canEdit}}
+        <i class="bb-delete-icon icon-remove pull-left"
+           title="Delete this tag and value"></i>
+        <i class="bb-edit-icon icon-pencil pull-right"
+           title="Edit the value of this tag"></i>
+        {{value}}
+      {{else if value}}
+        {{linkify value}}
       {{else}}
-        {{#if canEdit}}
-          <i class="bb-delete-icon icon-remove pull-left"
-             title="Delete this tag and value"></i>
-          <i class="bb-edit-icon icon-pencil pull-right"
-             title="Edit the value of this tag"></i>
-          {{value}}
-        {{else}}
-          {{#if value}}
-            {{linkify value}}
-          {{else}}
-            &nbsp; {{! make sure right-hand side stays in place! }}
-          {{/if}}
-        {{/if}}
+        &nbsp; {{! make sure right-hand side stays in place! }}
       {{/if}}
     </dd>
   {{/each}}</dl>
@@ -452,16 +448,14 @@
               <input type="text" id="tags-{{id}}-{{canon}}-value"
                      value="{{value}}"
                      class="input-block-level" autofocus />
+            {{else if canEdit}}
+              <i class="bb-delete-icon icon-remove pull-left"
+                 title="Delete this tag and value"></i>
+              <i class="bb-edit-icon icon-pencil pull-right"
+                 title="Change the value of this tag"></i>
+              {{value}}
             {{else}}
-              {{#if canEdit}}
-                <i class="bb-delete-icon icon-remove pull-left"
-                   title="Delete this tag and value"></i>
-                <i class="bb-edit-icon icon-pencil pull-right"
-                   title="Change the value of this tag"></i>
-                {{value}}
-              {{else}}
-                {{linkify value}}
-              {{/if}}
+              {{linkify value}}
             {{/if}}
           </td>
         </tr>
@@ -479,12 +473,10 @@
               <input type="text" id="link-{{_id}}"
                      value="{{./link}}"
                      class="input-block-level" autofocus />
-            {{else}}
-              {{#if canEdit}}
-                <i class="bb-edit-icon icon-pencil pull-right"
-                   title="Change the value of the hunt site link"></i>
-                <a href="{{./link}}">{{./link}}</a>
-              {{/if}}
+            {{else if canEdit}}
+              <i class="bb-edit-icon icon-pencil pull-right"
+                 title="Change the value of the hunt site link"></i>
+              <a href="{{./link}}">{{./link}}</a>
             {{/if}}
           </td>
         </tr>

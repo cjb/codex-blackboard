@@ -58,20 +58,20 @@
       <p align="center">
         <a href="{{prevTimestamp}}" class="chat-link">See earlier messages</a>
       </p>
-    {{else}}{{#if timestamp}}
+    {{else if timestamp}}
       <p align="center">Start of chat log.</p>
-    {{/if}}{{/if}}{{/if}}
+    {{/if}}{{/if}}
     {{#each messages}}{{scrollHack}}
       {{#if message.presence}}
 <div class="bb-message-presence {{message.presence}}" title={{body}}>
   {{gravatar id=email image="wavatar" size=14 }}{{message.nick}}
 </div>
-      {{else}}{{#if message.system}}
+      {{else if message.system}}
 <div class="bb-message-system">
    <div class="pull-right timestamp">{{pretty_ts message.timestamp}}</div>
      {{body}}
 </div>
-      {{else}}{{#if message.action}}
+      {{else if message.action}}
 <div class="bb-message-action{{#unless usefulEnough message}} bb-is-useless{{/unless}}">
    <div class="pull-right timestamp">{{pretty_ts message.timestamp}}</div>
      <i class="icon-hand-right"></i>
@@ -90,7 +90,7 @@
     {{body}}
   </div>
 </div>
-      {{/if}}{{/if}}{{/if}}
+      {{/if}}
       {{#if isLastRead message.timestamp}}
 <div class="bb-message-last-read">read</div>
       {{/if}}

@@ -42,22 +42,22 @@
   {{/if}}
   {{#if currentPageEquals "quip"}}
   <li class="active"><a><i class="icon-check icon-white"></i> {{#if idIsNew}}Add New Quip{{else}}Quip: {{quip.name}}{{/if}}</a></li>
-  {{else}}
-  {{#if currentPageEquals "oplog"}}
+  {{else if currentPageEquals "oplog"}}
   <li class="active"><a><i class="icon-time icon-white"></i> Operation Logs</a></li>
-  {{else}}{{#if currentPageEquals "facts"}}
+  {{else if currentPageEquals "facts"}}
   <li class="active"><a><i class="icon-wrench icon-white"></i> Server Facts</a></li>
-  {{else}}{{#if currentPageEquals "callins"}}
-  <li class="active"><a><i class="icon-check icon-white"></i> Answer Queue</a></li>
-  {{/if}}
-  <li class="{{#if currentPageEquals "chat"}}active{{else}}bb-omit-when-narrow{{/if}}">
-  <a href="/chat/{{type}}/{{id}}" class="chat-link"><i class="icon-comment icon-white"></i>
+  {{else}}
+    {{#if currentPageEquals "callins"}}
+      <li class="active"><a><i class="icon-check icon-white"></i> Answer Queue</a></li>
+    {{/if}}
+    <li class="{{#if currentPageEquals "chat"}}active{{else}}bb-omit-when-narrow{{/if}}">
+    <a href="/chat/{{type}}/{{id}}" class="chat-link"><i class="icon-comment icon-white"></i>
     {{#if typeEquals "roundgroups"}}{{link id=id editing=true}}{{/if}}
     {{#if typeEquals "rounds"}}Round{{/if}}
     {{#if typeEquals "puzzles"}}Puzzle{{/if}}
     {{#if typeEquals "general"}}General{{/if}}
     chat</a></li>
-  {{/if}}{{/if}}{{/if}}
+  {{/if}}
 </ul>
   {{#if currentPageEquals "chat"}}
     {{> chat_header }}

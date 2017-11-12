@@ -4,9 +4,9 @@
   <p align="center">
   <a href="{{prevTimestamp}}" class="oplogs-link">See earlier logs</a>
   </p>
-  {{else}}{{#if timestamp}}
+  {{else if timestamp}}
   <p align="center">Start of operation log.</p>
-  {{/if}}{{/if}}
+  {{/if}}
 {{#each oplogs}}
   <div class="bb-oplog">
     <span class="timestamp">{{pretty_ts this.timestamp}}</span>
