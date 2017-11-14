@@ -262,6 +262,7 @@ if Meteor.isServer
 #   action: boolean (true for /me commands)
 #   oplog:  boolean (true for semi-automatic operation log message)
 #   presence: optional string ('join'/'part' for presence-change only)
+#   bot_ignore: optional boolean (true for messages from e.g. email or twitter)
 #   to:   destination of pm (optional)
 #   room_name: "<type>/<id>", ie "puzzle/1", "round/1".
 #                             "general/0" for main chat.

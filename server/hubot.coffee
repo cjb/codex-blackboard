@@ -69,6 +69,7 @@ class BlackboardAdapter extends Hubot.Adapter
         nick: "codexbot"
         body: string
         room_name: envelope.room
+        bot_ignore: true
 
   # Public: Raw method for sending emote data back to the chat source.
   #
@@ -85,6 +86,7 @@ class BlackboardAdapter extends Hubot.Adapter
         body: string
         room_name: envelope.room
         action: true
+        bot_ignore: true
 
   # Priv: our extension -- send a PM to user
   priv: (envelope, strings...) ->
@@ -95,6 +97,7 @@ class BlackboardAdapter extends Hubot.Adapter
         to: "#{envelope.user.id}"
         body: string
         room_name: envelope.room
+        bot_ignore: true
 
   # Public: Raw method for building a reply and sending it back to the chat
   # source. Extend this.
@@ -135,6 +138,9 @@ class BlackboardAdapter extends Hubot.Adapter
   # Returns nothing.
   close: ->
 
+IGNORED_NICKS =
+  'codexbot': true
+  '': true
 Meteor.startup ->
   robot = new Robot null, null, false, Meteor.settings?.botname ? 'codexbot'
   robot.alias = 'bot'
@@ -163,7 +169,8 @@ Meteor.startup ->
   model.Messages.find({}).observeChanges
     added: (id, msg) ->
       return if startup
-      return if msg.nick is "codexbot" or msg.nick is ""
+      return if msg.bot_ignore
+      return if IGNORED_NICKS[msg.nick]?
       return if msg.system or msg.action or msg.oplog or msg.bodyIsHtml
       console.log "Received from #{msg.nick} in #{msg.room_name}: #{msg.body}"\
         if DEBUG
@@ -180,3 +187,4 @@ Meteor.startup ->
     body: 'wakes up'
     room_name: 'general/0'
     action: true
+    bot_ignore: true

@@ -47,10 +47,12 @@ mailListener.on 'mail', (mail) ->
     nick: 'thehunt'
     action: true
     body: "sent mail: #{mail.subject}"
+    bot_ignore: true
   Meteor.call 'newMessage',
     nick: 'thehunt'
     body: mail.html ? mail.text
     bodyIsHtml: mail.html?
+    bot_ignore: true
 
 Meteor.startup ->
   mailListener.start()
