@@ -55,8 +55,22 @@
       <span class="bb-hide-when-narrower">Codex</span></span> <span class="bb-hide-when-narrow">Puzzle </span><span class="bb-no-wrap">Blackboard
       </span>
     </h1>
-    {{#each roundgroups}}
-    <section id="group{{_id}}">
+  <table class="table table-bordered table-condensed bb-puzzle">
+  <thead>
+    {{#unless compactMode}}
+    <tr>
+      <th class="puzzle-name">Name</th>
+      <th class="puzzle-answer">Solution</th>
+      <th class="puzzle-status">Status</th>
+      {{#unless canEdit}}
+      <th class="puzzle-working">Working on this</th>
+      <th class="puzzle-update">Last update</th>
+      {{/unless}}
+    </tr>
+    {{/unless}}
+  </thead>
+    {{#each roundgroups}}<tbody>
+    <tr><th colspan=5 id="group{{_id}}">
       <h2 class="bb-editable" data-bbedit="roundgroups/{{_id}}/title">
     {{#if editing "roundgroups" _id "title"}}
       <input type="text" id="roundgroups-{{_id}}-title"
@@ -96,27 +110,13 @@
      </button>
    </div>
   {{/if}}
-  
-  <table class="table table-bordered table-condensed bb-puzzle">
-  <thead>
-    {{#unless compactMode}}
-    <tr>
-      <th class="puzzle-name">Name</th>
-      <th class="puzzle-answer">Solution</th>
-      <th class="puzzle-status">Status</th>
-      {{#unless canEdit}}
-      <th class="puzzle-working">Working on this</th>
-      <th class="puzzle-update">Last update</th>
-      {{/unless}}
-    </tr>
-    {{/unless}}
-  </thead>
-    {{#each rounds}}
+  </th></tr>
+  {{#each rounds}}
       {{> blackboard_round }}
     {{/each}}
-  </table>
-    </section>
+    </tbody>
     {{/each}}
+  </table>
   </div><!-- bb-tables -->
   {{#if hideStatus}}
   <div class="bb-hide-status"><i class='icon-chevron-left'></i></div>
@@ -154,9 +154,9 @@
 </template>
 
 <template name="blackboard_round">
-  <section id="r{{round._id}}{{updateScrollSpy}}">
   {{#if showRound }}
-  <h3 class="bb-editable" data-bbedit="rounds/{{round._id}}/title">
+  <tr><th colspan=5>
+  <h3 id="r{{round._id}}{{updateScrollSpy}}" class="bb-editable" data-bbedit="rounds/{{round._id}}/title">
   {{#if editing "rounds" round._id "title"}}
       <input type="text" id="rounds-{{round._id}}-title"
              value="{{round.name}}"
@@ -171,8 +171,7 @@
     {{link id=round._id title=rX editing=canEdit}}
     <small>({{rX}}: {{num_solved}}/{{num_puzzles}} puzzles solved)</small>
   {{/if}}
-  </h3>
-<tbody>
+  </h3></th></tr>
   {{#if hasPuzzles}}
     {{! META }}
     {{#if showMeta}}
@@ -261,9 +260,8 @@
       {{> blackboard_puzzle}}
     {{/each}}
   {{else}}
-  <tr><td colspan=0>No puzzles in this round yet.</td></tr>
+  <tr><td colspan=5>No puzzles in this round yet.</td></tr>
   {{/if}}
-  </tbody>
   {{#unless "true"}}{{#with round}}{{>blackboard_tags}}{{/with}}{{/unless}}
   {{#if canEdit}}
   <div class="bb-round-buttons" data-bbedit="rounds/{{round._id}}">
@@ -287,7 +285,6 @@
      </button>
   </div>
   {{/if}}{{/if}}
-  </section>
 </template>
 
 <template name="nick_presence">
