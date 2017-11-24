@@ -96,9 +96,25 @@
      </button>
    </div>
   {{/if}}
+  
+  <table class="table table-bordered table-condensed bb-puzzle">
+  <thead>
+    {{#unless compactMode}}
+    <tr>
+      <th class="puzzle-name">Name</th>
+      <th class="puzzle-answer">Solution</th>
+      <th class="puzzle-status">Status</th>
+      {{#unless canEdit}}
+      <th class="puzzle-working">Working on this</th>
+      <th class="puzzle-update">Last update</th>
+      {{/unless}}
+    </tr>
+    {{/unless}}
+  </thead>
     {{#each rounds}}
       {{> blackboard_round }}
     {{/each}}
+  </table>
     </section>
     {{/each}}
   </div><!-- bb-tables -->
@@ -156,20 +172,8 @@
     <small>({{rX}}: {{num_solved}}/{{num_puzzles}} puzzles solved)</small>
   {{/if}}
   </h3>
-
+<tbody>
   {{#if hasPuzzles}}
-  <table class="table table-bordered table-condensed bb-puzzle"><tbody>
-    {{#unless compactMode}}
-    <tr>
-      <th class="puzzle-name">Name</th>
-      <th class="puzzle-answer">Solution</th>
-      <th class="puzzle-status">Status</th>
-      {{#unless canEdit}}
-      <th class="puzzle-working">Working on this</th>
-      <th class="puzzle-update">Last update</th>
-      {{/unless}}
-    </tr>
-    {{/unless}}
     {{! META }}
     {{#if showMeta}}
     <tr>
@@ -256,10 +260,10 @@
     {{#each puzzles}}
       {{> blackboard_puzzle}}
     {{/each}}
-  </tbody></table>
   {{else}}
-  <p><i>No puzzles in this round yet.</i></p>
+  <tr><td colspan=0>No puzzles in this round yet.</td></tr>
   {{/if}}
+  </tbody>
   {{#unless "true"}}{{#with round}}{{>blackboard_tags}}{{/with}}{{/unless}}
   {{#if canEdit}}
   <div class="bb-round-buttons" data-bbedit="rounds/{{round._id}}">
