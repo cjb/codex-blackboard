@@ -143,11 +143,12 @@ Template.header_loginmute.helpers
     nick = Session.get 'nick'
     return nick unless nick
     n = model.Nicks.findOne canon: model.canonical(nick)
+    cn = n?.canon or model.canonical(nick)
     return {
       name: n?.name or nick
-      canon: n?.canon or model.canonical(nick)
+      canon: cn
       realname: model.getTag n, 'Real Name'
-      gravatar: (model.getTag n, 'Gravatar') or "#{nick}@#{settings.DEFAULT_HOST}"
+      gravatar: (model.getTag n, 'Gravatar') or "#{cn}@#{settings.DEFAULT_HOST}"
     }
   wikipage: ->
     return '' if Session.equals('currentPage', 'blackboard')
@@ -316,7 +317,7 @@ Template.header_nickmodal_contents.onCreated ->
       $('#nickEmail').val(gravatar or '')
     this.updateGravatar()
   this.updateGravatar = () =>
-    email = $('#nickEmail').val() or "#{$('#nickInput').val()}@#{settings.DEFAULT_HOST}"
+    email = $('#nickEmail').val() or "#{model.canonical($('#nickInput').val())}@#{settings.DEFAULT_HOST}"
     gravatar = $.gravatar email,
       image: 'wavatar' # 'monsterid'
       classes: 'img-polaroid'
