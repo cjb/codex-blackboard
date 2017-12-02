@@ -27,7 +27,8 @@
   @chat-arrow-size: 6px;
   @chat-arrow-height: 15px;
   @gravatar-size: 48px;
-  .media + .media.bb-message-followup {
+  .media + .media.bb-message-followup,
+  .media.bb-message-followup-client {
       margin-top: -9px;
       &:before, &:after {
         visibility: hidden;
@@ -202,7 +203,8 @@
         -webkit-border-radius: 0px;
       }
     }
-    .media + .media.bb-message-followup { margin-top: -4px; }
+    .media + .media.bb-message-followup,
+    .media.bb-message-followup-client { margin-top: -4px; }
     .bb-message-action, .bb-message-system { padding-left: 6px; }
     .bb-message-last-read { margin-left: 0px; margin-right: 0px; }
     .bb-message-body {

@@ -18,6 +18,9 @@ MIGRATE_ANSWERS = false
 # move pages of messages to oldmessages collection
 MOVE_OLD_PAGES = true
 
+# Server-side, client-side, or no follow-up processing
+followupStyle = -> Meteor.settings?.public?.followupStyle ? 'client'
+
 # helper function: like _.throttle, but always ensures `wait` of idle time
 # between invocations.  This ensures that we stay chill even if a single
 # execution of the function starts to exceed `wait`.
@@ -271,6 +274,8 @@ if Meteor.isServer
 #   followup: boolean (true if the previous message in the log is not
 #                      a system/action/oplog message and shares the same
 #                      `nick` and `to` values)
+#             ^ This field is only accurate if we are doing server-side
+#               followup processing (settings.FOLLOWUP_STYLE == 'server')
 #   useful: boolean (true for useful responses from bots; not set for "fun"
 #                    bot messages and commands that trigger them.)
 #   useless_cmd: boolean (true if this message triggered the bot to
@@ -300,7 +305,7 @@ if Meteor.isServer
   # watch messages collection and set the followup field as appropriate
   # (followup field should already be set properly when the field is
   #  archived into the OldMessages collection)
-  do ->
+  if followupStyle() is 'server' then do ->
     # defer (and then throttle) this computation on startup, so
     # startup doesn't take forever.
     initiallyDefer = true
@@ -1142,11 +1147,12 @@ spread_id_to_link = (id) ->
       # there are multiple messages with the same timestamp); there's
       # a server observe thread to compute the actual correct value.  we just
       # want to reduce flicker in the common case.
-      prev = Messages.find(
-        {room_name: newMsg.room_name, timestamp: $lt: newMsg.timestamp},
-        {sort: [['timestamp','desc']], limit: 1 }).fetch()
-      if prev.length and computeMessageFollowup(prev[0], newMsg)
-        newMsg.followup = true
+      if followupStyle() is 'server'
+        prev = Messages.find(
+          {room_name: newMsg.room_name, timestamp: $lt: newMsg.timestamp},
+          {sort: [['timestamp','desc']], limit: 1 }).fetch()
+        if prev.length and computeMessageFollowup(prev[0], newMsg)
+          newMsg.followup = true
       newMsg._id = Messages.insert newMsg
       return newMsg
 
@@ -1593,6 +1599,7 @@ share.model =
   pretty_collection: pretty_collection
   getTag: getTag
   isStuck: isStuck
+  followupStyle: followupStyle
   canonical: canonical
   drive_id_to_link: drive_id_to_link
   spread_id_to_link: spread_id_to_link

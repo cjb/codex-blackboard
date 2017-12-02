@@ -72,13 +72,13 @@
      {{body}}
 </div>
       {{else if message.action}}
-<div class="bb-message-action{{#unless usefulEnough message}} bb-is-useless{{/unless}}">
+<div class="bb-message-action{{#unless usefulEnough message}} bb-is-useless{{/unless}}" data-nick="{{message.nick}}">
    <div class="pull-right timestamp">{{pretty_ts message.timestamp}}</div>
      <i class="icon-hand-right"></i>
      <span title="{{message.nick}}{{nickLocation message.nick}}" class="{{#if nickNear message.nick}}near{{/if}}">{{nickOrName message.nick}}</span> {{body}}
 </div>
       {{else}}
-<div class="media{{#if message.to}} bb-message-pm{{/if}}{{#if followup}} bb-message-followup{{/if}}{{#unless usefulEnough message}} bb-is-useless{{/unless}}">
+<div class="media{{#if message.to}} bb-message-pm{{/if}}{{#if followup}} bb-message-followup{{/if}}{{#unless usefulEnough message}} bb-is-useless{{/unless}}" data-nick="{{message.nick}}" data-pm-to="{{message.to}}">
   {{gravatar id=email image="wavatar" size=48 classes="media-object pull-left img-rounded" }}
   <div class="media-body bb-message-body">
     <div class="pull-right timestamp">{{pretty_ts message.timestamp}}</div>

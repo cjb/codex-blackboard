@@ -29,12 +29,9 @@ settings.BB_SUB_ALL = server.subAll ? true
 # (PMs are always allows in ringhunters)
 settings.BB_DISABLE_PM = server.disablePM ? false
 
-# use the old client-side followup formatting, which slows down client
-# render speed.  this has been replaced by server-side followup
-# detection... but we're leaving the code in place just in case
-# the server-side code becomes a performance issue.
-# (Note that server-side followups will occassionally not label
-# a followup because a PM (invisible to you) intervened between
-# two messages.  The (slow) client-side followups look specifically
-# at messages visible to you, so don't have this issue.)
-settings.SLOW_CHAT_FOLLOWUPS = server.slowChatFollowups ? false
+# Also: server.followupStyle
+# Options are:
+#  'server' (server-side followups),
+#  'client' (client-side followups), or
+#  'none' (no follow-up rendering)
+# This setting is accessed via model.followupStyle()
