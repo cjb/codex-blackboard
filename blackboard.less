@@ -280,13 +280,7 @@ body {
     color: #888;
     margin-bottom: 0;
   }
-  section {
-    /* Indent our sections to start underneath the chat/update log */
-    padding-top: @navbar-height;
-    margin-top: (-@navbar-height);
-  }
   h2 {
-    border-bottom: 1px solid #e5e5e5;
     font-size: 200%;
     .bb-edit-icon, .bb-delete-icon { margin-top: 13px; }
   }
@@ -325,14 +319,10 @@ body {
   dl {
     margin: 0;
     &:empty { display: none; }
-    /* narrower tag names */
-    @tag-width: 120px;
     dt {
-      width: @tag-width;
       .bb-edit-icon { margin-left: 3px; }
     }
     dd {
-      margin-left: (@tag-width + 10px);
       position: relative; /* fixes z-order, makes whole width clickable */
       .bb-edit-icon { margin-right: 5px; }
       .bb-delete-icon { margin-right: 3px; }
@@ -397,11 +387,6 @@ body {
     /* try to make table spacing more-or-less consistent */
     td,th {
       position: relative; /* fix z-order issues, make whole width clickable */
-      width: 10%;
-      &.puzzle-name   { width: 35%; }
-      &.puzzle-answer { width: 25%; }
-      &.puzzle-update { width: 90px; min-width: 90px; }
-      &.puzzle-working { min-width: 99px; }
     }
 
     .puzzle-working {
