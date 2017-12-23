@@ -179,17 +179,45 @@
 .bb-chat-presence .near:before { .glyphicon-white; }
 
 @media (max-width: 480px) {
+  body {
+    padding-left: 0px;
+    padding-right: 0px;
+    background: white;
+  }
+  .navbar-fixed-top, .navbar-fixed-bottom {
+    margin-left: 0px;
+    margin-right: 0px;
+  }
   .bb-chat-messages {
     .media {
+      margin-top: 0px;
+      margin-bottom: 0px;
       /* hide chat bubble arrows when display gets too narrow */
       &:before, &:after { display: none; }
       .timestamp { float: right; /* still */ }
-      .media-object.pull-left { display: none; }
+      .media-object.pull-left { float: left; /* still */ margin: 0px; }
+      .img-rounded {
+                border-radius: 0px;
+           -moz-border-radius: 0px;
+        -webkit-border-radius: 0px;
+      }
     }
+    .media + .media.bb-message-followup { margin-top: -4px; }
     .bb-message-action, .bb-message-system { padding-left: 6px; }
-    .bb-message-body { min-height: 0; }
+    .bb-message-last-read { margin-left: 0px; margin-right: 0px; }
+    .bb-message-body {
+      /* min-height: 0; */
+              border-radius: 0px;
+         -moz-border-radius: 0px;
+      -webkit-border-radius: 0px;
+    }
   }
 }
+/*
+@media (max-width: 432px) {
+  .bb-chat-messages .media-object.pull-left { display: none; }
+} 
+*/ 
 /* hide messages from bot if bot is muted */
 html.bb-nobot .bb-is-useless { display: none; }
 
