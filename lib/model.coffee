@@ -271,6 +271,10 @@ if Meteor.isServer
 #   followup: boolean (true if the previous message in the log is not
 #                      a system/action/oplog message and shares the same
 #                      `nick` and `to` values)
+#   useful: boolean (true for useful responses from bots; not set for "fun"
+#                    bot messages and commands that trigger them.)
+#   useless_cmd: boolean (true if this message triggered the bot to
+#                         make a not-useful response)
 #
 # Messages which are part of the operation log have `nick`, `message`,
 # and `timestamp` set to describe what was done, when, and by who.
@@ -285,7 +289,9 @@ computeMessageFollowup = (prev, curr) ->
    prev.action == curr.action and
    prev.oplog == curr.oplog and
    prev.nick == curr.nick and
-   prev.to == curr.to)
+   prev.to == curr.to and
+   # folks hiding useless bot cmds might not see the prev message
+   (not prev.useless_cmd))
 if Meteor.isServer
   for M in [ Messages, OldMessages ]
     M._ensureIndex {to:1, room_name:1, timestamp:-1}, {}
@@ -1122,6 +1128,8 @@ spread_id_to_link = (id) ->
         to: canonical(args.to or "") or null
         room_name: args.room_name or "general/0"
         timestamp: UTCNow()
+        useful: args.useful or false
+        useless_cmd: args.useless_cmd or false
       # update the user's 'last read' message to include this one
       # (doing it here allows us to use server timestamp on message)
       unless (args.suppressLastRead or newMsg.system or (not newMsg.nick))
