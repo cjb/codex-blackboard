@@ -132,6 +132,8 @@ share.hubot.codex = (robot) ->
       who: who
       backsolve: backsolve
       provided: provided
+      # I don't mind a little redundancy, but if it bothers you uncomment this:
+      #suppressRoom: msg.envelope.room
     msg.reply "Okay, \"#{answer}\" for #{target.object.name} added to call-in list!"
     msg.finish()
 
