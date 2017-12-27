@@ -1,9 +1,8 @@
 {
   "dependencies": {
     "codex-blackboard-hubot-scripts": {
-      "version": "2.0.0",
-      "resolved": "https://github.com/cscott/codex-blackboard-hubot-scripts/tarball/62d35c1a0134fc59916cc4c8521f4837cb3135a0",
-      "from": "codex-blackboard-hubot-scripts@https://github.com/cscott/codex-blackboard-hubot-scripts/tarball/62d35c1a0134fc59916cc4c8521f4837cb3135a0",
+      "version": "https://github.com/cscott/codex-blackboard-hubot-scripts/tarball/62d35c1a0134fc59916cc4c8521f4837cb3135a0",
+      "integrity": "sha1-ltE65ni59HBf51YXwcVfRV0on0o=",
       "dependencies": {
         "hubot": {
           "version": "2.17.0",
@@ -919,7 +918,9 @@
                               }
                             },
                             "inherits": {
-                              "version": "1.0.0"
+                              "version": "1.0.0",
+                              "resolved": "https://registry.npmjs.org/inherits/-/inherits-1.0.0.tgz",
+                              "integrity": "sha1-OOGXUoW/H3upyE2hArsSdxMirEg="
                             },
                             "mkdirp": {
                               "version": "0.3.5",
@@ -975,7 +976,9 @@
                               "from": "slide@1.1.6"
                             },
                             "yamlish": {
-                              "version": "0.0.5"
+                              "version": "0.0.5",
+                              "resolved": "https://registry.npmjs.org/yamlish/-/yamlish-0.0.5.tgz",
+                              "integrity": "sha1-hsbI5rKLCCdBbcyG90GbulYQtX0="
                             }
                           }
                         }
