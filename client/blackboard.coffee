@@ -102,6 +102,7 @@ Template.blackboard_status_grid.helpers
       pY: "p#{1+index}"
     } for id, index in this.round?.puzzles)
     return p
+  stuck: (x) -> share.model.isStuck x
 
 Template.nick_presence.helpers
   email: ->

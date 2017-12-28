@@ -70,6 +70,10 @@ Template.chat.helpers
     type = Session.get 'type'
     type is 'general' or \
       (model.collection(type)?.findOne Session.get("id"))?
+  object: ->
+    type = Session.get 'type'
+    type isnt 'general' and \
+      (model.collection(type)?.findOne Session.get("id"))
   solved: ->
     type = Session.get 'type'
     type isnt 'general' and \

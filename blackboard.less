@@ -71,12 +71,18 @@ body {
     font-size: .65em;
     text-transform: none;
   }
-  .bb-callin-btn, .bb-addquip-btn {
+  .bb-callin-btn, .bb-addquip-btn, .bb-summon-btn {
     float: right; margin-top: 4px; margin-right: 3px;
   }
 }
 .bb-chat-messages {
   margin-bottom: 26px; /* 41px navbar - 15px padding on #bb-body */
+}
+.bb-chat-callin, .bb-puzzleround {
+  .bb-summon-form {
+    .stuck-at, .stuck-need { width: auto; }
+    .label-stuck-other { display: block; }
+  }
 }
 
 #bb-body {
@@ -175,6 +181,7 @@ body {
     }
   }
 }
+
 #bb-right-sidebar {
   position: fixed;
   right: 14px;
@@ -222,6 +229,9 @@ body {
     }
     .bb-status-solved {
       background:#AAFF99;
+    }
+    .bb-status-stuck {
+      background:#FFFF00;
     }
     .bb-status-unsolved {
       background:#FCFCFC;

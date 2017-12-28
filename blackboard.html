@@ -116,17 +116,17 @@
 <template name="blackboard_status_grid">
   <div class="bb-status-grid">
     {{#each roundgroups}}
-    <div class="bb-status-grid-row bb-status-{{#unless solved}}un{{/unless}}solved">{{link id=_id}}</div>
+    <div class="bb-status-grid-row {{#if solved}}bb-status-solved{{else}}{{#if stuck this}}bb-status-stuck{{else}}bb-status-unsolved{{/if}}{{/if}}">{{link id=_id}}</div>
     {{#each rounds}}
     <div class="bb-status-grid-row">
       <div class="bb-status-grid-cell">
-        <div class="bb-status-{{#unless round.solved}}un{{/unless}}solved">
+        <div class="{{#if round.solved}}bb-status-solved{{else}}{{#if stuck round}}bb-status-stuck{{else}}bb-status-unsolved{{/if}}{{/if}}">
           {{link id=round._id title=round.name text=rX}}:
         </div>
       </div><!--
       -->{{#each puzzles}}<!--
       --><div class="bb-status-grid-cell">
-        <div class="bb-status-{{#unless puzzle.solved}}un{{/unless}}solved">
+        <div class="{{#if puzzle.solved}}bb-status-solved{{else}}{{#if stuck puzzle}}bb-status-stuck{{else}}bb-status-unsolved{{/if}}{{/if}}">
           {{link id=puzzle._id title=puzzle.name text=puzzle_num}}
         </div>
       </div><!--

@@ -7,7 +7,9 @@
 <div class="bb-top-content">{{! start top of splitter }}
 
 <div class="bb-top-left-content">{{! start top left splitter }}
-{{#unless puzzle.solved}}{{> puzzle_callin_modal}}{{/unless}}
+{{#unless puzzle.solved}}
+  {{#with puzzle}}{{> puzzle_callin_modal}}{{> puzzle_summon_modal}}{{/with}}
+{{/unless}}
 <h1>Puzzle <small>{{puzzle.name}}
   (<a class="bb-wiki" href="{{wikiRP r=round_num p=puzzle_num}}">wiki r{{round_num}}p{{puzzle_num}}</a>)
   {{#if puzzle.link}}(<a href="{{puzzle.link}}" target="_blank">puzzle link <i class="icon-share-alt"></i></a>){{/if}}
@@ -96,6 +98,66 @@ Open spreadsheet in new window</a>
     </dd>
 {{/each}}
 </dl>
+</template>
+
+<template name="puzzle_summon_modal">
+<button class="btn btn-small bb-summon-btn {{#if stuck}}stuck{{else}}unstuck{{/if}} {{#if currentPageEquals "chat"}}btn-inverse{{/if}}">{{#if stuck}}Clear STUCK status{{else}}Flag as STUCK{{/if}}</button>
+<div class="modal">
+  <div class="modal-header">
+    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+    <h3>Call in the cavalry on a STUCK puzzle</h3>
+  </div>
+  <div class="modal-body">
+
+    <p>So you're stuck, huh?  We have a few team members who are
+      particularly good at the process needed to get puzzles over
+      persistent humps.</p>
+
+    <p>Before you call them in, have you gone through
+      a <a target="_blank"
+      href="https://acme-corp.com/0101/haveyoutried.pdf">"Have You
+      Tried?"</a> list? (Here's <a target="_blank"
+      href="http://www.danielwakabayashi.com/pturnips_andy_stuck.html">another
+      one</a>.)  If you've done something once, have you tried "doing it
+      again"?</p>
+
+    <p>If you're ready to call in the cavalry, could you categorize
+      your particular brand of stuck-ness?</p>
+
+    <form class="form-inline bb-summon-form">
+      <p>
+        <label>I'm stuck
+        <select class="stuck-at">
+          <option value="at start">at the very start of the puzzle (no clue).</option>
+          <option value="after obvious">after we've done the initial obvious stuff.</option>
+          <option value="in the middle">somewhere in the middle muddle.</option>
+          <option value="at extraction">at the final extraction step.</option>
+        </select></label>
+      </p>
+      <p>
+        <label>I need
+        <select class="stuck-need">
+          <option value="ideas">any idea how to proceed.</option>
+          <option value="narrowing">help narrowing down a lot of possible ideas.</option>
+          <option value="a thing">a physical item.</option>
+          <option value="a place">presence at a physical location.</option>
+          <option value="special skills">someone with special skills.</option>
+          <option value="other">something else.</option>
+        </select></label>
+      </p>
+      <p>
+        <label class="label-stuck-other">
+        Other brief information that may be helpful:<br/>
+        <input class="stuck-other input-block-level" type="text" placeholder="I need a rubber chicken.">
+        </label>
+      </p>
+    </form>
+  </div>
+  <div class="modal-footer">
+    <button class="btn" data-dismiss="modal">Cancel</button>
+    <button class="btn btn-primary bb-summon-submit">Send in the call for help!</button>
+  </div>
+</div>
 </template>
 
 <template name="puzzle_callin_modal">
