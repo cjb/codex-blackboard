@@ -54,6 +54,106 @@ if settings.BB_SUB_ALL
   Meteor.subscribe 'all-roundsandpuzzles'
 # we also always subscribe to the last-pages feed; see chat.coffee
 
+notificationDeps = {}
+
+keystring = (k) -> "notification_#{k}"
+
+# Chrome for Android only lets you use Notifications via
+# ServiceWorkerRegistration, not directly with the Notification class.
+# It appears no other browser (that isn't derived from Chrome) is like that.
+# Since there's no capability to detect, we have to use user agent.
+isAndroidChrome = -> /Android.*Chrome\/[.0-9]*/.test(navigator.userAgent)
+
+notificationDefaults =
+  callins: false
+  answers: true
+  announcements: true
+  'new-puzzles': true
+  stuck: false
+
+share.notification =
+  count: () ->
+    notificationDeps['@count'] ?= new Tracker.Dependency
+    notificationDeps['@count'].depend()
+    i = 0
+    for stream, def of notificationDefaults
+      if localStorage.getItem(keystring stream) is "true"
+        i += 1
+    return i
+  set: (k, v) ->
+    ks = keystring k
+    v = notificationDefaults[k] if v is undefined
+    was = localStorage.getItem(ks)
+    localStorage.setItem(ks, v)
+    notificationDeps[ks] ?= new Tracker.Dependency
+    notificationDeps[ks].changed()
+    if was isnt v
+      notificationDeps['@count'] ?= new Tracker.Dependency
+      notificationDeps['@count'].changed()
+  get: (k) ->
+    ks = keystring k
+    notificationDeps[ks] ?= new Tracker.Dependency
+    notificationDeps[ks].depend()
+    v = localStorage.getItem(ks)
+    return unless v?
+    v is "true"
+  # On android chrome, we clobber this with a version that uses the
+  # ServiceWorkerRegistration.
+  notify: (title, settings) ->
+    new Notification title, settings
+  ask: ->
+    Notification.requestPermission (ok) ->
+      Session.set 'notifications', ok
+      setupNotifications() if ok is 'granted'
+
+setupNotifications = ->
+  if isAndroidChrome()
+    navigator.serviceWorker.register(Meteor._relativeToSiteRootUrl 'empty.js').then((reg) ->
+      share.notification.notify = (title, settings) ->
+        reg.showNotification title, settings
+      finishSetupNotifications()
+    ).catch (error) -> Session.set 'notifications', 'default'
+    return
+  finishSetupNotifications()
+
+finishSetupNotifications = ->
+  for stream, def of notificationDefaults
+    share.notification.set(stream, def) unless share.notification.get(stream)?
+
+Meteor.startup ->
+  now = share.model.UTCNow() + 3
+  Tracker.autorun ->
+    return if share.notification.count() is 0 # unsubscribes
+    p = share.chat.pageForTimestamp 'oplog/0', 0, {subscribe:true}
+    return unless p? # wait until page info is loaded
+    messages = if p.archived then "oldmessages" else "messages"
+    Meteor.subscribe "#{messages}-in-range", p.room_name, p.from, p.to
+  share.model.Messages.find({room_name: 'oplog/0', timestamp: $gte: now}).observeChanges
+    added: (id, msg) ->
+      return unless Notification.permission is 'granted'
+      return unless share.notification.get(msg.stream)
+      gravatar = $.gravatar chat.nickEmail(msg.nick),
+        image: 'wavatar'
+        size: 192
+        secure: true
+      body = msg.body
+      if msg.type and msg.id
+        body = "#{body} #{share.model.pretty_collection(msg.type)}
+                #{share.model.collection(msg.type).findOne(msg.id)?.name}"
+      share.notification.notify msg.nick,
+        body: body
+        tag: id
+        icon: gravatar[0].src
+  if not Notification
+    Session.set 'notifications', 'denied'
+    return
+  Session.set 'notifications', Notification.permission
+  setupNotifications() if Notification.permission is 'granted'
+
+addEventListener 'storage', (event) ->
+  return unless event.storageArea is localStorage
+  notificationDeps[event.key]?.changed()
+
 # Router
 BlackboardRouter = Backbone.Router.extend
   routes:

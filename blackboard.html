@@ -26,6 +26,33 @@
        Add new round group
      </button>
      </div>
+    {{else}}
+     <div class="btn-group text-left">
+     {{#if notificationsEnabled}}
+     <button class="btn btn-small bb-notification-enabled{{#if anyNotificationsEnabled}} btn-inverse{{/if}}">
+       <i class="{{#if anyNotificationsEnabled}}icon-bullhorn icon-white{{else}}icon-off{{/if}}"></i>
+       Notifications
+     </button>
+     <button class="btn btn-small dropdown-toggle{{#if anyNotificationsEnabled}} btn-inverse{{/if}}" data-toggle="dropdown">
+       <span class="caret"></span>
+     </button>
+     <ul class="dropdown-menu pull-left bb-notification-controls">
+      {{#each notificationStreams}}
+        <li><a href="#"><label for="bb-notification-{{name}}">
+          <input type="checkbox" id="bb-notification-{{name}}"
+                 data-notification-stream="{{name}}"
+                 checked="{{notificationStreamEnabled name}}">
+        {{label}}
+        </label></a></li>
+      {{/each}}
+     </ul>
+     {{else if notificationsAsk}}
+     <button class="btn btn-small bb-notification-ask">
+       <i class="icon-off"></i>
+       Enable notifications
+     </button>
+     {{/if}}
+     </div>
     {{/if}}
 <div class="btn-group bb-sort-order">
   <button class="btn btn-small {{#if sortReverse}}active{{/if}}"

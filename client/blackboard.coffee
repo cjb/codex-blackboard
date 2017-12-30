@@ -78,6 +78,47 @@ Template.blackboard.helpers
   hideStatus: -> Session.get 'hideStatus'
   compactMode: compactMode
   nCols: nCols
+
+# Notifications
+notificationStreams = [
+  {name: 'new-puzzles', label: 'New Puzzles'}
+  {name: 'announcements', label: 'Announcements'}
+  {name: 'callins', label: "Call-Ins"}
+  {name: 'answers', label: "Answers"}
+  {name: 'stuck', label: 'Stuck Puzzles'}
+]
+
+notificationStreamsEnabled = ->
+  item.name for item in notificationStreams \
+    when share.notification?.get?(item.name)
+
+Template.blackboard.helpers
+  notificationStreams: notificationStreams
+  notificationsAsk: ->
+    p = Session.get 'notifications'
+    p isnt 'granted' and p isnt 'denied'
+  notificationsEnabled: -> Session.equals 'notifications', 'granted'
+  anyNotificationsEnabled: -> (share.notification.count() > 0)
+  notificationStreamEnabled: (stream) -> share.notification.get stream
+Template.blackboard.events
+  "click .bb-notification-ask": (event, template) ->
+    share.notification.ask()
+  "click .bb-notification-enabled": (event, template) ->
+    if share.notification.count() > 0
+      for item in notificationStreams
+        share.notification.set(item.name, false)
+    else
+      for item in notificationStreams
+        share.notification.set(item.name) # default value
+  "click .bb-notification-controls.dropdown-menu a": (event, template) ->
+    $inp = $( event.currentTarget ).find( 'input' )
+    stream = $inp.attr('data-notification-stream')
+    share.notification.set(stream, !share.notification.get(stream))
+    $( event.target ).blur()
+    return false
+  "change .bb-notification-controls [data-notification-stream]": (event, template) ->
+    share.notification.set event.target.dataset.notificationStream, event.target.checked
+
 ############## groups, rounds, and puzzles ####################
 Template.blackboard.helpers
   roundgroups: ->
@@ -96,7 +137,7 @@ Template.blackboard.helpers
     } for id, index in this.rounds)
     r.reverse() if Session.get 'sortReverse'
     return r
-  stuck: share.model.isStuck 
+  stuck: share.model.isStuck
 
 Template.blackboard_status_grid.helpers
   roundgroups: ->

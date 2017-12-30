@@ -117,6 +117,11 @@ Template.chat.helpers
     type isnt 'general' and \
       (model.collection(type)?.findOne Session.get("id"))?.solved
 
+nickEmail = (nick) ->
+  cn = model.canonical(nick)
+  n = model.Nicks.findOne canon: cn
+  return model.getTag(n, 'Gravatar') or "#{cn}@#{settings.DEFAULT_HOST}"
+
 # Template Binding
 Template.messages.helpers
   room_name: -> Session.get('room_name')
@@ -154,10 +159,7 @@ Template.messages.helpers
         followup: (serverFollowup and m.followup) or false
         message: m
 
-  email: ->
-    cn = model.canonical(this.message.nick)
-    n = model.Nicks.findOne canon: cn
-    return model.getTag(n, 'Gravatar') or "#{cn}@#{settings.DEFAULT_HOST}"
+  email: -> nickEmail this.message.nick
   body: ->
     body = this.message.body or ''
     unless this.message.bodyIsHtml
@@ -681,6 +683,7 @@ share.chat =
   cleanupChat: cleanupChat
   hideMessageAlert: hideMessageAlert
   joinRoom: joinRoom
+  nickEmail: nickEmail
   # pagination helpers
   pageForTimestamp: pageForTimestamp
   messagesForPage: messagesForPage
