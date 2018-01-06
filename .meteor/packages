@@ -21,9 +21,9 @@ codex-blackboard-hubot-scripts
 cscottnet:random-name
 cscottnet:geolocation
 reactive-var@1.0.11
-meteor-base@1.0.4
+meteor-base@1.1.0
 mobile-experience@1.0.4
-mongo@1.1.24
+mongo@1.1.18
 blaze-html-templates@1.0.4
 session@1.1.7
 jquery@1.11.10
@@ -33,7 +33,8 @@ reload@1.1.11
 ejson@1.0.13
 spacebars@1.0.12
 standard-minifier-css@1.3.4
-standard-minifier-js@2.0.0
-modules@0.8.2
+standard-minifier-js@2.1.0
+modules@0.9.0
 shell-server@0.2.3
 babel-runtime@1.0.1
+dynamic-import
