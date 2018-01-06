@@ -96,15 +96,26 @@ To migrate the meteor database format, first ensure that you have
 `mongodump` installed (`apt-get install mongo-tools` if necessary).
 
 Ensure meteor is running your app before starting the dump:
+
     $ meteor --settings private/settings.json &
     $ mongodump -h 127.0.0.1 --port 3001 -d meteor
+
 Then stop meteor and reset the DB (which will create a DB of the new type):
+
     $ meteor reset
+
 Start up meteor again, and restore the DB into the new storage engine:
+
     $ meteor --settings private/settings.json &
     $ mongorestore --maintainInsertionOrder -h 127.0.0.1 --port 3001 -d meteor --drop dump/meteor
+
 If your version of mongorestore is "old", then you might have to drop the
 `--maintainInsertionOrder` argument to the `mongorestore` command.
+
+The machine we've been using for the hunt has an "old" mongodump, so
+we've been taking and restoring the backups over an ssh tunnel:
+
+    $ ssh remotehost -L 3001:localhost:3001
 
 ## Goals, etc.
 
