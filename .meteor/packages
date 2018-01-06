@@ -8,9 +8,9 @@ coffeescript@1.11.1_4
 backbone
 less@2.7.9
 bootstrap
-http@1.2.11
+http@1.2.12
 random@1.0.10
-check@1.2.4
+check@1.2.5
 cscottnet:googleapis
 cscottnet:twitter
 cscottnet:mail-listener2
@@ -23,7 +23,7 @@ cscottnet:geolocation
 reactive-var@1.0.11
 meteor-base@1.0.4
 mobile-experience@1.0.4
-mongo@1.1.15
+mongo@1.1.16
 blaze-html-templates@1.0.4
 session@1.1.7
 jquery@1.11.10
@@ -32,8 +32,8 @@ logging@1.1.17
 reload@1.1.11
 ejson@1.0.13
 spacebars@1.0.12
-standard-minifier-css@1.3.3
-standard-minifier-js@1.2.2
+standard-minifier-css@1.3.4
+standard-minifier-js@1.2.3
 modules@0.7.9
-shell-server@0.2.2
+shell-server@0.2.3
 babel-runtime@1.0.1
