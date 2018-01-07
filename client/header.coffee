@@ -403,6 +403,7 @@ ensureNick = share.ensureNick = (cb=(->)) ->
 Template.header_confirmmodal.helpers
   confirmModalVisible: -> !!(Session.get 'confirmModalVisible')
 Template.header_confirmmodal_contents.onRendered ->
+  $('#confirmModal .bb-confirm-cancel').focus()
   $('#confirmModal').modal show: true
 Template.header_confirmmodal_contents.events
   "click .bb-confirm-ok": (event, template) ->
