@@ -55,10 +55,9 @@ sendHelper = Meteor.bindEnvironment (robot, envelope, strings, map) ->
       continue
     if string?
       lines.push string
-  if lines.length and not props.useful
+  if lines.length and envelope.message.direct and (not props.useful)
     model.Messages.update envelope.message.id, $set: useless_cmd: true
   lines.map (line) ->
-    console.log 'response', line, props
     try
       map(line, props)
     catch err
@@ -195,6 +194,7 @@ Meteor.startup ->
       # if private, ensure it's treated as a direct address
       if tm.private and not mynameRE.test(tm.text)
         tm.text = "#{robot.name} #{tm.text}"
+      tm.direct = mynameRE.test(tm.text)
       adapter.receive tm
   startup = false
   Meteor.call "newMessage",
