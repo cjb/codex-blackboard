@@ -82,7 +82,7 @@ Template.registerHelper 'nickLocation', (args) ->
   args = share.keyword_or_positional 'nick', args
   return '' if args.nick is Session.get('nick') # that's me!
   if args.nick is 'codexbot'
-    idx = Math.floor(Session.get('currentTime') / 10*60*1000)
+    idx = Math.floor(Session.get('currentTime') / (10*60*1000))
     return " is #{CODEXBOT_LOCATIONS[idx%CODEXBOT_LOCATIONS.length]}"
   d = distanceTo(args.nick)
   return '' unless d?
