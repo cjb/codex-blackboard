@@ -628,6 +628,9 @@ html.fullHeight {
     margin-left: -20px;
     margin-right: -20px;
   }
+  .puzzle-answer, .puzzle-status, .puzzle-working, .puzzle-update {
+    word-break: break-all;
+  }
 }
 
 /* Tablet
@@ -639,7 +642,8 @@ html.fullHeight {
   }
 
   #roomName { width:85px; } /* narrow room name input */
-  .bb-omit-when-narrow { display: none; }
+  .bb-omit-when-narrow, .puzzle-working, .puzzle-update { display: none; }
+  .puzzle-answer { word-break: break-all; }
 
   /* fix up .dl-horizontal styles */
   #bb-tables dl {
