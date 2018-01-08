@@ -71,28 +71,30 @@
    <div class="pull-right timestamp">{{pretty_ts message.timestamp}}</div>
      {{body}}
 </div>
-      {{else if message.action}}
-<div class="bb-message-action{{#unless usefulEnough message}} bb-is-useless{{/unless}}" data-nick="{{message.nick}}">
+      {{else if usefulEnough message}}
+        {{# if message.action}}
+<div class="bb-message-action" data-nick="{{message.nick}}">
    <div class="pull-right timestamp">{{pretty_ts message.timestamp}}</div>
      <i class="icon-hand-right"></i>
      <span title="{{message.nick}}{{nickLocation message.nick}}" class="{{#if nickNear message.nick}}near{{/if}}">{{nickOrName message.nick}}</span> {{body}}
 </div>
-      {{else}}
-<div class="media{{#if message.to}} bb-message-pm{{/if}}{{#if followup}} bb-message-followup{{/if}}{{#unless usefulEnough message}} bb-is-useless{{/unless}}" data-nick="{{message.nick}}" data-pm-to="{{message.to}}">
+        {{else}}
+<div class="media{{#if message.to}} bb-message-pm{{/if}}{{#if followup}} bb-message-followup{{/if}}" data-nick="{{message.nick}}" data-pm-to="{{message.to}}">
   {{gravatar id=email image="wavatar" size=48 classes="media-object pull-left img-rounded" }}
   <div class="media-body bb-message-body">
     <div class="pull-right timestamp">{{pretty_ts message.timestamp}}</div>
     <h5 class="media-heading"><span title="{{message.nick}}{{nickLocation message.nick}}" class="{{#if nickNear message.nick}}near{{/if}}">{{nickOrName message.nick}}</span>
-    {{#if message.to}}
+          {{#if message.to}}
     <small>(Private message to {{nickOrName message.to}})</small>
-    {{/if}}
+          {{/if}}
     </h5>
     {{body}}
   </div>
 </div>
-      {{/if}}
-      {{#if isLastRead message.timestamp}}
+        {{/if}}
+        {{#if isLastRead message.timestamp}}
 <div class="bb-message-last-read">read</div>
+        {{/if}}
       {{/if}}
     {{else}}
       <p align="center">
