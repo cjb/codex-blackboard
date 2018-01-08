@@ -4,7 +4,7 @@
 # but you can also edit it by hand.
 
 insecure@1.0.7
-coffeescript@1.11.1_4
+coffeescript
 backbone
 less@2.7.11
 bootstrap
