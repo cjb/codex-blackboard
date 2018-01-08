@@ -70,7 +70,7 @@
     {{/unless}}
   </thead>
     {{#each roundgroups}}<tbody>
-    <tr><th colspan=5 id="group{{_id}}">
+    <tr><th colspan="{{nCols}}" id="group{{_id}}">
       <h2 class="bb-editable" data-bbedit="roundgroups/{{_id}}/title">
     {{#if editing "roundgroups" _id "title"}}
       <input type="text" id="roundgroups-{{_id}}-title"
@@ -155,7 +155,7 @@
 
 <template name="blackboard_round">
   {{#if showRound }}
-  <tr><th colspan=5>
+  <tr><th colspan="{{nCols}}">
   <h3 id="r{{round._id}}{{updateScrollSpy}}" class="bb-editable" data-bbedit="rounds/{{round._id}}/title">
   {{#if editing "rounds" round._id "title"}}
       <input type="text" id="rounds-{{round._id}}-title"
@@ -260,7 +260,7 @@
       {{> blackboard_puzzle}}
     {{/each}}
   {{else}}
-  <tr><td colspan=5>No puzzles in this round yet.</td></tr>
+  <tr><td colspan="{{nCols}}">No puzzles in this round yet.</td></tr>
   {{/if}}
   {{#unless "true"}}{{#with round}}{{>blackboard_tags}}{{/with}}{{/unless}}
   {{#if canEdit}}
