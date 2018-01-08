@@ -18,7 +18,6 @@ codex-blackboard-hubot-scripts@2.0.0
 coffeescript@1.12.7_3
 coffeescript-compiler@1.12.7_3
 cscottnet:alertify-bootstrap@0.3.11
-cscottnet:es5-shim@4.4.1
 cscottnet:geolocation@1.0.4
 cscottnet:googleapis@2.1.7_1
 cscottnet:hubot@2.17.0

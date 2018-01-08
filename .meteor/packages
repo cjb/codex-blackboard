@@ -15,7 +15,6 @@ cscottnet:googleapis
 cscottnet:twitter
 cscottnet:mail-listener2
 cscottnet:alertify-bootstrap
-cscottnet:es5-shim
 cscottnet:hubot
 codex-blackboard-hubot-scripts
 cscottnet:random-name
@@ -38,3 +37,4 @@ modules@0.11.0
 shell-server@0.3.0
 babel-runtime@1.1.1
 dynamic-import@0.2.0
+ecmascript
