@@ -262,19 +262,13 @@
   {{else}}
   <tr><td colspan="{{nCols}}">No puzzles in this round yet.</td></tr>
   {{/if}}
-  {{#unless "true"}}{{#with round}}{{>blackboard_tags}}{{/with}}{{/unless}}
   {{#if canEdit}}
+  <tr><td colspan="{{nCols}}">
   <div class="bb-round-buttons" data-bbedit="rounds/{{round._id}}">
      <button class="btn btn-mini btn-inverse bb-add-puzzle">
        <i class="icon-plus icon-white"></i>
        Add new puzzle to this round
      </button>
-     {{#unless "true"}}
-     <button class="btn btn-mini btn-inverse bb-add-tag">
-       <i class="icon-tag icon-white"></i>
-       Add new tag to this round
-     </button>
-     {{/unless}}
      <button class="btn btn-mini btn-inverse bb-move-down">
        <i class="icon-arrow-down icon-white"></i>
        Move round down
@@ -284,7 +278,9 @@
        Move round up
      </button>
   </div>
-  {{/if}}{{/if}}
+  </td></tr>
+  {{/if}}
+  {{/if}}
 </template>
 
 <template name="nick_presence">
