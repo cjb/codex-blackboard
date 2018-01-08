@@ -55,6 +55,11 @@ useful = (node) ->
   return true unless Session.equals('nobot', true)
   return not node.classList.contains('bb-is-useless')
 
+someUseful = (nodeList) ->
+  for n in nodeList
+    return true if useful n
+  return false
+
 # compare to: computeMessageFollowup in lib/model.coffee
 computeMessageFollowup = (prev, curr) ->
   return false unless prev?.classList?.contains("media")
@@ -64,8 +69,9 @@ computeMessageFollowup = (prev, curr) ->
   return false unless prev.dataset.pmTo == curr.dataset.pmTo
   return true
 
-assignMessageFollowup = (curr, prev=undefined) ->
-  return unless useful(curr) and curr.classList.contains('media')
+assignMessageFollowup = (curr, prev) ->
+  return prev unless useful(curr)
+  return curr unless curr.classList.contains('media')
   if prev is undefined
     prev = curr.previousElementSibling
   while prev? and not useful(prev)
@@ -77,18 +83,16 @@ assignMessageFollowup = (curr, prev=undefined) ->
     curr.classList.add("bb-message-followup-client")
   else
     curr.classList.remove("bb-message-followup-client")
+  return curr
 
 # by keeping track of the last useful node as we go through the list,
 # we avoid O(N^2) blowup for long useless node lists.
-assignMessageFollowupList = (nodeList, prev=undefined) ->
+assignMessageFollowupList = (nodeList, prev) ->
   if nodeList.length > 0 and prev is undefined
     prev = nodeList[0].previousElementSibling
-  while prev? and not useful(prev)
-    prev = prev.previousElementSibling
   for n in nodeList
-    continue unless useful(n)
-    assignMessageFollowup n, prev
-    prev = n
+    if useful(n)
+      prev = assignMessageFollowup n, prev
   return prev
 
 refreshFollowups = ->
@@ -102,12 +106,22 @@ instachat["alertWhenUnreadMessages"] = false
 instachat["scrolledToBottom"]        = true
 instachat["mutationObserver"] = if model.followupStyle() is 'client' then \
 new MutationObserver (recs, obs) ->
+  # note that nodes in rec.nextSibling may themselves be removed by a
+  # subsequent MutationRecord.  Keep a map to allow us to find the eventual
+  # nextSibling
+  m = new Map()
   for rec in recs
-    # previous element's followup status can't be affected by changes after it
+    (m.set n, rec.nextSibling) for n in rec.removedNodes
+
+  for rec in recs
+    # previous element's followup status can't be affected by changes after it;
+    # either and added or a removed node needs to be useful in order for the
+    # status of the next element to change
+    continue unless (someUseful rec.addedNodes) or (someUseful rec.removedNodes)
     prev = assignMessageFollowupList rec.addedNodes, rec.previousSibling
     nextEl = rec.nextSibling
-    while nextEl? and not useful(nextEl)
-      nextEl = nextEl?.nextElementSibling
+    nextEl = m.get(nextEl) while m.has(nextEl)
+    nextEl = nextEl.nextSibling while nextEl? and not useful(nextEl)
     assignMessageFollowup nextEl, prev
   return
 
