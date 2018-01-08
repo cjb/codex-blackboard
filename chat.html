@@ -113,7 +113,8 @@ No chat messages{{#if timestamp}} before {{pretty_ts timestamp}}{{/if}}.
       {{/if}}
       <a href="/chat/{{room_name}}" class="chat-link">See most recent logs</a>
       </p>
+    {{/if}}{{/if}}
     {{! Ensure there's always a small "last-child" here to scroll to.}}
-    {{else}}<p></p>{{/if}}{{else}}<p></p>{{/if}}
+    <p id=chat-bottom></p>
   </div>
 </template>
