@@ -23,7 +23,8 @@ Template.registerHelper 'typeEquals', (arg) ->
   # register a more precise dependency on the value of type
   Session.equals 'type', arg
 Template.registerHelper 'canEdit', () ->
-  (Session.get 'nick') and (Session.get 'canEdit')
+  (Session.get 'nick') and (Session.get 'canEdit') and \
+  (Session.equals 'currentPage', 'blackboard')
 Template.registerHelper 'editing', (args..., options) ->
   canEdit = options?.hash?.canEdit or (Session.get 'canEdit')
   return false unless (Session.get 'nick') and canEdit
