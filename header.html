@@ -35,7 +35,7 @@
     <a href="/rounds/{{round._id}}" class="rounds-link">
       <i class="icon-folder-open icon-white"></i> Round: {{round.name}}
       {{#if round.link}} <span class="fake-link" data-href="{{round.link}}" title="Link to hunt site"><i class="icon-share-alt icon-white"></i></span>{{/if}}
-      {{#if round.spreadsheet}} <span class="fake-link" data-href="{{spread_link round.spreadsheet}}"><i class="icon-th icon-white"></i></span>{{/if}}
+      {{#if round.spreadsheet}} <span class="fake-link" data-href="{{spread_link round.spreadsheet}}" title="Link to round spreadsheet"><i class="icon-th icon-white"></i></span>{{/if}}
     </a>
   </li>
   {{/if}}
@@ -44,7 +44,7 @@
     <a href="/puzzles/{{puzzle._id}}" class="puzzles-link">
       <i class="icon-book icon-white"></i> Puzzle: {{puzzle.name}}
       {{#if puzzle.link}} <span class="fake-link" data-href="{{puzzle.link}}" title="Link to hunt site"><i class="icon-share-alt icon-white"></i></span>{{/if}}
-      {{#if puzzle.spreadsheet}} <span class="fake-link" data-href="{{spread_link puzzle.spreadsheet}}"><i class="icon-th icon-white"></i></span>{{/if}}
+      {{#if puzzle.spreadsheet}} <span class="fake-link" data-href="{{spread_link puzzle.spreadsheet}}" title="Link to puzzle spreadsheet"><i class="icon-th icon-white"></i></span>{{/if}}
     </a>
   </li>
   {{/if}}
