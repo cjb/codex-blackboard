@@ -10,7 +10,7 @@
   <table class="table"><tbody>{{! tables for layout, oh my }}
     <tr><td>
 {{#unless round.solved}}
-  {{#with round}}{{> puzzle_callin_modal}}{{> puzzle_summon_button}}{{/with}}
+  {{#with round}}{{> puzzle_callin_modal}}{{> puzzle_summon_modal}}{{/with}}
 {{/unless}}
 <h1>Round <small>{{round.name}}
   (<a class="bb-wiki" href="{{wikiRP r=round_num p=0}}">wiki r{{round_num}}p0</a>)
