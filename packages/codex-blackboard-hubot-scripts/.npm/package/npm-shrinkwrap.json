@@ -64,8 +64,8 @@
       "integrity": "sha1-BsIe7RobBq62dVPNxT4jJ0usIpY="
     },
     "codex-blackboard-hubot-scripts": {
-      "version": "https://github.com/cscott/codex-blackboard-hubot-scripts/tarball/465763e2766dae3c3b0b1b9a05dca878479bb1ee",
-      "integrity": "sha1-XLDgfJgnzfRt30v2Fsuy8/D/cjI=",
+      "version": "https://github.com/cscott/codex-blackboard-hubot-scripts/tarball/423818ba01f3289f6c7de7c42ab860a601328e4e",
+      "integrity": "sha1-nz8seVKOaofC8o6JQkbGEqFJios=",
       "dependencies": {
         "coffee-script": {
           "version": "1.12.7",
@@ -257,6 +257,11 @@
           "integrity": "sha1-Y1XTLPGwTN/2tITl5xF4Ky8MOb4="
         }
       }
+    },
+    "hubot-what-the-fox": {
+      "version": "1.1.1",
+      "resolved": "https://registry.npmjs.org/hubot-what-the-fox/-/hubot-what-the-fox-1.1.1.tgz",
+      "integrity": "sha1-+uWdlXBBKrlshzs/MI/pFzb8CSA="
     },
     "hubot-xkcd": {
       "version": "0.0.5",
