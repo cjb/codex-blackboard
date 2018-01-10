@@ -1,22 +1,17 @@
 @font-face
 {
-  font-family: "Inconsolata";
-  src: url("../fonts/Inconsolata.otf");
+  font-family: "Noto Color Emoji";
+  font-style: normal;
+  font-weight: 400;
+  src: local('Noto Color Emoji'), local('NotoColorEmoji'), url('../fonts/NotoColorEmoji.ttf') format('truetype');
 }
 
 @font-face
 {
-  font-family: "Droid Sans";
+  font-family: "Noto Emoji";
   font-style: normal;
   font-weight: 400;
-  src: local('Droid Sans'), local('DroidSans'), url('../fonts/DroidSans.ttf') format('truetype');
-}
-@font-face
-{
-  font-family: "Droid Sans";
-  font-style: normal;
-  font-weight: 700;
-  src: local('Droid Sans Bold'), local('DroidSans-Bold'), url('../fonts/DroidSans-Bold.ttf') format('truetype');
+  src: local('Noto Emoji'), local('NotoEmoji'), url('../fonts/NotoEmoji.ttf') format('truetype');
 }
 
 .ellipsis {
@@ -48,7 +43,18 @@
 body {
   background: url('/img/grid_noise.png');
   background-attachment: fixed;
-  font-family: 'Droid Sans', sans-serif;
+  font-family: "Noto Sans", sans-serif, "Noto Color Emoji", "Noto Emoji";
+  // Override bootstrap
+  input, button, select, textarea {
+    font-family: "Noto Sans", sans-serif, "Noto Color Emoji", "Noto Emoji";
+  }
+}
+// For mobile devices which actually support native emojis:
+body.has-emojis {
+  font-family: "Noto Sans", sans-serif;
+  input, button, select, textarea {
+      font-family: "Noto Sans", sans-serif;
+  }
 }
 .bb-puzzleround, .bb-chat-messages {
   padding-top: 40px; /* allow space for breadcrumbs in navbar */
@@ -67,7 +73,7 @@ body {
     display: inline-block; min-width: 120px;
   }
   .answer > .backsolve {
-    font-family: "Droid Sans", sans-serif;
+    font-family: "Noto Sans", sans-serif, "Noto Color Emoji", "Noto Emoji";
     font-size: .65em;
     text-transform: none;
   }
@@ -692,7 +698,7 @@ html.fullHeight {
       padding-right: 50px;
       font-size: 75%;
       & > .left { display: none; }
-    } 
+    }
     .table-condensed {
       th, td {
         padding: 2px;

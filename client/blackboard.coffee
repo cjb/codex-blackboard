@@ -24,6 +24,22 @@ Meteor.startup ->
       console.log 'that was easy', doc, oldDoc
       unless Session.get 'mute'
         blackboard.newAnswerSound?.play?()
+  # see if we've got native emoji support, and add the 'has-emojis' class
+  # if so; inspired by
+  # https://stackoverflow.com/questions/27688046/css-reference-to-phones-emoji-font
+  checkEmoji = (char, x, y, fillStyle='#000') ->
+    node = document.createElement('canvas')
+    ctx = node.getContext('2d')
+    ctx.fillStyle = fillStyle
+    ctx.textBaseline = 'top'
+    ctx.font = '32px Arial'
+    ctx.fillText(char, 0, 0)
+    return ctx.getImageData(x, y, 1, 1)
+  reddot = checkEmoji '\uD83D\uDD34', 16, 16
+  dancing = checkEmoji '\uD83D\uDD7A', 12, 16 # unicode 9.0
+  if reddot[0] > reddot[1] and dancing[0] > 0
+    console.log 'has unicode 9 color emojis'
+    document.body.classList.add 'has-emojis'
 
 # Returns an event map that handles the "escape" and "return" keys and
 # "blur" events on a text input (given by selector) and interprets them
