@@ -10,7 +10,7 @@
 {{#unless puzzle.solved}}
   {{#with puzzle}}{{> puzzle_callin_modal}}{{> puzzle_summon_modal}}{{/with}}
 {{/unless}}
-<h1>Puzzle <small>{{puzzle.name}}
+<h1 class="{{#if stuck}}bb-status-stuck{{/if}}">Puzzle <small>{{puzzle.name}}
   (<a class="bb-wiki" href="{{wikiRP r=round_num p=puzzle_num}}">wiki r{{round_num}}p{{puzzle_num}}</a>)
   {{#if puzzle.link}}(<a href="{{puzzle.link}}" target="_blank">puzzle link <i class="icon-share-alt"></i></a>){{/if}}
 </small></h1>

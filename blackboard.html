@@ -175,7 +175,7 @@
   {{#if hasPuzzles}}
     {{! META }}
     {{#if showMeta}}
-    <tr>
+    <tr class="{{#if stuck round}}bb-status-stuck{{/if}}">
       <td class="puzzle-name"><div>
         {{#unless canEdit}}
           <a href="{{spread_link round.spreadsheet}}" title="Spreadsheet for round" class="pull-right"><i class="icon-th"></i></a>
@@ -290,7 +290,7 @@
 </template>
 
 <template name="blackboard_puzzle">
-  <tr><!-- {{id}} -->
+  <tr class="{{#if stuck puzzle}}bb-status-stuck{{/if}}"><!-- {{id}} -->
     <td class="puzzle-name"><div>{{! div needed to establish relative pos }}
       <div class="bb-editable" data-bbedit="puzzles/{{puzzle._id}}/title">
       {{#if editing "puzzles" puzzle._id "title"}}

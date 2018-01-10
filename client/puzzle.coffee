@@ -12,6 +12,7 @@ Template.puzzle.helpers
     r.round_num = 1 + group?.round_start + \
                   (group?.rounds or []).indexOf(round?._id)
     r.hunt_year = settings.HUNT_YEAR
+    r.stuck = model.isStuck puzzle
     return r
 
 Template.puzzle.onCreated ->

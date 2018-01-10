@@ -12,6 +12,7 @@ Template.round.helpers
     r.puzzles = ((model.Puzzles.findOne(p) or {_id:p}) \
       for p in (round?.puzzles or []))
     r.hunt_year = settings.HUNT_YEAR
+    r.stuck = model.isStuck round
     return r
   tag: (name) ->
     return (model.getTag this, name) or ''

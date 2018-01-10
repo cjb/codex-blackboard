@@ -96,6 +96,7 @@ Template.blackboard.helpers
     } for id, index in this.rounds)
     r.reverse() if Session.get 'sortReverse'
     return r
+  stuck: share.model.isStuck 
 
 Template.blackboard_status_grid.helpers
   roundgroups: ->
@@ -120,7 +121,7 @@ Template.blackboard_status_grid.helpers
       pY: "p#{1+index}"
     } for id, index in this.round?.puzzles)
     return p
-  stuck: (x) -> share.model.isStuck x
+  stuck: share.model.isStuck
 
 Template.nick_presence.helpers
   email: ->
@@ -316,6 +317,7 @@ Template.blackboard_round.helpers
     count
   compactMode: compactMode
   nCols: nCols
+  stuck: share.model.isStuck 
 
 Template.blackboard_puzzle.helpers
   tag: (name) ->
@@ -331,6 +333,7 @@ Template.blackboard_puzzle.helpers
     count
   compactMode: compactMode
   nCols: nCols
+  stuck: share.model.isStuck
 
 tagHelper = (id) ->
   isRoundGroup = ('rounds' of this)
