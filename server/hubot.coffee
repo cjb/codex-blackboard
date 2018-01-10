@@ -78,6 +78,9 @@ class BlackboardAdapter extends Hubot.Adapter
     return @priv envelope, strings... if envelope.message.private
     sendHelper @robot, envelope, strings, (string, props) ->
       console.log "send #{envelope.room}: #{string} (#{envelope.user.id})" if DEBUG
+      if envelope.message.direct and (not props.useful)
+        unless string.startsWith(envelope.user.id)
+          string = "#{envelope.user.id}: #{string}"
       Meteor.call "newMessage", Object.assign {}, props,
         nick: "codexbot"
         body: string
