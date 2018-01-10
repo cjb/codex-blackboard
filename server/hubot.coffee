@@ -170,6 +170,7 @@ Meteor.startup ->
   Object.keys(share.hubot).forEach (scriptName) ->
     console.log "Loading hubot script: #{scriptName}"
     share.hubot[scriptName](robot)
+  robot.brain.emit('loaded')
   # register our nick
   n = Meteor.call 'newNick', {name: 'codexbot'}
   Meteor.call 'setTag', {type:'nicks', object:n._id, name:'Gravatar', value:'codex@printf.net', who:n.canon}
