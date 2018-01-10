@@ -1,14 +1,14 @@
 Package.describe({
   name: 'codex-blackboard-hubot-scripts',
   summary: 'Hubot scripts for codex blackboard',
-  version: '2.0.0',
+  version: '2.1.0',
   git: 'https://github.com/cscott/codex-blackboard-hubot-scripts.git'
 });
 
 Npm.depends({
     // it is annoying that Meteor requires an exact hash here :(
-    "codex-blackboard-hubot-scripts": "https://github.com/cscott/codex-blackboard-hubot-scripts/tarball/62d35c1a0134fc59916cc4c8521f4837cb3135a0",
-    "coffee-script": "1.10.0"
+    "codex-blackboard-hubot-scripts": "https://github.com/cscott/codex-blackboard-hubot-scripts/tarball/465763e2766dae3c3b0b1b9a05dca878479bb1ee",
+    "coffee-script": "1.10.0",
 });
 
 Package.onUse(function(api) {
