@@ -21,6 +21,8 @@ MOVE_OLD_PAGES = true
 # Server-side, client-side, or no follow-up processing
 followupStyle = -> Meteor.settings?.public?.followupStyle ? 'client'
 
+emojify = (s) -> share.emojify?(s) or s
+
 # helper function: like _.throttle, but always ensures `wait` of idle time
 # between invocations.  This ensures that we stay chill even if a single
 # execution of the function starts to exceed `wait`.
@@ -1135,6 +1137,8 @@ spread_id_to_link = (id) ->
         timestamp: UTCNow()
         useful: args.useful or false
         useless_cmd: args.useless_cmd or false
+      # translate emojis!
+      newMsg.body = emojify newMsg.body unless newMsg.bodyIsHtml
       # update the user's 'last read' message to include this one
       # (doing it here allows us to use server timestamp on message)
       unless (args.suppressLastRead or newMsg.system or (not newMsg.nick))
