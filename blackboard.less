@@ -38,7 +38,7 @@
           border-radius: @radius;
 }
 
-@navbar-height: 69px;
+@navbar-height: 101px; /* was 69px */
 
 body {
   background: url('/img/grid_noise.png');
@@ -635,6 +635,7 @@ html.fullHeight {
   body {
     padding-top: 0;
   }
+  .bb-buttonbar .bb-login { float: right }
   .container-fluid > .navbar-fixed-top {
     /* compensate for 20px of padding on container-fluid */
     margin-left: -20px;
@@ -655,6 +656,7 @@ html.fullHeight {
 
   #roomName { width:85px; } /* narrow room name input */
   .bb-omit-when-narrow, .puzzle-working, .puzzle-update { display: none; }
+  .bb-buttonbar .bb-login { float: right }
   .puzzle-answer { word-break: break-all; }
 
   /* fix up .dl-horizontal styles */
