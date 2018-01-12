@@ -64,8 +64,8 @@
       "integrity": "sha1-BsIe7RobBq62dVPNxT4jJ0usIpY="
     },
     "codex-blackboard-hubot-scripts": {
-      "version": "https://github.com/cscott/codex-blackboard-hubot-scripts/tarball/423818ba01f3289f6c7de7c42ab860a601328e4e",
-      "integrity": "sha1-nz8seVKOaofC8o6JQkbGEqFJios=",
+      "version": "https://github.com/cscott/codex-blackboard-hubot-scripts/tarball/f75ead3e1cb1d4047cdbc26b34a052ffb9005400",
+      "integrity": "sha1-LjzTSzZybY4Afz8oZ6hRy+u6BPA=",
       "dependencies": {
         "coffee-script": {
           "version": "1.12.7",
@@ -234,18 +234,6 @@
       "resolved": "https://registry.npmjs.org/hubot-scripts/-/hubot-scripts-2.17.2.tgz",
       "integrity": "sha1-mwjpB9XPq6cteDIEBnp4zp3zriQ="
     },
-    "hubot-tell": {
-      "version": "1.2.4",
-      "resolved": "https://registry.npmjs.org/hubot-tell/-/hubot-tell-1.2.4.tgz",
-      "integrity": "sha1-DPs5ZTCLmcLd2IAx8OoKIJGRrys=",
-      "dependencies": {
-        "coffee-script": {
-          "version": "1.7.1",
-          "resolved": "https://registry.npmjs.org/coffee-script/-/coffee-script-1.7.1.tgz",
-          "integrity": "sha1-YplqhheAx15tUGnROCJyO3NAS/w="
-        }
-      }
-    },
     "hubot-thank-you": {
       "version": "0.0.3",
       "resolved": "https://registry.npmjs.org/hubot-thank-you/-/hubot-thank-you-0.0.3.tgz",
@@ -359,10 +347,14 @@
       "integrity": "sha1-yGIjevCiE/l//0ZZS9HUTspwXWM=",
       "dependencies": {
         "inherits": {
-          "version": "1.0.0"
+          "version": "1.0.0",
+          "resolved": "https://registry.npmjs.org/inherits/-/inherits-1.0.0.tgz",
+          "integrity": "sha1-OOGXUoW/H3upyE2hArsSdxMirEg="
         },
         "yamlish": {
-          "version": "0.0.5"
+          "version": "0.0.5",
+          "resolved": "https://registry.npmjs.org/yamlish/-/yamlish-0.0.5.tgz",
+          "integrity": "sha1-hsbI5rKLCCdBbcyG90GbulYQtX0="
         }
       }
     },
@@ -382,11 +374,6 @@
           "integrity": "sha1-ykMJ2t7mtUzAuNJH6NfHoJdb3Js="
         }
       }
-    },
-    "timeago": {
-      "version": "0.1.0",
-      "resolved": "https://registry.npmjs.org/timeago/-/timeago-0.1.0.tgz",
-      "integrity": "sha1-IRdqhNRpvjXuQxxcSMC2q6H3JGQ="
     },
     "tiny-emitter": {
       "version": "2.0.2",
