@@ -1585,6 +1585,16 @@ spread_id_to_link = (id) ->
       return unless Meteor.isServer
       # Return special folder used for uploads to general Ringhunters chat
       return share.drive.ringhuntersFolder
+
+    # if a round/puzzle folder gets accidentally deleted, this can be used to
+    # manually re-create it.
+    fixPuzzleFolder: (args) ->
+      check args, ObjectWith
+        type: ValidType
+        object: IdOrObject
+        name: NonEmptyString
+      id = args.object._id or args.object
+      newDriveFolder args.type, id, args.name
 )()
 
 UTCNow = -> Date.now()
