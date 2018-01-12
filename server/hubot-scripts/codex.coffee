@@ -327,6 +327,6 @@ share.hubot.codex = (robot) ->
     Meteor.call 'newMessage',
       oplog: true
       nick: msg.envelope.user.id
-      body: msg.match[1]
+      body: "Announcement: #{msg.match[1]}"
       stream: 'announcements'
     msg.finish()
